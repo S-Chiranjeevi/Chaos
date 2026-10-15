@@ -91,43 +91,43 @@ export function ResearchScreeningPage({ onNavigate, currentLanguage = 'en' }) {
       </div>
 
       {/* Zero Retention & Privacy Guarantee */}
-      <div className="p-4 rounded-xl bg-stone-50 dark:bg-stone-800/40 border border-stone-200 dark:border-stone-700/80 flex items-start gap-3 text-xs leading-relaxed text-stone-600 dark:text-stone-300">
-        <Lock size={18} className="text-teal-600 shrink-0 mt-0.5" />
+      <div className="p-4 rounded-xl bg-white border border-stone-200 shadow-xs flex items-start gap-3 text-xs sm:text-sm leading-relaxed text-stone-700">
+        <Lock size={18} className="text-teal-700 shrink-0 mt-0.5" />
         <div>
-          <strong className="text-stone-800 dark:text-stone-100 block mb-0.5">
+          <strong className="text-stone-900 block mb-0.5 font-bold">
             Privacy-First Architecture & Zero Data Retention Guarantee:
           </strong>
           All medical inputs and ultrasound images are processed transiently in volatile memory during the HTTP request. 
-          <strong> No patient names, contact info, clinical values, or uploaded scans are ever persisted to disk, databases, or external servers.</strong> Image memory buffers are immediately purged after processing.
+          <strong className="text-stone-900 font-semibold"> No patient names, contact info, clinical values, or uploaded scans are ever persisted to disk, databases, or external servers.</strong> Image memory buffers are immediately purged after processing.
         </div>
       </div>
 
       {/* Tabs Navigation */}
-      <div className="border-b border-stone-200 dark:border-stone-700">
+      <div className="border-b border-stone-200">
         <nav className="flex space-x-2 sm:space-x-4" aria-label="Screening Modes">
           <button
             type="button"
             onClick={() => setActiveTab('clinical')}
-            className={`py-3 px-3 sm:px-4 text-xs sm:text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
+            className={`py-3 px-3 sm:px-4 text-xs sm:text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${
               activeTab === 'clinical'
-                ? 'border-teal-600 text-teal-700 dark:text-teal-400 font-semibold'
-                : 'border-transparent text-stone-500 hover:text-stone-700 dark:hover:text-stone-300'
+                ? 'border-teal-700 text-teal-800'
+                : 'border-transparent text-stone-600 hover:text-stone-900'
             }`}
           >
             <Stethoscope size={16} />
             <span>Mode A: Clinical Parameters</span>
             {ultrasoundPreFill && (
-              <span className="w-2 h-2 rounded-full bg-teal-500 inline-block" title="Ultrasound data attached" />
+              <span className="w-2 h-2 rounded-full bg-teal-600 inline-block" title="Ultrasound data attached" />
             )}
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('ultrasound')}
-            className={`py-3 px-3 sm:px-4 text-xs sm:text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
+            className={`py-3 px-3 sm:px-4 text-xs sm:text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${
               activeTab === 'ultrasound'
-                ? 'border-teal-600 text-teal-700 dark:text-teal-400 font-semibold'
-                : 'border-transparent text-stone-500 hover:text-stone-700 dark:hover:text-stone-300'
+                ? 'border-teal-700 text-teal-800'
+                : 'border-transparent text-stone-600 hover:text-stone-900'
             }`}
           >
             <ImageIcon size={16} />
@@ -137,10 +137,10 @@ export function ResearchScreeningPage({ onNavigate, currentLanguage = 'en' }) {
           <button
             type="button"
             onClick={() => setActiveTab('transparency')}
-            className={`py-3 px-3 sm:px-4 text-xs sm:text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
+            className={`py-3 px-3 sm:px-4 text-xs sm:text-sm font-semibold border-b-2 transition-colors flex items-center gap-2 ${
               activeTab === 'transparency'
-                ? 'border-teal-600 text-teal-700 dark:text-teal-400 font-semibold'
-                : 'border-transparent text-stone-500 hover:text-stone-700 dark:hover:text-stone-300'
+                ? 'border-teal-700 text-teal-800'
+                : 'border-transparent text-stone-600 hover:text-stone-900'
             }`}
           >
             <Info size={16} />
@@ -191,47 +191,47 @@ export function ResearchScreeningPage({ onNavigate, currentLanguage = 'en' }) {
 
       {/* Tab 3: Model & Science Transparency */}
       {activeTab === 'transparency' && (
-        <div className="space-y-6 text-stone-700 dark:text-stone-300">
-          <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 p-6 shadow-sm space-y-4">
-            <div className="flex items-center gap-2 text-teal-700 dark:text-teal-400 font-semibold text-sm">
+        <div className="space-y-6 text-stone-800">
+          <div className="bg-white rounded-2xl border border-stone-200 p-6 shadow-sm space-y-4">
+            <div className="flex items-center gap-2 text-teal-800 font-bold text-sm">
               <FileCheck2 size={20} />
               <h2>LunaHer Pattern Screening Model</h2>
             </div>
-            <p className="text-xs sm:text-sm leading-relaxed text-stone-600 dark:text-stone-300">
+            <p className="text-xs sm:text-sm leading-relaxed text-stone-700">
               LunaHer’s pattern screening model organizes clinical parameters and image feature estimates for discussion with a qualified healthcare professional. It cannot diagnose PCOS or replace clinical care.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-              <div className="p-3 bg-stone-50 dark:bg-stone-800 rounded-xl border border-stone-200 dark:border-stone-700">
-                <span className="text-xs text-stone-500 block">5-Fold CV Accuracy</span>
-                <span className="text-xl font-bold font-mono text-emerald-700 dark:text-emerald-400">90.15%</span>
+              <div className="p-3 bg-stone-50 rounded-xl border border-stone-200">
+                <span className="text-xs text-stone-600 font-medium block">5-Fold CV Accuracy</span>
+                <span className="text-xl font-bold font-mono text-emerald-800">90.15%</span>
               </div>
-              <div className="p-3 bg-stone-50 dark:bg-stone-800 rounded-xl border border-stone-200 dark:border-stone-700">
-                <span className="text-xs text-stone-500 block">5-Fold CV F1 Score</span>
-                <span className="text-xl font-bold font-mono text-teal-700 dark:text-teal-400">84.50%</span>
+              <div className="p-3 bg-stone-50 rounded-xl border border-stone-200">
+                <span className="text-xs text-stone-600 font-medium block">5-Fold CV F1 Score</span>
+                <span className="text-xl font-bold font-mono text-teal-800">84.50%</span>
               </div>
-              <div className="p-3 bg-stone-50 dark:bg-stone-800 rounded-xl border border-stone-200 dark:border-stone-700">
-                <span className="text-xs text-stone-500 block">5-Fold CV ROC-AUC</span>
-                <span className="text-xl font-bold font-mono text-indigo-700 dark:text-indigo-400">95.44%</span>
+              <div className="p-3 bg-stone-50 rounded-xl border border-stone-200">
+                <span className="text-xs text-stone-600 font-medium block">5-Fold CV ROC-AUC</span>
+                <span className="text-xl font-bold font-mono text-indigo-800">95.44%</span>
               </div>
             </div>
 
-            <div className="space-y-3 pt-4 border-t border-stone-100 dark:border-stone-800 text-xs leading-relaxed">
-              <h3 className="font-semibold text-stone-800 dark:text-stone-200 text-sm">
+            <div className="space-y-3 pt-4 border-t border-stone-200 text-xs sm:text-sm leading-relaxed">
+              <h3 className="font-bold text-stone-900 text-sm sm:text-base">
                 Transparent Pipeline Audit Findings
               </h3>
-              <ul className="list-disc pl-5 space-y-1.5 text-stone-600 dark:text-stone-400">
+              <ul className="list-disc pl-5 space-y-1.5 text-stone-700">
                 <li>
-                  <strong>Trained XGBoost Classifier:</strong> Model artifact is stored in <code className="bg-stone-100 dark:bg-stone-800 px-1 py-0.5 rounded">backend/app/ml_models/best_xgboost_model.pkl</code>. It uses 42 features exactly matching the Kaggle PCOS dataset feature matrix with median cohort imputation for optional lab values.
+                  <strong className="text-stone-900 font-semibold">Trained XGBoost Classifier:</strong> Model artifact is stored in <code className="bg-stone-100 text-stone-900 px-1 py-0.5 rounded font-mono text-xs">backend/app/ml_models/best_xgboost_model.pkl</code>. It uses 42 features exactly matching the Kaggle PCOS dataset feature matrix with median cohort imputation for optional lab values.
                 </li>
                 <li>
-                  <strong>Ultrasound Image Estimation:</strong> LunaHer analyzes image contrast and connected regions to estimate candidate follicle-like areas. It does not provide a diagnostic interpretation of an ultrasound image.
+                  <strong className="text-stone-900 font-semibold">Ultrasound Image Estimation:</strong> LunaHer analyzes image contrast and connected regions to estimate candidate follicle-like areas. It does not provide a diagnostic interpretation of an ultrasound image.
                 </li>
                 <li>
-                  <strong>Feature Independence:</strong> This screening tool is kept strictly decoupled from PCOS Saathi’s APIVerve menstrual cycle forecasting and daily symptom journal to avoid invalid confounding risk scores.
+                  <strong className="text-stone-900 font-semibold">Feature Independence:</strong> This screening tool is kept strictly decoupled from PCOS Saathi’s APIVerve menstrual cycle forecasting and daily symptom journal to avoid invalid confounding risk scores.
                 </li>
                 <li>
-                  <strong>Model Context:</strong> LunaHer uses reference values from observational screening data. Results are informational estimates only and are not a diagnostic device.
+                  <strong className="text-stone-900 font-semibold">Model Context:</strong> LunaHer uses reference values from observational screening data. Results are informational estimates only and are not a diagnostic device.
                 </li>
               </ul>
             </div>
