@@ -7,7 +7,7 @@ const MUSIC_SOURCE = `${import.meta.env.BASE_URL}audio/soothing-background.mpeg`
 export function BackgroundMusic() {
   const audioRef = useRef(null)
   const [isPlaying, setIsPlaying] = useState(false)
-  const [volume, setVolume] = useState(0.22)
+  const [volume, setVolume] = useState(0.45)
   const [message, setMessage] = useState('Soothing music is off')
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export function BackgroundMusic() {
   }
 
   function toggleMute() {
-    const nextVolume = volume > 0 ? 0 : 0.22
+    const nextVolume = volume > 0 ? 0 : 0.45
     setVolume(nextVolume)
     setMessage(nextVolume === 0 ? 'Soothing music is muted' : 'Soothing music volume is restored')
   }
@@ -62,7 +62,7 @@ export function BackgroundMusic() {
         </button>
         <label className="music-volume-label">
           <span className="sr-only">Music volume</span>
-          <input type="range" min="0" max="0.5" step="0.05" value={volume} onChange={(event) => setVolume(Number(event.target.value))} />
+          <input type="range" min="0" max="0.8" step="0.05" value={volume} onChange={(event) => setVolume(Number(event.target.value))} />
         </label>
       </div>
     </aside>
