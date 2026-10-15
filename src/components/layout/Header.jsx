@@ -78,17 +78,7 @@ export function Header({
             </span>
           </div>
 
-          {/* Test Error Trigger (Demonstrates Global Error Area) */}
-          {onTriggerDemoError && (
-            <button
-              type="button"
-              onClick={onTriggerDemoError}
-              className="px-2 py-1 bg-stone-100 hover:bg-stone-200 border border-stone-300 rounded-lg text-[10px] font-medium text-stone-600 hidden xl:inline-block"
-              title="Test the Global Error notification component"
-            >
-              Simulate Error
-            </button>
-          )}
+
 
         </div>
       </div>
