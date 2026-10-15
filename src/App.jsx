@@ -41,7 +41,7 @@ const PAGE_TO_PATH = {
 const PAGE_TITLES = {
   home: 'Home',
   talk: 'Talk or Type',
-  tracker: 'My Health Tracker',
+  tracker: 'Cycle Insights & Forecast',
   insights: 'Early Warnings and Insights',
   doctor: 'Doctor Summary',
   learn: 'Learn and Myths',
