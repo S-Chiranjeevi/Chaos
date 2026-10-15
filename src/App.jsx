@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Globe } from 'lucide-react';
-import Header from './components/layout/Header.jsx';
 import GlobalError from './components/layout/GlobalError.jsx';
 import { LanguageSelector, SUPPORTED_LANGUAGES } from './components/common/LanguageSelector.jsx';
 import { BottomNavigation } from './components/BottomNavigation.jsx';
@@ -186,11 +185,6 @@ export function App() {
           alert('Retrying local storage verification...');
           setGlobalError(null);
         }}
-      />
-
-      {/* Header */}
-      <Header
-        onNavigateHome={() => navigate('home')}
       />
 
       <div className="app-body">

@@ -15,7 +15,7 @@
   color: var(--layout-ink);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
-.app-body { display: flex; min-height: calc(100vh - 80px); }
+.app-body { display: flex; min-height: 100vh; }
 .sakhi-layout *, .sakhi-layout *::before, .sakhi-layout *::after { box-sizing: border-box; }
 .sakhi-layout button, .sakhi-layout input, .sakhi-layout textarea, .sakhi-layout select { font: inherit; }
 .sakhi-layout button { cursor: pointer; }
@@ -23,7 +23,7 @@
 .skip-link { position: fixed; z-index: 1000; top: 10px; left: 10px; padding: 10px 14px; background: #fff; color: #173d38; border: 2px solid #176b59; border-radius: 10px; transform: translateY(-150%); }
 .skip-link:focus { transform: translateY(0); }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
-.desktop-navigation { position: sticky; top: 80px; flex: 0 0 260px; width: 260px; height: calc(100vh - 80px); padding: 25px 16px 18px; display: flex; flex-direction: column; background: #fff; border-right: 1px solid var(--layout-line); }
+.desktop-navigation { position: sticky; top: 0; flex: 0 0 260px; width: 260px; height: 100vh; padding: 25px 16px 18px; display: flex; flex-direction: column; background: #fff; border-right: 1px solid var(--layout-line); }
 .app-brand { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 0 9px 20px; color: var(--layout-ink); text-decoration: none; font-weight: 800; font-size: 19px; letter-spacing: -.4px; }
 .app-brand small { display: block; color: var(--layout-muted); font-size: 11px; font-weight: 500; letter-spacing: 0; }
 .brand-flower { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 14px; color: #fff; background: var(--layout-green); font-size: 23px; }
@@ -142,7 +142,7 @@
   .sakhi-layout { display: block; padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
   .desktop-navigation { display: none; }
   .app-column { width: 100%; }
-  .app-body { display: block; min-height: calc(100vh - 64px); }
+  .app-body { display: block; min-height: 100vh; }
   .mobile-topbar { position: sticky; top: 0; z-index: 50; min-height: 56px; padding: 8px 15px; display: flex; align-items: center; justify-content: space-between; background: #ffffffed; border-bottom: 1px solid var(--layout-line); backdrop-filter: blur(12px); }
   .lunaher-header-logo { width: 76px; height: 62px; }
   .lunaher-privacy-indicator { padding: 6px 7px !important; }
