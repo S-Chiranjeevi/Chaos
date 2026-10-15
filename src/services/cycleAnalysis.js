@@ -32,7 +32,7 @@ export function analyzeCycles(cycleEntries = [], healthEntries = []) {
 
   const intervals = entries.slice(1).map((entry, index) => {
     const days = daysBetweenDates(entries[index].startDate, entry.startDate)
-    return { from: entries[index].startDate, to: entry.startDate, days, above35Days: days > 35, above45Days: days > 45 }
+    return { from: entries[index].startDate, to: entry.startDate, days, below21Days: days < 21, above35Days: days > 35, above45Days: days > 45 }
   }).filter((interval) => interval.days > 0)
 
   const lengths = intervals.map((interval) => interval.days)
@@ -91,8 +91,10 @@ export function analyzeCycles(cycleEntries = [], healthEntries = []) {
   }
 
   const discussionPrompts = []
-  if (average !== null && average > 35) discussionPrompts.push('Your average logged cycle is above 35 days. Consider discussing this pattern with a healthcare professional.')
+  if (intervals.some((interval) => interval.above35Days)) discussionPrompts.push('Your recent cycle lengths may be irregular. At least one logged cycle was longer than 35 days. Cycle patterns vary by age and individual health; consider discussing this pattern with a healthcare professional.')
+  if (intervals.some((interval) => interval.below21Days)) discussionPrompts.push('At least one logged cycle was shorter than 21 days. Cycle patterns vary by age and individual health; consider discussing it if this repeats or concerns you.')
   if (intervals.some((interval) => interval.above45Days)) discussionPrompts.push('There is a gap above 45 days between logged period starts. Consider booking a healthcare visit to discuss it.')
+  if (lengths.length >= 2 && longest - shortest > 9) discussionPrompts.push('Your recent cycle lengths vary by more than 9 days. Cycle patterns vary by age and individual health; consider discussing this pattern with a healthcare professional, especially if it continues.')
   if (trailingLongCycles >= 3) discussionPrompts.push('Three logged cycles in a row are above 35 days. Consider booking a visit with a healthcare professional.')
   if (painTrend) discussionPrompts.push(`Your logged pain level has increased from ${painTrend.from.toLowerCase()} to ${painTrend.to.toLowerCase()}. Consider arranging care earlier.`)
   if (flowTrend) discussionPrompts.push(`Your logged flow level has increased from ${flowTrend.from.toLowerCase()} to ${flowTrend.to.toLowerCase()}. Consider arranging care earlier.`)
@@ -108,6 +110,7 @@ export function analyzeCycles(cycleEntries = [], healthEntries = []) {
     longestCycle: longest,
     cycleVariation: shortest === null ? null : longest - shortest,
     cyclesAbove35Days: intervals.filter((interval) => interval.above35Days).length,
+    cyclesBelow21Days: intervals.filter((interval) => interval.below21Days).length,
     gapsAbove45Days: intervals.filter((interval) => interval.above45Days).length,
     trailingLongCycles,
     repeatedSymptoms,

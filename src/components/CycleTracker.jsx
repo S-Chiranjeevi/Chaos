@@ -163,17 +163,18 @@ function CycleTracker() {
         <aside className="cycle-stat-card" aria-label="Cycle statistics">
           <div className="cycle-section-title"><span className="cycle-icon"><Activity size={18} aria-hidden="true" /></span><div><h3>Cycle statistics</h3><p>Calculated from your logged start dates.</p></div></div>
           <div className="cycle-stats-grid">
-            <article className="cycle-stat"><span>Logged cycles</span><strong>{analysis.periodCount}</strong></article>
+            <article className="cycle-stat"><span>Period starts logged</span><strong>{analysis.periodCount}</strong></article>
             <article className="cycle-stat"><span>Average cycle</span><strong>{analysis.averageCycleLength === null ? '—' : `${analysis.averageCycleLength} days`}</strong></article>
             <article className="cycle-stat"><span>Shortest cycle</span><strong>{analysis.shortestCycle === null ? '—' : `${analysis.shortestCycle} days`}</strong></article>
             <article className="cycle-stat"><span>Longest cycle</span><strong>{analysis.longestCycle === null ? '—' : `${analysis.longestCycle} days`}</strong></article>
             <article className="cycle-stat"><span>Cycle variation</span><strong>{analysis.cycleVariation === null ? '—' : `${analysis.cycleVariation} days`}</strong></article>
             <article className="cycle-stat"><span>Cycles above 35 days</span><strong>{analysis.cyclesAbove35Days}</strong></article>
+            <article className="cycle-stat"><span>Cycles below 21 days</span><strong>{analysis.cyclesBelow21Days}</strong></article>
             <article className="cycle-stat"><span>Gaps above 45 days</span><strong>{analysis.gapsAbove45Days}</strong></article>
           </div>
           <p className="cycle-stat-footnote">Cycle length is the number of days between period start dates. These estimates reflect your entries only.</p>
           <div className="cycle-missing-data"><strong>Missing data</strong>{analysis.isEmpty ? <p>No entries yet.</p> : <p>{analysis.missingCount ? `${analysis.missingCount} optional detail${analysis.missingCount === 1 ? ' is' : 's are'} missing across ${analysis.periodCount} ${analysis.periodCount === 1 ? 'entry' : 'entries'}.` : 'No missing details in your logged entries.'} Missing fields: end date {analysis.missingData.endDate}, flow {analysis.missingData.flowLevel}, pain {analysis.missingData.painLevel}, symptoms {analysis.missingData.symptoms}, mood {analysis.missingData.mood}, energy {analysis.missingData.energyLevel}.</p>}</div>
-          <p className="cycle-nondiagnostic-note">Cycle patterns never prove PCOS. This tracker cannot diagnose a condition.</p>
+          <p className="cycle-nondiagnostic-note">Cycle patterns vary by age and individual health. These observations do not diagnose PCOS or another condition.</p>
         </aside>
       </div>
 
