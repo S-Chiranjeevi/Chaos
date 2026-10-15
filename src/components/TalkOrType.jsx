@@ -216,7 +216,8 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
     })
 
     setHealthEntry(newEntry)
-    publishHealthEntry(newEntry)
+    const saveResult = publishHealthEntry(newEntry)
+    setStorageSaveError(saveResult?.ok ? '' : saveResult?.error || 'Your note could not be saved on this device.')
 
     if (onHealthEntryCreated) onHealthEntryCreated(newEntry)
 
