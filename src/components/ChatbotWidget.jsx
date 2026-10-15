@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Bot, ChevronDown, MessageCircle, Send, ShieldAlert, X } from 'lucide-react'
+import { Bot, ChevronDown, Loader2, MessageCircle, Send, ShieldAlert, X } from 'lucide-react'
 import { UrgentCareBanner } from './UrgentCareBanner.jsx'
 import { CHAT_STARTER, createChatReply } from '../services/chatbotService.js'
 import { t } from '../data/translations.js'
+import { AnalysisUnavailableError, requestSymptomAnalysis } from '../services/apiClient.js'
+import { getSafetyDisclaimer } from '../services/safetyRules.js'
 
 function Message({ message, onSuggestion, onNavigate }) {
   const isAssistant = message.sender === 'assistant'
@@ -34,6 +36,8 @@ export function ChatbotWidget({ onNavigate, currentLanguage = 'en' }) {
   const [isOpen, setIsOpen] = useState(false)
   const [draft, setDraft] = useState('')
   const [messages, setMessages] = useState([CHAT_STARTER])
+  const [useGemini, setUseGemini] = useState(false)
+  const [isSending, setIsSending] = useState(false)
   const transcriptRef = useRef(null)
 
   useEffect(() => {
@@ -45,22 +49,42 @@ export function ChatbotWidget({ onNavigate, currentLanguage = 'en' }) {
     if (label === 'Open doctor summary') onNavigate?.('doctor')
   }
 
-  function sendMessage(value = draft) {
+  async function sendMessage(value = draft) {
     const text = value.trim()
-    if (!text) return
+    if (!text || isSending) return
 
-    const reply = createChatReply(text)
+    const localReply = createChatReply(text)
     const userMessage = { id: `user-${Date.now()}`, sender: 'user', text }
-    const assistantMessage = {
-      id: `assistant-${Date.now() + 1}`,
-      sender: 'assistant',
-      text: reply.message,
-      kind: reply.kind,
-      warnings: reply.warnings,
-      suggestions: reply.suggestions,
-    }
-    setMessages((current) => [...current, userMessage, assistantMessage])
+    setMessages((current) => [...current, userMessage])
     setDraft('')
+    setIsSending(true)
+
+    let reply = localReply
+    if (useGemini && localReply.kind !== 'urgent') {
+      try {
+        const ai = await requestSymptomAnalysis({ text, language: 'auto' })
+        const explanation = ai.explanation && ai.explanation !== ai.answer ? `\n\n${ai.explanation}` : ''
+        const suggestions = Array.isArray(ai.questionsForDoctor) && ai.questionsForDoctor.length
+          ? ai.questionsForDoctor.slice(0, 2).filter(Boolean)
+          : localReply.suggestions
+        reply = {
+          kind: 'guidance',
+          message: `${ai.answer}${explanation}\n\n${getSafetyDisclaimer()}`,
+          warnings: [],
+          suggestions,
+        }
+      } catch (error) {
+        const unavailable = error instanceof AnalysisUnavailableError
+        reply = {
+          ...localReply,
+          message: `${localReply.message}\n\n${unavailable ? 'Gemini is unavailable right now, so I used on-device guidance.' : 'I used on-device guidance for this response.'}`,
+        }
+      }
+    }
+
+    const assistantMessage = { id: `assistant-${Date.now() + 1}`, sender: 'assistant', text: reply.message, kind: reply.kind, warnings: reply.warnings, suggestions: reply.suggestions }
+    setMessages((current) => [...current, assistantMessage])
+    setIsSending(false)
   }
 
   const launcherLabel = isOpen
@@ -88,9 +112,13 @@ export function ChatbotWidget({ onNavigate, currentLanguage = 'en' }) {
           </div>
           <form className="chatbot-composer" onSubmit={(event) => { event.preventDefault(); sendMessage() }}>
             <label className="sr-only" htmlFor="chatbot-message">Type a message</label>
-            <textarea id="chatbot-message" value={draft} onChange={(event) => setDraft(event.target.value)} placeholder={placeholderText} rows="2" />
-            <button type="submit" disabled={!draft.trim()} aria-label="Send message"><Send size={18} /></button>
+            <textarea id="chatbot-message" value={draft} onChange={(event) => setDraft(event.target.value)} placeholder={placeholderText} rows="2" disabled={isSending} />
+            <button type="submit" disabled={!draft.trim() || isSending} aria-label="Send message">{isSending ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}</button>
           </form>
+          <label className="flex items-start gap-2 px-3 pb-3 text-[11px] leading-snug text-stone-500">
+            <input type="checkbox" className="mt-0.5 accent-rose-700" checked={useGemini} onChange={(event) => setUseGemini(event.target.checked)} />
+            <span>Use Gemini AI for this chat. Your message is sent to Google Gemini only when this is selected.</span>
+          </label>
         </section>
       )}
       <button
