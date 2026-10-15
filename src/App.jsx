@@ -11,7 +11,7 @@ import './App.css'
 import './Gemini.css'
 
 const RESULT_LABELS = {
-  en: { resultTitle: 'Your symptom summary', nextStep: 'A starting point for your next step', routine: 'Routine follow-up', soon: 'Discuss with a clinician', urgent: 'Urgent care', mentioned: 'What you mentioned', topics: 'Topics to explore', questions: 'Questions you could ask', care: 'Care guidance', disclaimer: 'This is information, not a diagnosis.', urgentMessage: 'Some symptoms you described may need urgent medical attention. Please seek urgent medical care or contact local emergency services.', unclear: 'I could not confidently identify a symptom pattern. You can try describing what you feel, when it started, and how it affects you.', privacy: 'When Gemini is configured, your note is sent to Google for analysis and saved in this browser.', consent: 'I understand my health description will be sent to Google Gemini for analysis.', analyzing: 'Understanding your description…', localFallback: 'Gemini is unavailable, so Luna Her used its on-device pattern checks. This may miss symptoms, especially in regional languages.' },
+  en: { resultTitle: 'Your symptom summary', nextStep: 'A starting point for your next step', routine: 'Routine follow-up', soon: 'Discuss with a clinician', urgent: 'Urgent care', mentioned: 'What you mentioned', topics: 'Topics to explore', questions: 'Questions you could ask', care: 'Care guidance', disclaimer: 'This is information, not a diagnosis.', urgentMessage: 'Some symptoms you described may need urgent medical attention. Please seek urgent medical care or contact local emergency services.', unclear: 'I could not confidently identify a symptom pattern. You can try describing what you feel, when it started, and how it affects you.', privacy: 'When Gemini is configured, your message is sent to Google for a response. Messages that describe symptoms are saved in this browser.', consent: 'I understand my message will be sent to Google Gemini for a response.', analyzing: 'Preparing your response…', localFallback: 'Gemini is unavailable, so Luna Her used its on-device pattern checks. This may miss symptoms, especially in regional languages.' },
   hi: { resultTitle: 'आपके लक्षणों का सारांश', nextStep: 'अगले कदम के लिए एक शुरुआत', routine: 'सामान्य जानकारी', soon: 'डॉक्टर से चर्चा करें', urgent: 'तत्काल देखभाल', mentioned: 'आपने क्या बताया', topics: 'चर्चा के विषय', questions: 'डॉक्टर से पूछने के प्रश्न', care: 'देखभाल संबंधी जानकारी', disclaimer: 'यह जानकारी है, निदान नहीं।', urgentMessage: 'आपके बताए कुछ लक्षणों में तुरंत चिकित्सा सहायता की ज़रूरत हो सकती है। कृपया तत्काल चिकित्सा सहायता लें।', unclear: 'हम लक्षणों को स्पष्ट रूप से पहचान नहीं सके। आप क्या महसूस कर रहे हैं और यह कब शुरू हुआ, बताने की कोशिश करें।', privacy: 'Gemini चालू होने पर आपका नोट विश्लेषण के लिए Google को भेजा जाएगा और इस ब्राउज़र में सहेजा जाएगा।', consent: 'मैं समझता/समझती हूँ कि मेरा स्वास्थ्य विवरण विश्लेषण के लिए Google Gemini को भेजा जाएगा।', analyzing: 'आपके विवरण को समझा जा रहा है…', localFallback: 'Gemini उपलब्ध नहीं है, इसलिए Luna Her ने इस डिवाइस पर उपलब्ध सीमित जाँच का उपयोग किया। क्षेत्रीय भाषाओं में कुछ लक्षण छूट सकते हैं।' },
   kn: { resultTitle: 'ನಿಮ್ಮ ಲಕ್ಷಣಗಳ ಸಾರಾಂಶ', nextStep: 'ಮುಂದಿನ ಹೆಜ್ಜೆಗೆ ಒಂದು ಆರಂಭ', routine: 'ಸಾಮಾನ್ಯ ಮಾಹಿತಿ', soon: 'ವೈದ್ಯರೊಂದಿಗೆ ಚರ್ಚಿಸಿ', urgent: 'ತುರ್ತು ಚಿಕಿತ್ಸೆ', mentioned: 'ನೀವು ತಿಳಿಸಿದವು', topics: 'ಚರ್ಚಿಸಬಹುದಾದ ವಿಷಯಗಳು', questions: 'ವೈದ್ಯರನ್ನು ಕೇಳಬಹುದಾದ ಪ್ರಶ್ನೆಗಳು', care: 'ಆರೈಕೆ ಮಾಹಿತಿ', disclaimer: 'ಇದು ಮಾಹಿತಿ ಮಾತ್ರ, ರೋಗನಿರ್ಣಯವಲ್ಲ.', urgentMessage: 'ನೀವು ವಿವರಿಸಿದ ಕೆಲವು ಲಕ್ಷಣಗಳಿಗೆ ತುರ್ತು ವೈದ್ಯಕೀಯ ನೆರವು ಬೇಕಾಗಬಹುದು. ದಯವಿಟ್ಟು ತುರ್ತು ಆರೈಕೆ ಪಡೆಯಿರಿ.', unclear: 'ಲಕ್ಷಣಗಳನ್ನು ಸ್ಪಷ್ಟವಾಗಿ ಗುರುತಿಸಲು ಆಗಲಿಲ್ಲ. ಏನು ಅನಿಸುತ್ತಿದೆ ಮತ್ತು ಯಾವಾಗ ಆರಂಭವಾಯಿತು ಎಂದು ವಿವರಿಸಿ.', privacy: 'Gemini ಹೊಂದಿಸಿದಾಗ, ನಿಮ್ಮ ವಿವರಣೆಯನ್ನು ವಿಶ್ಲೇಷಣೆಗೆ Google ಗೆ ಕಳುಹಿಸಿ ಈ ಬ್ರೌಸರ್‌ನಲ್ಲಿ ಉಳಿಸಲಾಗುತ್ತದೆ.', consent: 'ನನ್ನ ಆರೋಗ್ಯ ವಿವರಣೆಯನ್ನು ವಿಶ್ಲೇಷಣೆಗೆ Google Gemini ಗೆ ಕಳುಹಿಸಲಾಗುತ್ತದೆ ಎಂಬುದು ನನಗೆ ತಿಳಿದಿದೆ.', analyzing: 'ನಿಮ್ಮ ವಿವರಣೆಯನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಲಾಗುತ್ತಿದೆ…', localFallback: 'Gemini ಲಭ್ಯವಿಲ್ಲ. Luna Her ಈ ಸಾಧನದ ಸೀಮಿತ ಮಾದರಿ ಪರಿಶೀಲನೆಯನ್ನು ಬಳಸಿದೆ; ಪ್ರಾದೇಶಿಕ ಭಾಷೆಗಳಲ್ಲಿನ ಕೆಲವು ಲಕ್ಷಣಗಳು ತಪ್ಪಬಹುದು.' },
   ta: { resultTitle: 'உங்கள் அறிகுறிகளின் சுருக்கம்', nextStep: 'அடுத்த படிக்கான தொடக்கம்', routine: 'பொதுவான தகவல்', soon: 'மருத்துவருடன் பேசுங்கள்', urgent: 'அவசர சிகிச்சை', mentioned: 'நீங்கள் குறிப்பிட்டவை', topics: 'விவாதிக்க வேண்டியவை', questions: 'மருத்துவரிடம் கேட்க வேண்டிய கேள்விகள்', care: 'பராமரிப்பு வழிகாட்டல்', disclaimer: 'இது தகவல் மட்டுமே; நோயறிதல் அல்ல.', urgentMessage: 'நீங்கள் குறிப்பிட்ட சில அறிகுறிகளுக்கு உடனடி மருத்துவ உதவி தேவைப்படலாம். அவசர மருத்துவ உதவியை நாடுங்கள்.', unclear: 'அறிகுறிகளைத் தெளிவாக அடையாளம் காண முடியவில்லை. என்ன உணர்கிறீர்கள், எப்போது தொடங்கியது என்பதை விவரிக்கவும்.', privacy: 'Gemini அமைக்கப்பட்டிருந்தால், உங்கள் குறிப்பு பகுப்பாய்விற்காக Google-க்கு அனுப்பப்பட்டு இந்த உலாவியில் சேமிக்கப்படும்.', consent: 'எனது சுகாதார விளக்கம் பகுப்பாய்விற்காக Google Gemini-க்கு அனுப்பப்படும் என்பதைப் புரிந்துகொள்கிறேன்.', analyzing: 'உங்கள் விளக்கத்தைப் புரிந்துகொள்கிறோம்…', localFallback: 'Gemini கிடைக்கவில்லை. Luna Her இந்தச் சாதனத்தின் வரையறுக்கப்பட்ட முறை சரிபார்ப்பைப் பயன்படுத்தியது; பிராந்திய மொழி அறிகுறிகள் விடுபடலாம்.' },
@@ -19,12 +19,24 @@ const RESULT_LABELS = {
   te: { resultTitle: 'మీ లక్షణాల సారాంశం', nextStep: 'తదుపరి అడుగుకు ఒక ప్రారంభం', routine: 'సాధారణ సమాచారం', soon: 'ఆరోగ్య నిపుణుడితో చర్చించండి', urgent: 'తక్షణ వైద్య సహాయం', mentioned: 'మీరు తెలిపినవి', topics: 'చర్చించాల్సిన విషయాలు', questions: 'వైద్యుడిని అడగగల ప్రశ్నలు', care: 'సంరక్షణ సూచనలు', disclaimer: 'ఇది సమాచారం మాత్రమే, నిర్ధారణ కాదు.', urgentMessage: 'మీరు తెలిపిన కొన్ని లక్షణాలకు తక్షణ వైద్య సహాయం అవసరం కావచ్చు. దయచేసి అత్యవసర వైద్య సహాయం పొందండి.', unclear: 'లక్షణాలను స్పష్టంగా గుర్తించలేకపోయాం. మీకు ఏమి అనిపిస్తోంది, ఎప్పటి నుంచి ఉందో వివరించండి.', privacy: 'Gemini అమర్చినప్పుడు, మీ వివరాలు విశ్లేషణ కోసం Googleకు పంపబడతాయి మరియు ఈ బ్రౌజర్‌లో భద్రపరచబడతాయి.', consent: 'నా ఆరోగ్య వివరాలు విశ్లేషణ కోసం Google Geminiకి పంపబడతాయని నాకు తెలుసు.', analyzing: 'మీ వివరాలను అర్థం చేసుకుంటున్నాం…', localFallback: 'Gemini అందుబాటులో లేదు. Luna Her ఈ పరికరంలోని పరిమిత నమూనా తనిఖీని ఉపయోగించింది; ప్రాంతీయ భాషల్లో కొన్ని లక్షణాలు గుర్తించబడకపోవచ్చు.' },
 }
 
+const MESSAGE_PRIVACY_COPY = {
+  en: { privacy: 'When Gemini is configured, your message is sent to Google for a response. Messages that describe symptoms are saved in this browser.', consent: 'I understand my message will be sent to Google Gemini for a response.' },
+  hi: { privacy: 'Gemini चालू होने पर आपका संदेश जवाब के लिए Google को भेजा जाएगा। लक्षण बताने वाले संदेश इस ब्राउज़र में सहेजे जाते हैं।', consent: 'मैं समझता/समझती हूँ कि मेरा संदेश जवाब के लिए Google Gemini को भेजा जाएगा।' },
+  kn: { privacy: 'Gemini ಹೊಂದಿಸಿದಾಗ, ನಿಮ್ಮ ಸಂದೇಶಕ್ಕೆ ಉತ್ತರಿಸಲು Google ಗೆ ಕಳುಹಿಸಲಾಗುತ್ತದೆ. ಲಕ್ಷಣಗಳನ್ನು ವಿವರಿಸುವ ಸಂದೇಶಗಳನ್ನು ಈ ಬ್ರೌಸರ್‌ನಲ್ಲಿ ಉಳಿಸಲಾಗುತ್ತದೆ.', consent: 'ನನ್ನ ಸಂದೇಶಕ್ಕೆ ಉತ್ತರಿಸಲು ಅದನ್ನು Google Gemini ಗೆ ಕಳುಹಿಸಲಾಗುತ್ತದೆ ಎಂಬುದು ನನಗೆ ತಿಳಿದಿದೆ.' },
+  ta: { privacy: 'Gemini அமைக்கப்பட்டால், உங்கள் செய்தி பதிலுக்காக Google-க்கு அனுப்பப்படும். அறிகுறிகள் உள்ள செய்திகள் இந்த உலாவியில் சேமிக்கப்படும்.', consent: 'எனது செய்தி பதிலுக்காக Google Gemini-க்கு அனுப்பப்படும் என்பதைப் புரிந்துகொள்கிறேன்.' },
+  ml: { privacy: 'Gemini സജ്ജമാക്കിയാൽ, നിങ്ങളുടെ സന്ദേശം മറുപടിക്കായി Google-ലേക്ക് അയയ്ക്കും. ലക്ഷണങ്ങൾ വിവരിക്കുന്ന സന്ദേശങ്ങൾ ഈ ബ്രൗസറിൽ സൂക്ഷിക്കും.', consent: 'എന്റെ സന്ദേശം മറുപടിക്കായി Google Gemini-ലേക്ക് അയയ്ക്കുമെന്ന് ഞാൻ മനസ്സിലാക്കുന്നു.' },
+  te: { privacy: 'Gemini అమర్చినప్పుడు, మీ సందేశం సమాధానం కోసం Googleకు పంపబడుతుంది. లక్షణాలను తెలిపే సందేశాలు ఈ బ్రౌజర్‌లో భద్రపరచబడతాయి.', consent: 'నా సందేశం సమాధానం కోసం Google Geminiకి పంపబడుతుందని నాకు తెలుసు.' },
+}
+
 function mergeAnalysis(gemini, local, fallbackEngine, labels) {
-  const redFlags = [...new Set([...(gemini?.redFlags || []), ...local.redFlags, ...fallbackEngine.redFlags])]
-  const urgent = local.isUrgent || fallbackEngine.urgency === 'urgent' || gemini?.urgency === 'urgent' || redFlags.length > 0
+  const requestType = gemini?.requestType || (local.symptoms.length || fallbackEngine.extractedSymptoms.length ? 'symptoms' : 'general')
+  const redFlags = [...new Set([...(gemini?.redFlags || []), ...(requestType === 'general' ? [] : [...local.redFlags, ...fallbackEngine.redFlags])])]
+  const urgent = (requestType !== 'general' && (local.isUrgent || fallbackEngine.urgency === 'urgent')) || gemini?.urgency === 'urgent' || redFlags.length > 0
   const extractedSymptoms = gemini?.extractedSymptoms?.length ? gemini.extractedSymptoms : [...new Set([...local.symptoms.filter((symptom) => !symptom.isCustom).map((symptom) => symptom.symptom), ...fallbackEngine.extractedSymptoms])]
   return {
+    requestType,
     summary: gemini?.summary || '',
+    answer: gemini?.answer || gemini?.explanation || '',
     extractedSymptoms,
     possibleTopics: gemini?.possibleTopics?.length ? gemini.possibleTopics : fallbackEngine.possibleTopics.length ? fallbackEngine.possibleTopics : local.topics,
     urgency: urgent ? 'urgent' : gemini?.urgency || fallbackEngine.urgency || 'routine',
@@ -50,6 +62,7 @@ function App() {
   const [interimTranscript, setInterimTranscript] = useState('')
   const copy = UI_STRINGS[language] || UI_STRINGS.en
   const labels = RESULT_LABELS[language] || RESULT_LABELS.en
+  const messagePrivacy = MESSAGE_PRIVACY_COPY[language] || MESSAGE_PRIVACY_COPY.en
   const examples = EXAMPLE_PROMPTS[language] || EXAMPLE_PROMPTS.en
 
   async function submit(event) {
@@ -77,9 +90,11 @@ function App() {
     const assessment = mergeAnalysis(gemini, local, fallbackEngine, labels)
     setResult(assessment)
     try {
-      saveHealthEntry({ recordedAt: new Date().toISOString(), language, notes: note.trim(), symptoms: assessment.extractedSymptoms.map((symptom) => ({ symptom })), assessment: { urgency: assessment.urgency, redFlags: assessment.redFlags, summary: assessment.summary } })
+      if (assessment.requestType !== 'general') {
+        saveHealthEntry({ recordedAt: new Date().toISOString(), language, notes: note.trim(), symptoms: assessment.extractedSymptoms.map((symptom) => ({ symptom })), assessment: { urgency: assessment.urgency, redFlags: assessment.redFlags, summary: assessment.summary } })
+        window.dispatchEvent(new Event('sakhicare:health-entry-update'))
+      }
       setStorageError('')
-      window.dispatchEvent(new Event('sakhicare:health-entry-update'))
     } catch {
       setStorageError('Your summary is ready, but it could not be saved on this device.')
     }
@@ -146,18 +161,18 @@ function App() {
         </section>
 
         <section className="checker-section" id="checker">
-          <div className="section-heading"><p className="eyebrow">A gentle place to start</p><h2>{copy.talkOrTypeHeader}</h2><p>Describe your symptoms in English, Hindi, Kannada, Tamil, Malayalam, Telugu, or a mix of languages.</p></div>
+          <div className="section-heading"><p className="eyebrow">A gentle place to start</p><h2>{copy.talkOrTypeHeader}</h2><p>Ask a general health question or describe symptoms in English, Hindi, Kannada, Tamil, Malayalam, Telugu, or a mix of languages.</p></div>
           <div className="checker-grid">
             <form className="checker-card" onSubmit={submit}>
               <div className="checker-language-row"><label className="field-label" htmlFor="analysis-language">{copy.selectLanguage}</label><select id="analysis-language" value={language} onChange={(event) => { setLanguage(event.target.value); setVoiceError('') }}><option value="auto">Auto detect language</option>{LANGUAGES.map((item) => <option key={item.code} value={item.code}>{item.nativeName}</option>)}</select></div>
-              <label className="field-label" htmlFor="symptom-text">{copy.talkOrTypeHeader}</label>
-              <p className="field-hint">Share what you noticed, when it started, and how it affects you. The summary is information, not a diagnosis.</p>
+              <label className="field-label" htmlFor="symptom-text">{language === 'en' || language === 'auto' ? 'Ask a health question or describe symptoms' : copy.talkOrTypeHeader}</label>
+              <p className="field-hint">Ask a general health question, describe what you’re experiencing, or do both. Guidance is information, not a diagnosis.</p>
               <textarea id="symptom-text" maxLength={1500} rows={5} value={note} onChange={(event) => { setNote(event.target.value); if (event.target.value.trim()) setError('') }} placeholder={copy.inputPlaceholder} />
-              <div className="input-footer"><span className="privacy-note">▣ &nbsp;{labels.privacy}</span><span>{note.length} / 1500</span></div>
+              <div className="input-footer"><span className="privacy-note">▣ &nbsp;{messagePrivacy.privacy}</span><span>{note.length} / 1500</span></div>
               <div className="speech-controls"><button className={`speech-button ${isListening ? 'listening' : ''}`} type="button" onClick={toggleSpeech} aria-pressed={isListening} aria-label={isListening ? copy.tapToStop : copy.micTooltip}>{isListening ? <MicOff size={16} aria-hidden="true" /> : <Mic size={16} aria-hidden="true" />}{isListening ? copy.tapToStop : copy.micTooltip}</button>{interimTranscript && <span className="interim-transcript" aria-live="polite">{interimTranscript}</span>}</div>
               {voiceError && <p className="inline-error" role="status">{voiceError}</p>}
               <div className="example-prompts"><span>{copy.tryExamples}</span>{examples.slice(0, 3).map((example) => <button key={example.title} type="button" onClick={() => selectExample(example.text)}>{example.title}</button>)}</div>
-              <label className="gemini-consent"><input type="checkbox" checked={consent} onChange={(event) => { setConsent(event.target.checked); if (event.target.checked && error === 'consent') setError('') }} /><span>{labels.consent}</span></label>
+              <label className="gemini-consent"><input type="checkbox" checked={consent} onChange={(event) => { setConsent(event.target.checked); if (event.target.checked && error === 'consent') setError('') }} /><span>{messagePrivacy.consent}</span></label>
               <button className="primary-button submit-button" type="submit" disabled={isAnalyzing}>{isAnalyzing ? labels.analyzing : copy.understandBtn} <span aria-hidden="true">{isAnalyzing ? '…' : '→'}</span></button>
               {error === 'empty' && <p className="inline-error" role="alert">Please add a few words about what you’ve been noticing.</p>}
               {error === 'consent' && <p className="inline-error" role="alert">Please confirm before sending your health description for analysis.</p>}
@@ -170,12 +185,13 @@ function App() {
 
         {analysisNotice && <p className="analysis-notice" role="status">{analysisNotice}</p>}
         {result && <section className="results-section" id="results" aria-live="polite" aria-atomic="false"><article className="results-card">
-          <div className="results-head"><div><p className="eyebrow">{labels.resultTitle}</p><h2>{result.summary || labels.nextStep}</h2><span className="analysis-source">{result.source === 'gemini' ? 'Gemini assisted · Please review with a healthcare professional' : 'On-device pattern check · Limited coverage'}</span></div><span className={`urgency-pill ${result.urgency}`}>{result.urgency === 'urgent' ? labels.urgent : result.urgency === 'soon' ? labels.soon : labels.routine}</span></div>
+          <div className="results-head"><div><p className="eyebrow">{result.requestType === 'general' ? 'Luna Her answers' : labels.resultTitle}</p><h2>{result.summary || labels.nextStep}</h2><span className="analysis-source">{result.source === 'gemini' ? 'Gemini assisted · Please review health guidance with a healthcare professional' : 'On-device pattern check · Limited coverage'}</span></div>{result.requestType !== 'general' && <span className={`urgency-pill ${result.urgency}`}>{result.urgency === 'urgent' ? labels.urgent : result.urgency === 'soon' ? labels.soon : labels.routine}</span>}</div>
           {result.urgency === 'urgent' && <div className="urgent-banner" role="alert">{labels.urgentMessage}</div>}
-          <div className="results-body"><p className="result-summary">{result.explanation}</p><div className="result-block"><h3>{labels.mentioned}</h3><div className="symptom-tags">{result.extractedSymptoms.length ? result.extractedSymptoms.map((item) => <span className="symptom-tag" key={item}>{item}</span>) : <span className="symptom-tag">No specific symptom matched yet</span>}</div></div>
+          <div className="results-body"><div className="result-block ai-answer"><h3>{result.requestType === 'general' ? 'Answer' : 'Guidance'}</h3><p className="result-summary">{result.answer || result.explanation}</p></div>{result.requestType !== 'general' && <><div className="result-block"><h3>{labels.mentioned}</h3><div className="symptom-tags">{result.extractedSymptoms.length ? result.extractedSymptoms.map((item) => <span className="symptom-tag" key={item}>{item}</span>) : <span className="symptom-tag">No specific symptom matched yet</span>}</div></div>
             <div className="result-grid"><div className="result-block"><h3>{labels.topics}</h3><ul>{(result.possibleTopics.length ? result.possibleTopics : ['You can talk through your concerns with a healthcare professional.']).map((item) => <li key={item}>{item}</li>)}</ul></div><div className="result-block"><h3>{labels.questions}</h3><ul>{result.questionsForDoctor.map((item) => <li key={item}>{item}</li>)}</ul></div></div>
             <div className="results-doctor"><b>{labels.care}</b>{result.recommendedDoctor}</div>
             {result.redFlags.length > 0 && <div className="result-block"><h3>Symptoms needing attention</h3><ul>{result.redFlags.map((item) => <li key={item}>{item}</li>)}</ul></div>}
+            </>}
             <p className="results-disclaimer">{labels.disclaimer}</p>
           </div>
         </article></section>}
