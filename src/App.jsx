@@ -46,7 +46,7 @@ const PAGE_TITLES = {
   talk: 'Talk or Type',
   tracker: 'Cycle Insights & Forecast',
   insights: 'Early Warnings and Insights',
-  screening: 'PCOS Research Screening',
+  screening: 'LunaHer Pattern Screening',
   doctor: 'Doctor Summary',
   learn: 'Learn and Myths',
 };

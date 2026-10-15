@@ -1,4 +1,4 @@
-"""PCOS Research Screening API Endpoints (AMD-SlingShot Model Integration).
+"""LunaHer Pattern Screening API endpoints.
 
 Provides secure, validated endpoints for clinical parameter inference, ultrasound image
 follicle estimation, and model transparency metadata.
@@ -19,7 +19,7 @@ from ..services.screening_service import screening_service
 
 router = APIRouter(
     prefix="/api/pcos-screening",
-    tags=["PCOS Research Screening (AMD-SlingShot)"],
+    tags=["LunaHer Pattern Screening"],
 )
 
 
@@ -57,7 +57,7 @@ async def get_model_information() -> ModelInfoResponse:
     response_model=ClinicalScreeningResponse,
 )
 async def run_clinical_analysis(request: ClinicalScreeningRequest) -> ClinicalScreeningResponse:
-    """Executes the verified AMD-SlingShot XGBoost classifier on input clinical parameters.
+    """Runs the LunaHer Pattern Screening Model on clinical parameters.
 
     Never diagnoses PCOS; produces an uncalibrated experimental risk score with grounded
     feature contributions and educational clinician discussion topics.
@@ -87,7 +87,7 @@ async def run_clinical_analysis(request: ClinicalScreeningRequest) -> ClinicalSc
 async def run_ultrasound_analysis(file: UploadFile = File(...)) -> UltrasoundScreeningResponse:
     """Estimates antral follicle counts from an uploaded ultrasound scan image using the
 
-    AMD-SlingShot connected-components morphological pipeline.
+    LunaHer image pattern estimation pipeline.
     Temporary memory buffers are purged immediately upon processing completion.
     """
     # 1. Validate content type

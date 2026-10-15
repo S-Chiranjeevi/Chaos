@@ -1,5 +1,5 @@
 /**
- * PCOS Research Screening Client API (AMD-SlingShot Model Integration)
+ * LunaHer Pattern Screening client API.
  * Communicates with the FastAPI backend service for XGBoost inference
  * and ultrasound follicle estimation.
  */

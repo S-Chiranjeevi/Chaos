@@ -1,7 +1,7 @@
-"""PCOS Research Screening Service.
+"""LunaHer Pattern Screening Service.
 
 Encapsulates XGBoost model loading, feature alignment, clinical parameter inference,
-and ultrasound image follicle approximation directly ported from AMD-SlingShot.
+and ultrasound image feature estimation.
 """
 from __future__ import annotations
 
@@ -32,7 +32,7 @@ METADATA_PATH = os.path.join(MODEL_DIR, "model_metadata.json")
 
 
 class PCOSResearchScreeningService:
-    """Manages the AMD-SlingShot XGBoost model lifecycle and inference."""
+    """Manages the LunaHer Pattern Screening Model lifecycle and inference."""
 
     def __init__(self) -> None:
         self.model: Any = None
@@ -56,7 +56,7 @@ class PCOSResearchScreeningService:
                     self.model = pickle.load(f)
                 self.is_loaded = True
                 logger.info(
-                    "PCOS Research Screening Model loaded successfully (%d features)",
+                    "LunaHer Pattern Screening Model loaded successfully (%d features)",
                     len(self.feature_names),
                 )
             else:
@@ -106,7 +106,7 @@ class PCOSResearchScreeningService:
         })
 
         return ModelInfoResponse(
-            model_name="AMD-SlingShot PCOS Classifier",
+            model_name="LunaHer Pattern Screening Model",
             algorithm="XGBoost (Extreme Gradient Boosting)",
             version="1.0.0",
             is_loaded=self.is_loaded,
@@ -115,7 +115,7 @@ class PCOSResearchScreeningService:
             validation_metrics=metrics,
             dataset_source="Kaggle PCOS Dataset (PCOS_data_without_infertility.xlsx) - 538 clinical patient records",
             disclaimer=(
-                "The AMD-SlingShot model is an open-source research classifier. Cross-validation accuracy "
+                "The LunaHer model is a research-only statistical classifier. Cross-validation accuracy "
                 "reflects retrospective mathematical evaluation on public observational data and cannot be "
                 "interpreted as prospective clinical diagnostic performance."
             ),
@@ -309,7 +309,7 @@ class PCOSResearchScreeningService:
         )
 
     def process_ultrasound_image(self, image_bytes: bytes) -> UltrasoundScreeningResponse:
-        """Processes an ultrasound scan using the AMD-SlingShot connected-components blob pipeline."""
+        """Processes an ultrasound scan with LunaHer image pattern estimation."""
         if not image_bytes:
             raise ValueError("No image data provided for ultrasound analysis.")
 
@@ -327,7 +327,7 @@ class PCOSResearchScreeningService:
         if w < 100 or h < 100:
             raise ValueError(f"Image dimensions ({w}x{h}) are too small for ultrasound feature detection.")
 
-        # Grayscale conversion & thumbnail normalization (AMD-SlingShot heuristic)
+        # Grayscale conversion and thumbnail normalization for image pattern estimation.
         gray_image = image.convert("L")
         gray_image.thumbnail((512, 512))
         arr = np.array(gray_image, dtype=np.float32)
@@ -357,7 +357,7 @@ class PCOSResearchScreeningService:
                 width = comp["width"]
                 height = comp["height"]
                 aspect = min(width, height) / max(width, height)
-                # AMD-SlingShot filter criteria: area 20-1200, aspect >= 0.45, dimension 4-60px
+                # Candidate-region filter criteria: area 20-1200, aspect >= 0.45, dimension 4-60px
                 if 20 <= area <= 1200 and aspect >= 0.45 and 4 <= width <= 60 and 4 <= height <= 60:
                     count += 1
             follicle_estimate = int(max(0, min(30, count)))
@@ -365,7 +365,7 @@ class PCOSResearchScreeningService:
         notes = [
             f"Image analyzed with dimensions {w}x{h} px.",
             f"Detected approximately {follicle_estimate} circular anechoic candidate regions.",
-            "In AMD-SlingShot methodology, >= 10-12 follicles per ovary commonly correlates with polycystic morphology.",
+            "Candidate region counts are informational only and require review by a qualified clinician.",
         ]
 
         limitations = [

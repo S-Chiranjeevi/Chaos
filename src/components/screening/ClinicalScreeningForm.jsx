@@ -631,7 +631,7 @@ export function ClinicalScreeningForm({
             <div className="consent-copy">
               <strong>Informed Consent & Medical Understanding:</strong>
               <p>
-                I understand this analysis uses an open-source machine learning model (AMD-SlingShot XGBoost)
+                I understand this analysis uses LunaHer’s research-only pattern screening model
                 for research risk stratification. It is not an automated medical diagnosis, does not replace
                 evaluation by a gynecologist, and will not log my health data to an external server.
               </p>

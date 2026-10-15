@@ -105,13 +105,13 @@ export function ResearchScreeningPage() {
         <div className="relative z-10">
           <div className="flex items-center gap-2 text-teal-300 text-xs font-semibold uppercase tracking-wider mb-2">
             <Cpu size={16} />
-            <span>Research & ML Integration · AMD-SlingShot Pipeline</span>
+            <span>LunaHer Pattern Screening Model</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-2">
-            PCOS Research Screening
+            LunaHer Pattern Screening
           </h1>
           <p className="text-sm sm:text-base text-teal-100 max-w-2xl leading-relaxed">
-            Screen clinical, physical, and hormonal parameters using the validated machine learning pipeline adapted from AMD-SlingShot. This experimental tool provides statistical pattern classification to assist informed doctor consultations.
+            Review clinical, physical, and hormonal information with LunaHer’s research-only pattern screening model. It highlights statistical patterns to support a conversation with a qualified healthcare professional.
           </p>
 
           <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -271,10 +271,10 @@ export function ResearchScreeningPage() {
           <div className="bg-white dark:bg-stone-900 rounded-2xl border border-stone-200 dark:border-stone-800 p-6 shadow-sm space-y-4">
             <div className="flex items-center gap-2 text-teal-700 dark:text-teal-400 font-semibold text-sm">
               <FileCheck2 size={20} />
-              <h2>AMD-SlingShot Model Pipeline Architecture</h2>
+              <h2>LunaHer Pattern Screening Model</h2>
             </div>
             <p className="text-xs sm:text-sm leading-relaxed text-stone-600 dark:text-stone-300">
-              The clinical screening pipeline is adapted directly from the <strong>AMD-SlingShot</strong> reference repository (Kaggle PCOS dataset of 538 patient records across 42 physical and biochemical variables).
+              LunaHer’s pattern screening model organizes clinical parameters and image feature estimates for discussion with a qualified healthcare professional. It cannot diagnose PCOS or replace clinical care.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
@@ -301,13 +301,13 @@ export function ResearchScreeningPage() {
                   <strong>Trained XGBoost Classifier:</strong> Model artifact is stored in <code className="bg-stone-100 dark:bg-stone-800 px-1 py-0.5 rounded">backend/app/ml_models/best_xgboost_model.pkl</code>. It uses 42 features exactly matching the Kaggle PCOS dataset feature matrix with median cohort imputation for optional lab values.
                 </li>
                 <li>
-                  <strong>Ultrasound CNN Weights Status:</strong> The reference repository notebook <code className="bg-stone-100 dark:bg-stone-800 px-1 py-0.5 rounded">pcos-detection-from-usg-images.ipynb</code> referenced a Keras CNN (<code className="bg-stone-100 dark:bg-stone-800 px-1 py-0.5 rounded">pcos_cnn_model.h5</code>), but no trained weight artifact was ever committed upstream. Instead, upstream’s <code className="bg-stone-100 dark:bg-stone-800 px-1 py-0.5 rounded">app.py</code> utilized an adaptive contrast-thresholding follicle detection heuristic (<code className="bg-stone-100 dark:bg-stone-800 px-1 py-0.5 rounded">estimate_follicle_count_from_image</code>). We implemented this faithfully with full medical disclaimers rather than simulating nonexistent deep learning weights.
+                  <strong>Ultrasound Image Estimation:</strong> LunaHer analyzes image contrast and connected regions to estimate candidate follicle-like areas. It does not provide a diagnostic interpretation of an ultrasound image.
                 </li>
                 <li>
                   <strong>Feature Independence:</strong> This screening tool is kept strictly decoupled from PCOS Saathi’s APIVerve menstrual cycle forecasting and daily symptom journal to avoid invalid confounding risk scores.
                 </li>
                 <li>
-                  <strong>Dataset & License:</strong> The underlying dataset is derived from the publicly available Kaggle PCOS dataset (538 instances, released under CC0: Public Domain). Reference code from AMD-SlingShot is released under open-source MIT-style licensing.
+                  <strong>Model Context:</strong> LunaHer uses reference values from observational screening data. Results are informational estimates only and are not a diagnostic device.
                 </li>
               </ul>
             </div>

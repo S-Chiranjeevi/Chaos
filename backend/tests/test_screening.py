@@ -1,4 +1,4 @@
-"""Test suite for PCOS Research Screening (AMD-SlingShot Model Integration)."""
+"""Test suite for the LunaHer Pattern Screening Model."""
 from __future__ import annotations
 
 import io
@@ -28,7 +28,7 @@ def test_screening_model_info_endpoint():
     response = client.get("/api/pcos-screening/model-info")
     assert response.status_code == 200
     data = response.json()
-    assert data["model_name"] == "AMD-SlingShot PCOS Classifier"
+    assert data["model_name"] == "LunaHer Pattern Screening Model"
     assert data["algorithm"] == "XGBoost (Extreme Gradient Boosting)"
     assert data["feature_count"] == 42
     assert "validation_metrics" in data

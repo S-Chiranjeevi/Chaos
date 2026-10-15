@@ -1,5 +1,5 @@
 /**
- * PCOS Research Screening Benchmark Presets (AMD-SlingShot Dataset Profiles)
+ * LunaHer Pattern Screening benchmark presets.
  * Allows judges and users to test clinical model behavior with verified data.
  */
 

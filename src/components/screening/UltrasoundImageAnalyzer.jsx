@@ -134,7 +134,7 @@ export function UltrasoundImageAnalyzer({ onApplyFollicles }) {
         <div className="analyzer-title-col">
           <h3>
             <Layers size={20} className="text-teal-600 dark:text-teal-400" />
-            <span>Mode B: Ultrasound Follicle Analysis (AMD-SlingShot Pipeline)</span>
+            <span>Mode B: Ultrasound Pattern Analysis (LunaHer Model)</span>
           </h3>
           <p>
             Upload a pelvic ultrasound sonography scan. The algorithm applies contrast normalization
