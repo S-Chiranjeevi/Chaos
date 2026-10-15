@@ -1,164 +1,98 @@
-import React, { useState, useEffect } from 'react';
-import Header from './components/layout/Header.jsx';
-import Sidebar from './components/layout/Sidebar.jsx';
-import MobileNav from './components/layout/MobileNav.jsx';
-import GlobalError from './components/layout/GlobalError.jsx';
-import LanguageSelector from './components/common/LanguageSelector.jsx';
+import React, { useEffect, useState } from 'react'
+import Header from './components/layout/Header.jsx'
+import { LanguageSelector } from './components/common/LanguageSelector.jsx'
+import { BottomNavigation } from './components/BottomNavigation.jsx'
+import { Navigation } from './components/Navigation.jsx'
+import { PrivacyControls } from './components/PrivacyControls.jsx'
+import { DoctorSummaryPage } from './pages/DoctorSummaryPage.jsx'
+import { HealthTrackerPage } from './pages/HealthTrackerPage.jsx'
+import { Home } from './pages/Home.jsx'
+import { InsightsPage } from './pages/InsightsPage.jsx'
+import { LearnPage } from './pages/LearnPage.jsx'
+import { TalkOrTypePage } from './pages/TalkOrTypePage.jsx'
+import { getLatestHealthEntry } from './models/healthEntry.js'
+import './App.css'
+import './layout.css'
 
-import HomeView from './views/HomeView.jsx';
-import TalkView from './views/TalkView.jsx';
-import TrackerView from './views/TrackerView.jsx';
-import SummaryView from './views/SummaryView.jsx';
-import LearnView from './views/LearnView.jsx';
-
-// Pattern detection integration if available from teammate contribution
-import { PatternDetectionView } from './components/PatternDetectionView.jsx';
-
-/**
- * SakhiCare - Main Responsive Frontend Shell
- * Hackathon-optimized, accessible, privacy-first women's & maternal health shell.
- */
-export function App() {
-  // Navigation Route State (supports '/', '/talk', '/tracker', '/summary', '/learn')
-  const [currentPath, setCurrentPath] = useState(() => {
-    const hash = window.location.hash.replace('#', '');
-    if (['/', '/talk', '/tracker', '/summary', '/learn', '/patterns'].includes(hash)) {
-      return hash;
-    }
-    const path = window.location.pathname;
-    if (['/talk', '/tracker', '/summary', '/learn', '/patterns'].includes(path)) {
-      return path;
-    }
-    return '/';
-  });
-
-  // Current Language State
-  const [currentLanguage, setCurrentLanguage] = useState('en');
-  const [isLanguageModalOpen, setIsLanguageModalOpen] = useState(false);
-
-  // Global Error Area State
-  const [globalError, setGlobalError] = useState(null);
-
-  // Sync hash routing
-  useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.replace('#', '');
-      if (['/', '/talk', '/tracker', '/summary', '/learn', '/patterns'].includes(hash)) {
-        setCurrentPath(hash);
-      }
-    };
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
-
-  const handleNavigate = (path) => {
-    setCurrentPath(path);
-    window.location.hash = path;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleTriggerDemoError = () => {
-    setGlobalError({
-      title: 'Local Vault Sync Warning',
-      message: 'IndexedDB transaction took longer than expected. Local encrypted cache remains intact.',
-      code: 'ERR_LOCAL_STORAGE_WARN_04'
-    });
-  };
-
-  const handleEmergencyCall = () => {
-    alert('🚨 Emergency Protocol Triggered: Connecting to National Maternal & Ambulance Helpline: 108 / 102.');
-  };
-
-  return (
-    <div className="min-h-screen bg-stone-100/70 text-stone-900 font-sans flex flex-col selection:bg-rose-100 selection:text-rose-900">
-      
-      {/* 7. Global Error Message Area */}
-      <GlobalError
-        error={globalError}
-        onDismiss={() => setGlobalError(null)}
-        onRetry={() => {
-          alert('Retrying local storage verification...');
-          setGlobalError(null);
-        }}
-      />
-
-      {/* 2. Top Header (Logo, Language, Privacy Indicator) */}
-      <Header
-        currentLanguage={currentLanguage}
-        onOpenLanguageSelector={() => setIsLanguageModalOpen(true)}
-        onNavigateHome={() => handleNavigate('/')}
-        onTriggerDemoError={handleTriggerDemoError}
-      />
-
-      {/* Main Layout Container (Sidebar + Content Body) */}
-      <div className="flex-1 max-w-7xl w-full mx-auto flex">
-        
-        {/* 4. Desktop Sidebar Navigation */}
-        <Sidebar
-          currentPath={currentPath}
-          onNavigate={handleNavigate}
-          onEmergencyCall={handleEmergencyCall}
-        />
-
-        {/* Responsive Content Area */}
-        <main
-          id="main-content"
-          role="main"
-          className="flex-1 p-4 sm:p-6 lg:p-8 pb-24 md:pb-12 max-w-5xl w-full focus:outline-none"
-          tabIndex={-1}
-        >
-          {/* Active View Router */}
-          {currentPath === '/' && (
-            <HomeView onNavigate={handleNavigate} />
-          )}
-
-          {currentPath === '/talk' && (
-            <TalkView onNavigate={handleNavigate} currentLanguage={currentLanguage} />
-          )}
-
-          {currentPath === '/tracker' && (
-            <TrackerView onNavigate={handleNavigate} />
-          )}
-
-          {currentPath === '/summary' && (
-            <SummaryView onNavigate={handleNavigate} />
-          )}
-
-          {currentPath === '/learn' && (
-            <LearnView onNavigate={handleNavigate} />
-          )}
-
-          {currentPath === '/patterns' && PatternDetectionView && (
-            <div className="space-y-6">
-              <PatternDetectionView onNavigateToSymptomGuide={() => handleNavigate('/talk')} />
-            </div>
-          )}
-        </main>
-      </div>
-
-      {/* 3. Mobile Bottom Navigation */}
-      <MobileNav
-        currentPath={currentPath}
-        onNavigate={handleNavigate}
-      />
-
-      {/* Shared Multilingual Selector Modal */}
-      <LanguageSelector
-        isOpen={isLanguageModalOpen}
-        onClose={() => setIsLanguageModalOpen(false)}
-        currentLanguage={currentLanguage}
-        onSelectLanguage={(langCode) => setCurrentLanguage(langCode)}
-      />
-
-      {/* Accessibility Skip-To-Content Link */}
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 z-50 bg-rose-700 text-white px-4 py-2 rounded-xl shadow-lg text-xs font-semibold"
-      >
-        Skip directly to main health content
-      </a>
-    </div>
-  );
+const PATH_TO_PAGE = {
+  '/': 'home', '/talk': 'talk', '/tracker': 'tracker', '/insights': 'insights',
+  '/patterns': 'insights', '/doctor': 'doctor', '/summary': 'doctor', '/learn': 'learn', '/privacy': 'privacy',
+}
+const PAGE_TO_PATH = { home: '/', talk: '/talk', tracker: '/tracker', insights: '/insights', doctor: '/doctor', learn: '/learn', privacy: '/privacy' }
+const PAGE_TITLES = {
+  home: 'Home', talk: 'Talk or Type', tracker: 'My Health Tracker',
+  insights: 'Early Warnings and Insights', doctor: 'Doctor Summary',
+  learn: 'Learn and Myths', privacy: 'Privacy',
 }
 
-export default App;
+function App() {
+  const [activePage, setActivePage] = useState(() => PATH_TO_PAGE[window.location.pathname] || 'home')
+  const [currentLanguage, setCurrentLanguage] = useState('en')
+  const [languageDialogOpen, setLanguageDialogOpen] = useState(false)
+  const [lastSharedEntry, setLastSharedEntry] = useState(() => getLatestHealthEntry())
+  const [refreshKey, setRefreshKey] = useState(0)
+
+  useEffect(() => {
+    const handleEntryUpdate = (event) => {
+      setLastSharedEntry(event.detail)
+      setRefreshKey((value) => value + 1)
+    }
+    const handleHistoryChange = () => setActivePage(PATH_TO_PAGE[window.location.pathname] || 'home')
+    window.addEventListener('sakhicare:healthEntryUpdate', handleEntryUpdate)
+    window.addEventListener('popstate', handleHistoryChange)
+    return () => {
+      window.removeEventListener('sakhicare:healthEntryUpdate', handleEntryUpdate)
+      window.removeEventListener('popstate', handleHistoryChange)
+    }
+  }, [])
+
+  useEffect(() => {
+    document.title = `${PAGE_TITLES[activePage]} · SakhiCare`
+    if (activePage !== 'home') requestAnimationFrame(() => document.querySelector('[data-page-heading]')?.focus())
+  }, [activePage])
+
+  function navigate(page) {
+    const path = PAGE_TO_PATH[page] ? page : PATH_TO_PAGE[page] || 'home'
+    setActivePage(path)
+    const nextPath = PAGE_TO_PATH[path]
+    if (window.location.pathname !== nextPath) window.history.pushState({}, '', nextPath)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  function handleDataDeleted() {
+    setLastSharedEntry(null)
+    setRefreshKey((value) => value + 1)
+  }
+
+  function renderPage() {
+    switch (activePage) {
+      case 'talk': return <TalkOrTypePage key={currentLanguage} currentLanguage={currentLanguage} onHealthEntryCreated={setLastSharedEntry} />
+      case 'tracker': return <HealthTrackerPage latestEntry={lastSharedEntry} />
+      case 'insights': return <InsightsPage onNavigate={navigate} healthEntry={lastSharedEntry} refreshKey={refreshKey} />
+      case 'doctor': return <DoctorSummaryPage onNavigate={navigate} healthEntry={lastSharedEntry} refreshKey={refreshKey} />
+      case 'learn': return <LearnPage />
+      case 'privacy': return <div className="page-stack"><header className="page-heading"><p className="eyebrow">Your information belongs to you</p><h1 data-page-heading tabIndex="-1">Privacy</h1><p>See what stays on this device and remove your saved SakhiCare information whenever you choose.</p></header><PrivacyControls onDataDeleted={handleDataDeleted} /></div>
+      default: return <Home onNavigate={navigate} />
+    }
+  }
+
+  return (
+    <div className="app-root light-theme sakhi-layout">
+      <a className="skip-link" href="#main-content">Skip to main content</a>
+      <Header currentLanguage={currentLanguage} onOpenLanguageSelector={() => setLanguageDialogOpen(true)} onNavigateHome={() => navigate('home')} />
+      <div className="app-body">
+        <Navigation activePage={activePage} onNavigate={navigate} />
+        <div className="app-column">
+          <main id="main-content" className="page-content" tabIndex="-1">
+            {renderPage()}
+            <footer className="page-footer"><span>SakhiCare · A gentle place to begin</span><button type="button" onClick={() => navigate('privacy')}>Privacy choices</button></footer>
+          </main>
+        </div>
+      </div>
+      <BottomNavigation activePage={activePage} onNavigate={navigate} />
+      <LanguageSelector isOpen={languageDialogOpen} onClose={() => setLanguageDialogOpen(false)} currentLanguage={currentLanguage} onSelectLanguage={setCurrentLanguage} />
+    </div>
+  )
+}
+
+export default App

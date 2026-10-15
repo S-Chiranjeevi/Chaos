@@ -4,6 +4,7 @@
  * Standardized data contract for symptom descriptions, extracted clinical features,
  * and non-diagnostic educational guidance for PCOS and women's health.
  */
+import { clearLocalHealthData, readLocalData, STORAGE_KEYS, writeLocalData } from '../services/localStorage.js'
 
 export const SEVERITY_LEVELS = ['Mild', 'Moderate', 'Severe', 'Unspecified']
 
@@ -67,10 +68,8 @@ export const publishHealthEntry = (entry) => {
     window.dispatchEvent(event)
   } catch { /* The page can still save locally if events are unavailable. */ }
 
-  // Persist latest entry in localStorage
-  try {
-    localStorage.setItem('sakhicare_latest_entry', JSON.stringify(entry))
-  } catch { /* Private browsing or storage limits can prevent local saves. */ }
+  // Save only on this device. The UI handles storage failures without losing the note in memory.
+  return writeLocalData(STORAGE_KEYS.latestEntry, entry)
 }
 
 /**
@@ -78,18 +77,10 @@ export const publishHealthEntry = (entry) => {
  */
 export const getLatestHealthEntry = () => {
   if (typeof window === 'undefined') return null
-  try {
-    const stored = localStorage.getItem('sakhicare_latest_entry')
-    return stored ? JSON.parse(stored) : null
-  } catch {
-    return null
-  }
+  return readLocalData(STORAGE_KEYS.latestEntry, null).value
 }
 
 export const deleteAllLocalHealthData = () => {
   if (typeof window === 'undefined') return
-  for (let index = localStorage.length - 1; index >= 0; index -= 1) {
-    const key = localStorage.key(index)
-    if (key?.startsWith('sakhicare_')) localStorage.removeItem(key)
-  }
+  return clearLocalHealthData()
 }
