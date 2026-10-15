@@ -97,7 +97,7 @@ function getText(result) {
 
 function makePrompt(text, language) {
   const languageNames = { auto: 'the same language as the user input (detect it)', en: 'English', hi: 'Hindi', kn: 'Kannada', ta: 'Tamil', ml: 'Malayalam', te: 'Telugu' }
-  return `You are SakhiCare, a cautious women's health information assistant. Analyze an everyday symptom description and prepare a clear, supportive summary. Reply in ${languageNames[language]}.
+  return `You are Luna Her, a cautious women's health information assistant. Analyze an everyday symptom description and prepare a clear, supportive summary. Reply in ${languageNames[language]}.
 
 Safety rules:
 - Never diagnose PCOS or any other condition. Never say a pattern proves or confirms a diagnosis.
@@ -212,4 +212,4 @@ const server = createServer(async (req, res) => {
 
 const port = Number(process.env.API_PORT || process.env.PORT || 4174)
 const host = process.env.HOST || (process.env.NODE_ENV === 'production' || process.env.PORT ? '0.0.0.0' : '127.0.0.1')
-server.listen(port, host, () => console.log(`SakhiCare server listening on http://${host}:${port}; Gemini ${process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY ? 'configured' : 'not configured'}.`))
+server.listen(port, host, () => console.log(`Luna Her server listening on http://${host}:${port}; Gemini ${process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY ? 'configured' : 'not configured'}.`))

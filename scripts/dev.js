@@ -30,5 +30,5 @@ function launch(label, args) {
 
 process.on('SIGINT', () => stopAll(0))
 process.on('SIGTERM', () => stopAll(0))
-launch('SakhiCare API', ['server/index.js'])
+launch('Luna Her API', ['server/index.js'])
 launch('Vite', ['node_modules/vite/bin/vite.js', '--host', '127.0.0.1'])

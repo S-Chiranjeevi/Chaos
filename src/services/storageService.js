@@ -131,7 +131,7 @@ export function loadDoctorSummary() {
 
 export function exportAllLocalData() {
   return {
-    app: 'SakhiCare',
+    app: 'Luna Her',
     exportedAt: new Date().toISOString(),
     storage: 'This export was assembled from data stored locally in this browser.',
     healthEntries: loadHealthEntries(),
