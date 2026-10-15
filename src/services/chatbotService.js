@@ -32,7 +32,7 @@ const TOPIC_RESPONSES = [
 ]
 
 const DEFAULT_RESPONSE = {
-  message: 'I can help you organize symptoms, think of questions for a health visit, or explain how to use Luna Her’s tracking tools. Tell me what you have noticed in your own words.',
+  message: 'I can help you organize symptoms, think of questions for a health visit, or explain how to use LumaHer’s tracking tools. Tell me what you have noticed in your own words.',
   suggestions: ['What details should I track?', 'Help me prepare questions', 'Open cycle tracker'],
 }
 
@@ -89,6 +89,6 @@ export const CHAT_STARTER = {
   id: 'assistant-welcome',
   sender: 'assistant',
   kind: 'help',
-  text: addDisclaimer('Hi, I’m Luna Her’s guide. I can help you organize symptoms, use the tracker, and prepare questions for a health visit.'),
+  text: addDisclaimer('Hi, I’m LumaHer’s guide. I can help you organize symptoms, use the tracker, and prepare questions for a health visit.'),
   suggestions: DEFAULT_RESPONSE.suggestions,
 }
