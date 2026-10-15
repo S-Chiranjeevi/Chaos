@@ -1,9 +1,13 @@
-"""Unit tests for MongoDB integration endpoints in PCOS Saathi / SakhiCare backend."""
+"""Unit tests for MongoDB integration endpoints in PCOS Saathi / Luna Her backend."""
 import pytest
 from fastapi.testclient import TestClient
 
-from backend.app.main import app
-from backend.app.core.database import mongo_manager
+try:
+    from app.main import app
+    from app.core.database import mongo_manager
+except ImportError:
+    from backend.app.main import app
+    from backend.app.core.database import mongo_manager
 
 client = TestClient(app)
 
@@ -25,7 +29,7 @@ def test_db_configure_endpoint_invalid_or_offline():
     """Verify the /api/db/configure endpoint gracefully handles unreachable endpoints."""
     payload = {
         "uri": "mongodb://invalid-host-999.test:27017",
-        "db_name": "test_sakhicare",
+        "db_name": "test_lunaher",
         "timeout_ms": 500,
     }
     response = client.post("/api/db/configure", json=payload)

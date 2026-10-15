@@ -1,5 +1,5 @@
 /**
- * Follow-Up Question & Suggestion Synthesis Service for LunaHer / SakhiCare
+ * Follow-Up Question & Suggestion Synthesis Service for Luna Her
  * 
  * When a user enters symptoms, this service generates empathetic, clinically-sound,
  * non-diagnostic follow-up questions to understand:

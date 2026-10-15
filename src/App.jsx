@@ -12,6 +12,7 @@ import { LearnPage } from './pages/LearnPage.jsx';
 import { TalkOrTypePage } from './pages/TalkOrTypePage.jsx';
 import { ChatbotWidget } from './components/ChatbotWidget.jsx';
 import { BackgroundMusic } from './components/BackgroundMusic.jsx';
+import { ResearchScreeningPage } from './pages/ResearchScreeningPage.jsx';
 import { getLatestHealthEntry } from './models/healthEntry.js';
 import { StorageService } from './services/storageService.js';
 import './App.css';
@@ -25,6 +26,8 @@ const PATH_TO_PAGE = {
   '/patterns': 'insights',
   '/doctor': 'doctor',
   '/summary': 'doctor',
+  '/screening': 'screening',
+  '/research': 'screening',
   '/learn': 'learn',
 };
 
@@ -33,6 +36,7 @@ const PAGE_TO_PATH = {
   talk: '/talk',
   tracker: '/tracker',
   insights: '/insights',
+  screening: '/screening',
   doctor: '/summary',
   learn: '/learn',
 };
@@ -42,6 +46,7 @@ const PAGE_TITLES = {
   talk: 'Talk or Type',
   tracker: 'Cycle Insights & Forecast',
   insights: 'Early Warnings and Insights',
+  screening: 'PCOS Research Screening',
   doctor: 'Doctor Summary',
   learn: 'Learn and Myths',
 };
@@ -89,6 +94,8 @@ export function App() {
       setActivePage(PATH_TO_PAGE[window.location.pathname] || 'home');
     };
 
+    window.addEventListener('lunaher:healthEntryUpdate', handleEntryUpdate);
+    window.addEventListener('lunaher:dataDeleted', handleDataDeleted);
     window.addEventListener('sakhicare:healthEntryUpdate', handleEntryUpdate);
     window.addEventListener('sakhicare:dataDeleted', handleDataDeleted);
     window.addEventListener('pcos_saathi:data_change', handleStorageChange);
@@ -96,6 +103,8 @@ export function App() {
     window.addEventListener('hashchange', handleHistoryChange);
 
     return () => {
+      window.removeEventListener('lunaher:healthEntryUpdate', handleEntryUpdate);
+      window.removeEventListener('lunaher:dataDeleted', handleDataDeleted);
       window.removeEventListener('sakhicare:healthEntryUpdate', handleEntryUpdate);
       window.removeEventListener('sakhicare:dataDeleted', handleDataDeleted);
       window.removeEventListener('pcos_saathi:data_change', handleStorageChange);
@@ -144,6 +153,8 @@ export function App() {
             refreshKey={refreshKey}
           />
         );
+      case 'screening':
+        return <ResearchScreeningPage onNavigate={navigate} />;
       case 'doctor':
         return (
           <DoctorSummaryPage
@@ -176,15 +187,16 @@ export function App() {
         }}
       />
 
-      {/* Header */}
-      <Header
-        currentLanguage={currentLanguage}
-        onOpenLanguageSelector={() => setLanguageDialogOpen(true)}
-        onNavigateHome={() => navigate('home')}
-      />
+      {/* Header — slim bar, branding & language now live in the sidebar */}
+      <Header onNavigateHome={() => navigate('home')} />
 
       <div className="app-body">
-        <Navigation activePage={activePage} onNavigate={navigate} />
+        <Navigation
+          activePage={activePage}
+          onNavigate={navigate}
+          currentLanguage={currentLanguage}
+          onOpenLanguageSelector={() => setLanguageDialogOpen(true)}
+        />
         <div className="app-column">
           <main id="main-content" className="page-content" tabIndex="-1">
             {renderPage()}

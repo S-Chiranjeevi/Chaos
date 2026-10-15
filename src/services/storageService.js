@@ -235,20 +235,20 @@ export const StorageService = {
   },
 
   // =========================================================================
-  // BACKWARD COMPATIBILITY MIGRATION (from sakhicare_* keys)
+  // BACKWARD COMPATIBILITY MIGRATION (from lunaher_* and legacy sakhicare_* keys)
   // =========================================================================
   migrateLegacyKeys() {
     const storage = getStorage();
     try {
       // 1. Health Entry migration
-      const legacyHealth = storage.getItem('sakhicare_latest_entry');
+      const legacyHealth = storage.getItem('lunaher_latest_entry') || storage.getItem('sakhicare_latest_entry');
       if (legacyHealth && !storage.getItem(STORAGE_KEYS.HEALTH_ENTRIES)) {
         const parsed = JSON.parse(legacyHealth);
         this.saveHealthEntry(parsed);
       }
 
       // 2. Cycle Tracker migration
-      const legacyCycle = storage.getItem('sakhicare_cycle_tracker');
+      const legacyCycle = storage.getItem('lunaher_cycle_tracker') || storage.getItem('sakhicare_cycle_tracker');
       if (legacyCycle && !storage.getItem(STORAGE_KEYS.CYCLE_ENTRIES)) {
         const parsed = JSON.parse(legacyCycle);
         if (Array.isArray(parsed)) {
@@ -329,6 +329,8 @@ export const StorageService = {
       storage.removeItem(key);
     });
     // Also remove legacy keys
+    storage.removeItem('lunaher_latest_entry');
+    storage.removeItem('lunaher_cycle_tracker');
     storage.removeItem('sakhicare_latest_entry');
     storage.removeItem('sakhicare_cycle_tracker');
 

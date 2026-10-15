@@ -1,4 +1,4 @@
-"""MongoDB REST Endpoints for PCOS Saathi / SakhiCare.
+"""MongoDB REST Endpoints for PCOS Saathi / Luna Her.
 
 Supports CRUD, dynamic connection configuration, health checks,
 and full-vault synchronization between local storage and MongoDB.
@@ -20,7 +20,7 @@ router = APIRouter(prefix="/api/db", tags=["MongoDB Integration"])
 # -----------------------------------------------------------------------------
 class MongoConfigPayload(BaseModel):
     uri: str = Field(..., description="MongoDB connection string (e.g. mongodb://localhost:27017 or mongodb+srv://...)")
-    db_name: Optional[str] = Field(default="sakhicare_db", description="Database name")
+    db_name: Optional[str] = Field(default="luna_her_db", description="Database name")
     timeout_ms: Optional[int] = Field(default=3000, description="Connection timeout in ms")
 
 

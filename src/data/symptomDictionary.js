@@ -1,5 +1,5 @@
 /**
- * Multilingual Clinical Symptom Dictionary for SakhiCare
+ * Multilingual Clinical Symptom Dictionary for Luna Her
  * 
  * Provides standardized mappings, descriptions, colloquial synonyms, and categories
  * across 7 languages:

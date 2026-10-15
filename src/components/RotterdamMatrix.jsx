@@ -53,7 +53,7 @@ export function RotterdamMatrix() {
         <div>
           <strong>Why No Software or AI Can Diagnose PCOS:</strong>
           <p>
-            Under international Rotterdam Consensus guidelines, a diagnosis requires meeting at least 2 of these 3 pillars <strong>and</strong> ruling out mimicking conditions such as hypothyroidism (TSH), hyperprolactinemia, and congenital adrenal hyperplasia (17-OHP). Because apps cannot draw blood or perform pelvic ultrasounds, SakhiCare prepares you for your clinician appointment with organized notes.
+            Under international Rotterdam Consensus guidelines, a diagnosis requires meeting at least 2 of these 3 pillars <strong>and</strong> ruling out mimicking conditions such as hypothyroidism (TSH), hyperprolactinemia, and congenital adrenal hyperplasia (17-OHP). Because apps cannot draw blood or perform pelvic ultrasounds, Luna Her prepares you for your clinician appointment with organized notes.
           </p>
         </div>
       </div>

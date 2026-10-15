@@ -1,5 +1,5 @@
 /**
- * Multilingual Clinical Symptom Extractor for SakhiCare
+ * Multilingual Clinical Symptom Extractor for Luna Her
  * 
  * Analyzes conversational descriptions (in English, Hindi, Kannada, Tamil, Malayalam)
  * and extracts structured symptom cards containing:

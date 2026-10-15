@@ -1,5 +1,5 @@
 /**
- * Multilingual Translations Dictionary for SakhiCare
+ * Multilingual Translations Dictionary for Luna Her
  * 
  * Supports:
  * - English (en)

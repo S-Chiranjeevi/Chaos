@@ -1,5 +1,5 @@
 /**
- * PCOS Saathi & SakhiCare - MongoDB Service
+ * PCOS Saathi & Luna Her - MongoDB Service
  * 
  * Provides client-side connectivity, synchronization, and health checks
  * communicating with the FastAPI MongoDB backend endpoints (/api/db).
@@ -14,7 +14,7 @@ class MongoService {
     this.baseUrl = BACKEND_BASE;
     this.cachedStatus = {
       connected: false,
-      db_name: 'sakhicare_db',
+      db_name: 'luna_her_db',
       uri: 'mongodb://localhost:27017',
       latency_ms: null,
       error: 'Not checked yet',
@@ -70,7 +70,7 @@ class MongoService {
   /**
    * Dynamically test and update MongoDB connection URI (e.g. MongoDB Atlas or custom port).
    */
-  async configureConnection({ uri, dbName = 'sakhicare_db', timeoutMs = 4000 }) {
+  async configureConnection({ uri, dbName = 'luna_her_db', timeoutMs = 4000 }) {
     try {
       const res = await fetch(`${this.baseUrl}/api/db/configure`, {
         method: 'POST',

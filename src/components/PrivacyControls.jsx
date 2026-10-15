@@ -19,6 +19,7 @@ export function PrivacyControls({ onDataDeleted }) {
     setDeletedAll(true)
     setDeletedInsights(false)
     onDataDeleted?.()
+    window.dispatchEvent(new CustomEvent('lunaher:dataDeleted'))
     window.dispatchEvent(new CustomEvent('sakhicare:dataDeleted'))
   }
 
@@ -28,6 +29,7 @@ export function PrivacyControls({ onDataDeleted }) {
       setDeletedInsights(true)
       setDeletedAll(false)
       setError('')
+      window.dispatchEvent(new CustomEvent('lunaher:insightsDeleted'))
       window.dispatchEvent(new CustomEvent('sakhicare:insightsDeleted'))
     } catch {
       setError('Could not remove insights. Please try again.')
@@ -41,7 +43,7 @@ export function PrivacyControls({ onDataDeleted }) {
         <div>
           <h2>Your privacy & local data ownership</h2>
           <p>
-            <strong>Stored only on this device.</strong> SakhiCare uses browser local storage for your
+            <strong>Stored only on this device.</strong> Luna Her uses browser local storage for your
             health entries, cycle history, and AI insights. We do not send your health data to analytics,
             a tracking server, or an external AI model without your explicit consent.
           </p>
@@ -65,7 +67,7 @@ export function PrivacyControls({ onDataDeleted }) {
           className="delete-data-button"
           type="button"
           onClick={removeAllData}
-          aria-label="Delete all SakhiCare health data saved on this device"
+          aria-label="Delete all Luna Her health data saved on this device"
         >
           <Trash2 size={16} aria-hidden="true" /> Delete all my data
         </button>
@@ -79,7 +81,7 @@ export function PrivacyControls({ onDataDeleted }) {
 
       {deletedAll && (
         <p className="delete-confirmation" role="status">
-          <Check size={16} /> All SakhiCare data stored on this device has been deleted.
+          <Check size={16} /> All Luna Her data stored on this device has been deleted.
         </p>
       )}
 

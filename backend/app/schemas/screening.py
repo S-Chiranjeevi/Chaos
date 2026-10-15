@@ -1,0 +1,134 @@
+"""PCOS Research Screening Schemas (AMD-SlingShot Model Integration).
+
+Provides typed contracts for clinical parameter screening, ultrasound follicle
+estimation, model metadata, and transparent non-diagnostic results.
+"""
+from __future__ import annotations
+
+from typing import Any, Dict, List, Optional
+from pydantic import BaseModel, Field, field_validator
+
+
+class ClinicalScreeningRequest(BaseModel):
+    """Input parameters for the AMD-SlingShot XGBoost clinical model."""
+
+    # Physical / Anthropometric
+    age: Optional[float] = Field(None, ge=12, le=75, description="Age in years (e.g., 28)")
+    weight_kg: Optional[float] = Field(None, ge=25, le=250, description="Weight in kilograms (e.g., 62)")
+    height_cm: Optional[float] = Field(None, ge=100, le=230, description="Height in centimeters (e.g., 160)")
+    waist_inch: Optional[float] = Field(None, ge=18, le=70, description="Waist circumference in inches (e.g., 32)")
+    hip_inch: Optional[float] = Field(None, ge=20, le=80, description="Hip circumference in inches (e.g., 38)")
+
+    # Vitals & Glycemic
+    pulse_bpm: Optional[float] = Field(None, ge=40, le=160, description="Resting pulse in beats per minute (e.g., 74)")
+    rbs_mg_dl: Optional[float] = Field(None, ge=40, le=400, description="Random Blood Sugar in mg/dL (e.g., 95)")
+    bp_systolic: Optional[float] = Field(None, ge=70, le=220, description="Systolic Blood Pressure in mmHg (e.g., 118)")
+    bp_diastolic: Optional[float] = Field(None, ge=40, le=140, description="Diastolic Blood Pressure in mmHg (e.g., 78)")
+
+    # Menstrual Cycle
+    cycle_regularity: Optional[str] = Field("regular", description="'regular' or 'irregular'")
+    cycle_length_days: Optional[float] = Field(None, ge=15, le=180, description="Cycle duration in days (e.g., 35)")
+
+    # Hormonal Lab Values (Optional)
+    fsh_miu_ml: Optional[float] = Field(None, ge=0.1, le=150.0, description="Follicle-Stimulating Hormone (mIU/mL)")
+    lh_miu_ml: Optional[float] = Field(None, ge=0.1, le=150.0, description="Luteinizing Hormone (mIU/mL)")
+    amh_ng_ml: Optional[float] = Field(None, ge=0.01, le=40.0, description="Anti-Müllerian Hormone (ng/mL)")
+    prl_ng_ml: Optional[float] = Field(None, ge=0.5, le=200.0, description="Prolactin (ng/mL)")
+    prg_ng_ml: Optional[float] = Field(None, ge=0.01, le=60.0, description="Progesterone (ng/mL)")
+    tsh_miu_l: Optional[float] = Field(None, ge=0.01, le=50.0, description="Thyroid-Stimulating Hormone (mIU/L)")
+
+    # Clinical / Phenotypic Signs (Boolean toggles)
+    hair_growth: Optional[bool] = Field(None, description="Excess facial or body hair (Hirsutism)")
+    skin_darkening: Optional[bool] = Field(None, description="Velvety skin darkening on neck/creases (Acanthosis Nigricans)")
+    hair_loss: Optional[bool] = Field(None, description="Scalp hair thinning or male-pattern shedding")
+    pimples_acne: Optional[bool] = Field(None, description="Persistent adult or cystic acne")
+    weight_gain: Optional[bool] = Field(None, description="Recent difficulty managing weight or unexplained weight gain")
+
+    # Lifestyle
+    fast_food: Optional[bool] = Field(None, description="Frequent consumption of processed/fast food")
+    regular_exercise: Optional[bool] = Field(None, description="Participates in regular physical exercise")
+
+    # Ultrasound Follicle Counts (Direct entry or derived from Mode B)
+    follicles_left: Optional[int] = Field(None, ge=0, le=50, description="Number of antral follicles in Left Ovary")
+    follicles_right: Optional[int] = Field(None, ge=0, le=50, description="Number of antral follicles in Right Ovary")
+
+
+class ContributingFactor(BaseModel):
+    """Key clinical marker influencing model output."""
+    feature_name: str
+    user_value: Any
+    baseline_median: Any
+    impact_level: str  # "high", "moderate", "low"
+    explanation: str
+
+
+class ClinicalScreeningResponse(BaseModel):
+    """Structured response from the XGBoost research screening pipeline."""
+
+    prediction: int = Field(..., description="0 = Lower Risk Pattern, 1 = Elevated Research Risk Pattern")
+    screening_label: str
+    risk_score_percentage: float = Field(..., ge=0.0, le=100.0)
+    confidence_tier: str  # "low", "moderate", "elevated"
+
+    calculated_metrics: Dict[str, Optional[float]] = Field(
+        default_factory=dict,
+        description="Derived values such as BMI and Waist:Hip Ratio",
+    )
+
+    top_contributing_factors: List[ContributingFactor] = Field(
+        default_factory=list,
+        description="Top features driving the model classification",
+    )
+
+    model_metadata: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Algorithm version, feature count, and dataset validation scores",
+    )
+
+    limitations: List[str] = Field(
+        default_factory=list,
+        description="Scientific caveats regarding dataset scope and calibration",
+    )
+
+    clinical_disclaimer: str = (
+        "RESEARCH SCREENING ONLY — NOT A MEDICAL DIAGNOSIS. This output is generated by an experimental "
+        "XGBoost machine learning model trained on observational data from the AMD-SlingShot study. "
+        "It does not replace evaluation, ultrasound imaging, or laboratory assessment by a licensed gynecologist or endocrinologist."
+    )
+
+    suggested_clinician_discussion_topics: List[str] = Field(
+        default_factory=list,
+        description="Educational points the user may bring to their care provider",
+    )
+
+
+class UltrasoundScreeningResponse(BaseModel):
+    """Results from ultrasound image follicle estimation pipeline."""
+
+    left_follicle_estimate: int
+    right_follicle_estimate: int
+    images_processed: int
+    algorithm_method: str = "Connected-Component Morphology & Contrast Thresholding (AMD-SlingShot Pipeline)"
+    status: str = "success"
+
+    notes: List[str] = Field(default_factory=list)
+    limitations: List[str] = Field(default_factory=list)
+    disclaimer: str = (
+        "Ultrasound image analysis in this module uses automated contrast and morphological heuristics "
+        "to approximate visible dark follicle candidates. It is not an automated radiology diagnosis and cannot "
+        "substitute for high-resolution transvaginal sonography interpreted by a board-certified radiologist."
+    )
+
+
+class ModelInfoResponse(BaseModel):
+    """Metadata regarding loaded AMD-SlingShot model and supported parameters."""
+
+    model_name: str
+    algorithm: str
+    version: str
+    is_loaded: bool
+    feature_count: int
+    supported_features: List[Dict[str, Any]]
+    validation_metrics: Dict[str, float]
+    dataset_source: str
+    disclaimer: str

@@ -19,7 +19,7 @@ import { StorageService } from '../services/storageService.js';
 export function MongoStatusCard({ className = '' }) {
   const [status, setStatus] = useState({
     connected: false,
-    db_name: 'sakhicare_db',
+    db_name: 'luna_her_db',
     uri: 'mongodb://localhost:27017',
     latency_ms: null,
     error: null,
@@ -36,7 +36,7 @@ export function MongoStatusCard({ className = '' }) {
   const [syncFeedback, setSyncFeedback] = useState(null);
   const [showConfig, setShowConfig] = useState(false);
   const [uriInput, setUriInput] = useState('mongodb://localhost:27017');
-  const [dbNameInput, setDbNameInput] = useState('sakhicare_db');
+  const [dbNameInput, setDbNameInput] = useState('luna_her_db');
   const [configFeedback, setConfigFeedback] = useState(null);
 
   // Poll status on mount
@@ -296,7 +296,7 @@ export function MongoStatusCard({ className = '' }) {
                 type="text"
                 value={dbNameInput}
                 onChange={(e) => setDbNameInput(e.target.value)}
-                placeholder="sakhicare_db"
+                placeholder="luna_her_db"
                 className="w-full px-3 py-2 text-xs rounded-xl border border-stone-300 focus:border-rose-500 focus:ring-2 focus:ring-rose-200 outline-none bg-white"
                 required
               />

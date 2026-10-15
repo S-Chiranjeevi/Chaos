@@ -1,10 +1,11 @@
 import React from 'react'
-import { ArrowRight, BookOpen, CalendarDays, HeartPulse, MessageCircle, Stethoscope } from 'lucide-react'
+import { ArrowRight, BookOpen, CalendarDays, HeartPulse, MessageCircle, Microscope, Stethoscope } from 'lucide-react'
 
 const actions = [
   { id: 'talk', label: 'Describe my symptoms', detail: 'Write or say what you notice, using your own words.', icon: MessageCircle, primary: true },
   { id: 'tracker', label: 'Track my cycle', detail: 'Add a period date if you would like to keep a record.', icon: CalendarDays },
   { id: 'insights', label: 'View my insights', detail: 'Review notes you have saved on this device.', icon: HeartPulse },
+  { id: 'screening', label: 'PCOS Research Screening', detail: 'Screen clinical and lab values using AMD-SlingShot ML models.', icon: Microscope },
   { id: 'doctor', label: 'Prepare for a doctor visit', detail: 'Make a simple summary and questions to bring.', icon: Stethoscope },
   { id: 'learn', label: 'Learn about PCOS', detail: 'Read clear, gentle information and myth checks.', icon: BookOpen },
 ]

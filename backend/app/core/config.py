@@ -44,7 +44,7 @@ class Settings(BaseSettings):
         description="MongoDB connection string (local or MongoDB Atlas mongodb+srv://...)"
     )
     MONGODB_DB_NAME: str = Field(
-        default="sakhicare_db",
+        default="luna_her_db",
         description="MongoDB database name"
     )
     MONGODB_TIMEOUT_MS: int = Field(

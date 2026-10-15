@@ -29,7 +29,7 @@ function readInitialEntries() {
     if (Array.isArray(canonical) && canonical.length > 0) {
       return canonical;
     }
-    const legacy = localStorage.getItem('sakhicare_cycle_tracker');
+    const legacy = localStorage.getItem('lunaher_cycle_tracker') || localStorage.getItem('sakhicare_cycle_tracker');
     if (legacy) {
       const parsed = JSON.parse(legacy);
       if (Array.isArray(parsed)) {
@@ -81,7 +81,9 @@ export function CycleTracker({ latestEntry }) {
       const saved = StorageService.saveCycleEntry(newOrUpdated);
       const allEntries = StorageService.getCycleEntries();
       try {
+        localStorage.setItem('lunaher_cycle_tracker', JSON.stringify(allEntries));
         localStorage.setItem('sakhicare_cycle_tracker', JSON.stringify(allEntries));
+        window.dispatchEvent(new CustomEvent('lunaher:cycleTrackerUpdate', { detail: allEntries }));
         window.dispatchEvent(new CustomEvent('sakhicare:cycleTrackerUpdate', { detail: allEntries }));
       } catch {}
       reloadEntries();
@@ -98,7 +100,9 @@ export function CycleTracker({ latestEntry }) {
     try {
       const remaining = StorageService.deleteCycleEntry(id);
       try {
+        localStorage.setItem('lunaher_cycle_tracker', JSON.stringify(remaining));
         localStorage.setItem('sakhicare_cycle_tracker', JSON.stringify(remaining));
+        window.dispatchEvent(new CustomEvent('lunaher:cycleTrackerUpdate', { detail: remaining }));
         window.dispatchEvent(new CustomEvent('sakhicare:cycleTrackerUpdate', { detail: remaining }));
       } catch {}
       reloadEntries();
