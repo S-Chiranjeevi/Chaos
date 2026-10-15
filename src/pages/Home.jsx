@@ -1,6 +1,5 @@
 import React from 'react'
-import { ArrowRight, BookOpen, CalendarDays, HeartPulse, LockKeyhole, MessageCircle, Stethoscope } from 'lucide-react'
-import { DisclaimerBanner } from '../components/DisclaimerBanner.jsx'
+import { ArrowRight, BookOpen, CalendarDays, HeartPulse, MessageCircle, Stethoscope } from 'lucide-react'
 
 const actions = [
   { id: 'talk', label: 'Describe my symptoms', detail: 'Write or say what you notice, using your own words.', icon: MessageCircle, primary: true },
@@ -8,7 +7,6 @@ const actions = [
   { id: 'insights', label: 'View my insights', detail: 'Review notes you have saved on this device.', icon: HeartPulse },
   { id: 'doctor', label: 'Prepare for a doctor visit', detail: 'Make a simple summary and questions to bring.', icon: Stethoscope },
   { id: 'learn', label: 'Learn about PCOS', detail: 'Read clear, gentle information and myth checks.', icon: BookOpen },
-  { id: 'privacy', label: 'Manage privacy', detail: 'See what stays on your device and delete it.', icon: LockKeyhole },
 ]
 
 export function Home({ onNavigate }) {
@@ -20,7 +18,6 @@ export function Home({ onNavigate }) {
         <p>You do not need medical words or all the answers. Choose one thing that would help you today.</p>
         <button className="button button-primary welcome-action" type="button" onClick={() => onNavigate('talk')}>Describe my symptoms <ArrowRight size={18} aria-hidden="true" /></button>
       </section>
-      <DisclaimerBanner />
       <section aria-labelledby="home-actions-title">
         <div className="section-heading"><div><p className="eyebrow">Choose what feels useful</p><h2 id="home-actions-title">How can we help today?</h2></div></div>
         <div className="action-grid">

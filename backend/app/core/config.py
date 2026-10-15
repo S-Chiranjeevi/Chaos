@@ -31,6 +31,10 @@ class Settings(BaseSettings):
     )
     HOST: str = Field(default="0.0.0.0", description="FastAPI host")
     PORT: int = Field(default=8000, description="FastAPI port")
+    APIVERVE_API_KEY: Optional[str] = Field(
+        default=None,
+        description="API key for APIVerve Menstrual Cycle Calculator API"
+    )
     REQUEST_TIMEOUT_SECONDS: float = Field(
         default=8.0,
         description="HTTP client timeout for outgoing AI requests"
@@ -81,6 +85,11 @@ class Settings(BaseSettings):
     def has_gemini(self) -> bool:
         """Check if Gemini API key is validly configured."""
         return bool(self.GEMINI_API_KEY and self.GEMINI_API_KEY.strip())
+
+    @property
+    def has_apiverve(self) -> bool:
+        """Check if APIVerve API key is validly configured."""
+        return bool(self.APIVERVE_API_KEY and self.APIVERVE_API_KEY.strip())
 
 
 # Singleton settings instance

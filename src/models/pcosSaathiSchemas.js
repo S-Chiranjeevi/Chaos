@@ -16,6 +16,7 @@ export const STORAGE_KEYS = {
   DOCTOR_SUMMARY: 'pcos_saathi_doctor_summary',
   PREFERENCES: 'pcos_saathi_preferences',
   AI_CONSENT: 'pcos_saathi_ai_consent',
+  APIVERVE_FORECASTS: 'pcos_saathi_apiverve_forecasts',
 };
 
 // Global disclaimer string required across non-diagnostic medical surfaces

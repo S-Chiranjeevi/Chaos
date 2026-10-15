@@ -1,4 +1,4 @@
-import { BookOpen, CalendarDays, HeartPulse, House, MessageCircle, Shield, Stethoscope } from 'lucide-react'
+import { BookOpen, CalendarDays, HeartPulse, House, MessageCircle, Stethoscope } from 'lucide-react'
 
 export const MAIN_SECTIONS = [
   { id: 'home', label: 'Home', icon: House },
@@ -7,5 +7,4 @@ export const MAIN_SECTIONS = [
   { id: 'insights', label: 'Early Warnings and Insights', shortLabel: 'Insights', icon: HeartPulse },
   { id: 'doctor', label: 'Doctor Summary', shortLabel: 'Doctor', icon: Stethoscope },
   { id: 'learn', label: 'Learn and Myths', shortLabel: 'Learn', icon: BookOpen },
-  { id: 'privacy', label: 'Privacy', icon: Shield },
 ]
