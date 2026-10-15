@@ -3,6 +3,7 @@ import { ArrowRight, ClipboardList, HeartPulse } from 'lucide-react'
 import { DisclaimerBanner } from '../components/DisclaimerBanner.jsx'
 import { PatternDetectionView } from '../components/PatternDetectionView.jsx'
 import { UrgentCareBanner } from '../components/UrgentCareBanner.jsx'
+import { PersonalizedInsights } from '../components/PersonalizedInsights.jsx'
 import { readLocalData, STORAGE_KEYS } from '../services/localStorage.js'
 import { detectRedFlags } from '../services/safetyRules.js'
 import { validateOutput } from '../services/outputValidator.js'
@@ -49,5 +50,12 @@ export function InsightsPage({ onNavigate, healthEntry, refreshKey }) {
       <button className="button button-primary" type="button" onClick={() => onNavigate('doctor')}>Prepare for a doctor visit <ArrowRight size={17} aria-hidden="true" /></button>
     </>}
     <section className="surface-card"><h2>Patterns you may want to discuss</h2><p className="muted">Add dates or observations to see possible patterns. This tool does not diagnose a condition.</p><PatternDetectionView /></section>
+    <section className="surface-card" style={{ marginTop: '20px' }}>
+      <PersonalizedInsights
+        currentPeriodLogs={[]}
+        currentSymptomLogs={entry?.symptoms || []}
+        userLanguage={entry?.language === 'hi' ? 'Hindi' : 'English'}
+      />
+    </section>
   </div>
 }

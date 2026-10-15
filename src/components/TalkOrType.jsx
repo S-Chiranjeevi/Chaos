@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useRef } from 'react'
 import {
   Mic,
   MicOff,
@@ -82,17 +82,6 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
   const strings = UI_STRINGS[selectedLang] || UI_STRINGS.en
   const examples = EXAMPLE_PROMPTS[selectedLang] || EXAMPLE_PROMPTS.en
 
-  // Update typing vs empty states naturally
-  useEffect(() => {
-    if (['recording', 'transcribing', 'processing', 'results', 'permission-denied', 'unsupported-browser', 'network-error'].includes(currentState)) {
-      return
-    }
-    if (inputText.trim().length > 0) {
-      setCurrentState('typing')
-    } else {
-      setCurrentState('empty')
-    }
-  }, [inputText])
 
   // Handle language change
   function handleLanguageChange(code) {

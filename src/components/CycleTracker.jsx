@@ -52,6 +52,7 @@ export function CycleTracker({ latestEntry }) {
         detail: { key: STORAGE_KEYS.CYCLE_ENTRIES, data: nextEntries },
         bubbles: true,
       }));
+      window.dispatchEvent(new CustomEvent('sakhicare:cycleTrackerUpdate', { detail: nextEntries }));
     } catch {
       setStorageError('Could not save to local storage.');
     }

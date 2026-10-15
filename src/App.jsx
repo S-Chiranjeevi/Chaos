@@ -86,12 +86,14 @@ export function App() {
     };
 
     window.addEventListener('sakhicare:healthEntryUpdate', handleEntryUpdate);
+    window.addEventListener('sakhicare:dataDeleted', handleDataDeleted);
     window.addEventListener('pcos_saathi:data_change', handleStorageChange);
     window.addEventListener('popstate', handleHistoryChange);
     window.addEventListener('hashchange', handleHistoryChange);
 
     return () => {
       window.removeEventListener('sakhicare:healthEntryUpdate', handleEntryUpdate);
+      window.removeEventListener('sakhicare:dataDeleted', handleDataDeleted);
       window.removeEventListener('pcos_saathi:data_change', handleStorageChange);
       window.removeEventListener('popstate', handleHistoryChange);
       window.removeEventListener('hashchange', handleHistoryChange);

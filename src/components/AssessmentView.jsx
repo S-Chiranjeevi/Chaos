@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
-import { AlertCircle, HelpCircle, CheckSquare, ShieldCheck, Heart, Sparkles, Copy, Check, Stethoscope } from 'lucide-react'
+import { AlertCircle, HelpCircle, ShieldCheck, Heart, Sparkles, Copy, Check, Stethoscope } from 'lucide-react'
 
-export function AssessmentView({ assessment, symptoms = [] }) {
+export function AssessmentView({ assessment, _symptoms = [] }) {
   const [copiedQuestion, setCopiedQuestion] = useState(false)
   const [checkedQuestions, setCheckedQuestions] = useState({})
 
