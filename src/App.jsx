@@ -11,6 +11,7 @@ import { InsightsPage } from './pages/InsightsPage.jsx';
 import { LearnPage } from './pages/LearnPage.jsx';
 import { TalkOrTypePage } from './pages/TalkOrTypePage.jsx';
 import { PrivacyView } from './views/PrivacyView.jsx';
+import { ChatbotWidget } from './components/ChatbotWidget.jsx';
 import { getLatestHealthEntry } from './models/healthEntry.js';
 import { StorageService } from './services/storageService.js';
 import './App.css';
@@ -214,6 +215,8 @@ export function App() {
 
       {/* Mobile Navigation */}
       <BottomNavigation activePage={activePage} onNavigate={navigate} />
+
+      <ChatbotWidget onNavigate={navigate} />
 
       {/* Language Selector Modal */}
       <LanguageSelector
