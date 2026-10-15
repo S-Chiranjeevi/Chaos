@@ -4041,6 +4041,41 @@
   .chatbot-transcript { max-height: calc(100vh - 20rem); }
 }
 
+/* User-controlled ambient music */
+.background-music {
+  position: fixed;
+  z-index: 50;
+  left: 1rem;
+  bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  max-width: min(23rem, calc(100vw - 2rem));
+  padding: .65rem .75rem;
+  border: 1px solid #d8b4fe;
+  border-radius: 1rem;
+  background: rgba(250, 245, 255, .96);
+  color: #581c87;
+  box-shadow: 0 10px 25px rgba(88, 28, 135, .14);
+}
+
+.background-music-copy { display: flex; min-width: 0; align-items: center; gap: .5rem; }
+.background-music-copy > svg { flex: 0 0 auto; color: #7e22ce; }
+.background-music-copy div { display: grid; min-width: 0; gap: .1rem; }
+.background-music-copy strong { font-size: .8rem; line-height: 1.15; }
+.background-music-copy span { overflow: hidden; color: #7e22ce; font-size: .68rem; line-height: 1.2; text-overflow: ellipsis; white-space: nowrap; }
+.background-music-controls { display: flex; align-items: center; gap: .35rem; }
+.music-icon-button { display: grid; width: 2.15rem; height: 2.15rem; flex: 0 0 auto; place-items: center; border: 1px solid #c084fc; border-radius: .7rem; background: #fff; color: #6b21a8; }
+.music-icon-button:hover { background: #f3e8ff; }
+.music-icon-button:focus-visible, .music-volume-label input:focus-visible { outline: 3px solid #fbbf24; outline-offset: 2px; }
+.music-volume-label { display: grid; }
+.music-volume-label input { width: 4rem; accent-color: #7e22ce; }
+
+@media (max-width: 640px) {
+  .background-music { bottom: 4.75rem; left: .75rem; max-width: calc(100vw - 1.5rem); }
+  .music-volume-label { display: none; }
+}
+
 
 
 

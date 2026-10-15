@@ -12,6 +12,7 @@ import { LearnPage } from './pages/LearnPage.jsx';
 import { TalkOrTypePage } from './pages/TalkOrTypePage.jsx';
 import { PrivacyView } from './views/PrivacyView.jsx';
 import { ChatbotWidget } from './components/ChatbotWidget.jsx';
+import { BackgroundMusic } from './components/BackgroundMusic.jsx';
 import { getLatestHealthEntry } from './models/healthEntry.js';
 import { StorageService } from './services/storageService.js';
 import './App.css';
@@ -218,6 +219,7 @@ export function App() {
       <BottomNavigation activePage={activePage} onNavigate={navigate} />
 
       <ChatbotWidget onNavigate={navigate} />
+      <BackgroundMusic />
 
       {/* Language Selector Modal */}
       <LanguageSelector
