@@ -1,229 +1,232 @@
-import React, { useState, useEffect } from 'react'
-import { TalkOrType } from './components/TalkOrType.jsx'
-import { CycleTracker } from './components/CycleTracker.jsx'
-import { PersonalizedInsights } from './components/PersonalizedInsights.jsx'
-import { PrivacyControls } from './components/PrivacyControls.jsx'
-import { EducationLibrary } from './components/EducationLibrary.jsx'
-import { Heart, Shield, Sparkles, Stethoscope, Sun, Moon, Info } from 'lucide-react'
-import { getLatestHealthEntry } from './models/healthEntry.js'
-import './App.css'
+import React, { useEffect, useState } from 'react';
+import Header from './components/layout/Header.jsx';
+import GlobalError from './components/layout/GlobalError.jsx';
+import { LanguageSelector } from './components/common/LanguageSelector.jsx';
+import { BottomNavigation } from './components/BottomNavigation.jsx';
+import { Navigation } from './components/Navigation.jsx';
+import { DoctorSummaryPage } from './pages/DoctorSummaryPage.jsx';
+import { HealthTrackerPage } from './pages/HealthTrackerPage.jsx';
+import { Home } from './pages/Home.jsx';
+import { InsightsPage } from './pages/InsightsPage.jsx';
+import { LearnPage } from './pages/LearnPage.jsx';
+import { TalkOrTypePage } from './pages/TalkOrTypePage.jsx';
+import { PrivacyView } from './views/PrivacyView.jsx';
+import { getLatestHealthEntry } from './models/healthEntry.js';
+import { StorageService } from './services/storageService.js';
+import './App.css';
+import './layout.css';
 
-const CURRENT_YEAR = new Date().getFullYear()
+const PATH_TO_PAGE = {
+  '/': 'home',
+  '/talk': 'talk',
+  '/tracker': 'tracker',
+  '/insights': 'insights',
+  '/patterns': 'insights',
+  '/doctor': 'doctor',
+  '/summary': 'doctor',
+  '/learn': 'learn',
+  '/privacy': 'privacy',
+};
 
-function App() {
-  const [darkMode, setDarkMode] = useState(false)
-  const [lastSharedEntry, setLastSharedEntry] = useState(() => getLatestHealthEntry())
-  const [cycleTrackerLogs, setCycleTrackerLogs] = useState(() => {
-    try {
-      const saved = localStorage.getItem('sakhicare_cycle_tracker')
-      return saved ? JSON.parse(saved) : []
-    } catch {
-      return []
-    }
-  })
+const PAGE_TO_PATH = {
+  home: '/',
+  talk: '/talk',
+  tracker: '/tracker',
+  insights: '/insights',
+  doctor: '/summary',
+  learn: '/learn',
+  privacy: '/privacy',
+};
+
+const PAGE_TITLES = {
+  home: 'Home',
+  talk: 'Talk or Type',
+  tracker: 'My Health Tracker',
+  insights: 'Early Warnings and Insights',
+  doctor: 'Doctor Summary',
+  learn: 'Learn and Myths',
+  privacy: 'Privacy Controls',
+};
+
+export function App() {
+  const [activePage, setActivePage] = useState(() => {
+    const hash = window.location.hash.replace('#', '');
+    if (PATH_TO_PAGE[hash]) return PATH_TO_PAGE[hash];
+    return PATH_TO_PAGE[window.location.pathname] || 'home';
+  });
+
+  const [currentLanguage, setCurrentLanguage] = useState(() => {
+    return StorageService.getPreferences().language || 'en';
+  });
+  const [languageDialogOpen, setLanguageDialogOpen] = useState(false);
+  const [lastSharedEntry, setLastSharedEntry] = useState(() => getLatestHealthEntry());
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [globalError, setGlobalError] = useState(null);
 
   useEffect(() => {
-    // Listen for custom event from HealthEntry
     const handleEntryUpdate = (event) => {
-      setLastSharedEntry(event.detail)
-    }
+      setLastSharedEntry(event.detail);
+      setRefreshKey((value) => value + 1);
+    };
 
-    const handleCycleUpdate = (event) => {
-      setCycleTrackerLogs(event.detail)
-    }
+    const handleStorageChange = (e) => {
+      if (e.detail?.key === 'all_purged') {
+        setLastSharedEntry(null);
+        setRefreshKey((value) => value + 1);
+      }
+    };
 
-    const handleDataDeleted = () => {
-      setLastSharedEntry(null)
-      setCycleTrackerLogs([])
-    }
+    const handleHistoryChange = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (PATH_TO_PAGE[hash]) {
+        setActivePage(PATH_TO_PAGE[hash]);
+        return;
+      }
+      setActivePage(PATH_TO_PAGE[window.location.pathname] || 'home');
+    };
 
-    window.addEventListener('sakhicare:healthEntryUpdate', handleEntryUpdate)
-    window.addEventListener('sakhicare:cycleTrackerUpdate', handleCycleUpdate)
-    window.addEventListener('sakhicare:dataDeleted', handleDataDeleted)
+    window.addEventListener('sakhicare:healthEntryUpdate', handleEntryUpdate);
+    window.addEventListener('sakhicare:dataDeleted', handleDataDeleted);
+    window.addEventListener('pcos_saathi:data_change', handleStorageChange);
+    window.addEventListener('popstate', handleHistoryChange);
+    window.addEventListener('hashchange', handleHistoryChange);
+
     return () => {
-      window.removeEventListener('sakhicare:healthEntryUpdate', handleEntryUpdate)
-      window.removeEventListener('sakhicare:cycleTrackerUpdate', handleCycleUpdate)
-      window.removeEventListener('sakhicare:dataDeleted', handleDataDeleted)
-    }
-  }, [])
+      window.removeEventListener('sakhicare:healthEntryUpdate', handleEntryUpdate);
+      window.removeEventListener('sakhicare:dataDeleted', handleDataDeleted);
+      window.removeEventListener('pcos_saathi:data_change', handleStorageChange);
+      window.removeEventListener('popstate', handleHistoryChange);
+      window.removeEventListener('hashchange', handleHistoryChange);
+    };
+  }, []);
 
-  function toggleDarkMode() {
-    setDarkMode(!darkMode)
+  useEffect(() => {
+    document.title = `${PAGE_TITLES[activePage]} · PCOS Saathi`;
+    if (activePage !== 'home') {
+      requestAnimationFrame(() => document.querySelector('[data-page-heading]')?.focus());
+    }
+  }, [activePage]);
+
+  function navigate(page) {
+    const targetPage = PAGE_TO_PATH[page] ? page : PATH_TO_PAGE[page] || 'home';
+    setActivePage(targetPage);
+    const nextPath = PAGE_TO_PATH[targetPage] || '/';
+    window.location.hash = nextPath;
+    if (window.location.pathname !== nextPath) {
+      window.history.pushState({}, '', nextPath);
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function handleDataDeleted() {
+    StorageService.clearAllPcosData();
+    setLastSharedEntry(null);
+    setRefreshKey((value) => value + 1);
+  }
+
+  function handleTriggerDemoError() {
+    setGlobalError({
+      title: 'Local Vault Sync Notice',
+      message: 'IndexedDB transaction cached locally. All health data remains strictly on your device.',
+      code: 'OFFLINE_STORAGE_VERIFIED',
+    });
+  }
+
+  function renderPage() {
+    switch (activePage) {
+      case 'talk':
+        return (
+          <TalkOrTypePage
+            key={currentLanguage}
+            currentLanguage={currentLanguage}
+            onHealthEntryCreated={(entry) => {
+              setLastSharedEntry(entry);
+              setRefreshKey((v) => v + 1);
+            }}
+          />
+        );
+      case 'tracker':
+        return <HealthTrackerPage latestEntry={lastSharedEntry} />;
+      case 'insights':
+        return (
+          <InsightsPage
+            onNavigate={navigate}
+            healthEntry={lastSharedEntry}
+            refreshKey={refreshKey}
+          />
+        );
+      case 'doctor':
+        return (
+          <DoctorSummaryPage
+            onNavigate={navigate}
+            healthEntry={lastSharedEntry}
+            refreshKey={refreshKey}
+            currentLanguage={currentLanguage}
+          />
+        );
+      case 'learn':
+        return <LearnPage />;
+      case 'privacy':
+        return <PrivacyView onNavigate={navigate} />;
+      default:
+        return <Home onNavigate={navigate} />;
+    }
   }
 
   return (
-    <div className={`app-root ${darkMode ? 'dark-theme' : 'light-theme'}`}>
-      <header className="site-navbar">
-        <div className="navbar-container">
-          <a href="#top" className="brand-logo" aria-label="SakhiCare Home">
-            <span className="brand-symbol">✿</span>
-            <span className="brand-name">
-              Sakhi<span className="accent">Care</span>
-            </span>
-          </a>
+    <div className="app-root light-theme sakhi-layout min-h-screen bg-stone-100/70 text-stone-900 font-sans">
+      <a className="skip-link" href="#main-content">
+        Skip to main content
+      </a>
 
-          <div className="navbar-center-tag">
-            <span className="nav-pill">
-              <Sparkles size={13} className="pill-sparkle" />
-              Empathetic PCOS & Women's Health Guide
-            </span>
-          </div>
+      {/* Global Error Banner */}
+      <GlobalError
+        error={globalError}
+        onDismiss={() => setGlobalError(null)}
+        onRetry={() => {
+          alert('Retrying local storage verification...');
+          setGlobalError(null);
+        }}
+      />
 
-          <div className="navbar-actions">
-            <button
-              type="button"
-              className="theme-toggle-btn"
-              onClick={toggleDarkMode}
-              title={darkMode ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
-              aria-label="Toggle theme"
-            >
-              {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
-            <a href="#ai-insights-section" className="nav-cta-btn" style={{ background: 'rgba(168, 85, 247, 0.15)', color: 'var(--primary-color)', border: '1px solid rgba(168, 85, 247, 0.3)' }}>
-              <Sparkles size={14} />
-              <span>AI Insights</span>
-            </a>
-            <a href="#talk-or-type-section" className="nav-cta-btn">
-              <span>Talk or Type</span>
-              <span>↓</span>
-            </a>
-          </div>
+      {/* Header */}
+      <Header
+        currentLanguage={currentLanguage}
+        onOpenLanguageSelector={() => setLanguageDialogOpen(true)}
+        onNavigateHome={() => navigate('home')}
+        onTriggerDemoError={handleTriggerDemoError}
+      />
+
+      <div className="app-body">
+        <Navigation activePage={activePage} onNavigate={navigate} />
+        <div className="app-column">
+          <main id="main-content" className="page-content" tabIndex="-1">
+            {renderPage()}
+            <footer className="page-footer">
+              <span>PCOS Saathi · A gentle, private place to begin</span>
+              <button type="button" onClick={() => navigate('privacy')}>
+                Privacy choices
+              </button>
+            </footer>
+          </main>
         </div>
-      </header>
+      </div>
 
-      <main id="top" className="main-content">
-        {/* HERO SECTION */}
-        <section className="hero-section">
-          <div className="hero-container">
-            <div className="hero-content">
-              <div className="eyebrow-badge">
-                <Heart size={14} className="heart-icon" />
-                <span>Multilingual Care Navigation</span>
-              </div>
-              <h1 className="hero-headline">
-                Your body speaks in everyday words.<br />
-                <span className="gradient-text">Let's make sense of it together.</span>
-              </h1>
-              <p className="hero-lead">
-                Describe how you feel in <strong>English, Hindi, Kannada, Tamil, or Malayalam</strong>—by speaking or typing.
-                SakhiCare structures your symptoms into clear details and helps you prepare for your doctor visit with confidence.
-              </p>
+      {/* Mobile Navigation */}
+      <BottomNavigation activePage={activePage} onNavigate={navigate} />
 
-              <div className="hero-trust-badges">
-                <div className="trust-item">
-                  <Shield size={16} className="trust-icon" />
-                  <span>100% Private in Browser</span>
-                </div>
-                <div className="trust-item">
-                  <Info size={16} className="trust-icon" />
-                  <span>No Diagnosis · Educational Support</span>
-                </div>
-                <div className="trust-item">
-                  <Stethoscope size={16} className="trust-icon" />
-                  <span>Doctor Discussion Ready</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* TALK OR TYPE FEATURE SECTION */}
-        <section className="feature-section" id="talk-or-type-section">
-          <div className="section-container">
-            <div className="section-header">
-              <span className="subhead-pill">Interactive Feature</span>
-              <h2>“Talk or Type” for SakhiCare</h2>
-              <p>Choose your preferred language, speak into your microphone or type naturally.</p>
-            </div>
-
-            <TalkOrType onHealthEntryCreated={(entry) => setLastSharedEntry(entry)} />
-          </div>
-        </section>
-
-        {/* PERSONALIZED AI INSIGHTS FEATURE SECTION */}
-        <section className="insights-section" id="ai-insights-section">
-          <div className="section-container">
-            <PersonalizedInsights
-              currentPeriodLogs={cycleTrackerLogs}
-              currentSymptomLogs={lastSharedEntry?.symptoms || []}
-              userLanguage={lastSharedEntry?.language === 'hi' ? 'Hindi' : 'English'}
-            />
-          </div>
-        </section>
-
-        <section className="integration-section" id="tracker">
-          <div className="section-container">
-            <div className="section-header">
-              <span className="subhead-pill">Private cycle tracker</span>
-              <h2>Notice patterns over time</h2>
-              <p>Log a cycle or symptom in a few words. Entries stay only on this device.</p>
-            </div>
-            <CycleTracker latestEntry={lastSharedEntry} />
-          </div>
-        </section>
-
-        <section className="education-section" id="learn">
-          <div className="section-container">
-            <EducationLibrary />
-          </div>
-        </section>
-
-        <section className="privacy-section" id="privacy">
-          <div className="section-container"><PrivacyControls onDataDeleted={() => setLastSharedEntry(null)} /></div>
-        </section>
-
-        {/* HOW IT HELPS SECTION */}
-        <section className="guidance-overview-section" id="how-it-works">
-          <div className="section-container">
-            <div className="overview-grid">
-              <div className="step-card">
-                <div className="step-num">01</div>
-                <h3>Express in Any Dialect</h3>
-                <p>Use your local language or everyday phrasing without medical jargon.</p>
-              </div>
-              <div className="step-card">
-                <div className="step-num">02</div>
-                <h3>Structured Health Cards</h3>
-                <p>We identify duration, frequency, and severity for each symptom so you can review and edit.</p>
-              </div>
-              <div className="step-card">
-                <div className="step-num">03</div>
-                <h3>PCOS & Differential Guidance</h3>
-                <p>Learn why symptoms might occur with PCOS while acknowledging other possible conditions.</p>
-              </div>
-              <div className="step-card">
-                <div className="step-num">04</div>
-                <h3>Shared HealthEntry Record</h3>
-                <p>Export a standardized doctor prep report or interoperable data for care providers.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      {/* FOOTER */}
-      <footer className="site-footer">
-        <div className="footer-container">
-          <div className="footer-brand">
-            <span className="footer-logo">✿ SakhiCare</span>
-            <p>A companion for women's reproductive health navigation and self-advocacy.</p>
-          </div>
-          <div className="footer-disclaimer-box">
-            <strong>Medical Disclaimer:</strong>
-            <p>
-              SakhiCare is an informational tool. This is information, not a diagnosis.
-              “These symptoms can sometimes occur with PCOS, but they can also have other causes.”
-              Always consult a certified medical practitioner or gynecologist for diagnosis and clinical care.
-            </p>
-          </div>
-          <div className="footer-bottom-row">
-            <span>© {CURRENT_YEAR} SakhiCare · Hackathon Prototype</span>
-            <a href="#top" className="back-to-top">Back to top ↑</a>
-          </div>
-        </div>
-      </footer>
+      {/* Language Selector Modal */}
+      <LanguageSelector
+        isOpen={languageDialogOpen}
+        onClose={() => setLanguageDialogOpen(false)}
+        currentLanguage={currentLanguage}
+        onSelectLanguage={(lang) => {
+          setCurrentLanguage(lang);
+          StorageService.savePreferences({ language: lang });
+        }}
+      />
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

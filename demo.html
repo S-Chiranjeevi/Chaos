@@ -1,0 +1,2671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SakhiCare · Maternal & Women’s Health Frontend Shell</title>
+  <meta name="description" content="SakhiCare - A responsive, accessible, privacy-first women's health shell stored solely on your device. Built with React and Tailwind CSS." />
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23be123c'><path d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg>" />
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', '-apple-system', 'sans-serif'],
+          },
+          colors: {
+            rose: {
+              50: '#fff1f2',
+              100: '#ffe4e6',
+              200: '#fecdd3',
+              300: '#fda4af',
+              400: '#fb7185',
+              500: '#f43f5e',
+              600: '#e11d48',
+              700: '#be123c',
+              800: '#9f1239',
+              900: '#881337',
+              950: '#4c0519',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.97); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translate(-50%, -20px); }
+      to { opacity: 1; transform: translate(-50%, 0); }
+    }
+    .animate-fadeIn {
+      animation: fadeIn 0.15s ease-out forwards;
+    }
+    .animate-slideDown {
+      animation: slideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+    .safe-area-pb {
+      padding-bottom: env(safe-area-inset-bottom, 0.75rem);
+    }
+  </style>
+  <!-- React 18 and Babel Standalone -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-stone-100/70 text-stone-900 font-sans antialiased min-h-screen">
+  <div id="root"></div>
+
+  <!-- React Standalone Bundle Script -->
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // --- MOCK DATA & SCHEMAS ---
+    const SUPPORTED_LANGUAGES = [
+      { code: 'en', name: 'English', native: 'English', region: 'India (Default)', speechReady: true },
+      { code: 'hi', name: 'Hindi', native: 'हिन्दी', region: 'भारत', speechReady: true },
+      { code: 'bn', name: 'Bengali', native: 'বাংলা', region: 'ভারত / পশ্চিমবঙ্গ', speechReady: true },
+      { code: 'ta', name: 'Tamil', native: 'தமிழ்', region: 'இந்தியா / தமிழ்நாடு', speechReady: true },
+      { code: 'te', name: 'Telugu', native: 'తెలుగు', region: 'భారతదేశం / ఆంధ్రప్రదేశ్', speechReady: true },
+      { code: 'mr', name: 'Marathi', native: 'मराठी', region: 'भारत / महाराष्ट्र', speechReady: true }
+    ];
+
+    const MOCK_USER_PROFILE = {
+      name: 'Ananya Sharma',
+      age: 28,
+      preferredLanguage: 'en',
+      currentStage: 'Pregnancy · 2nd Trimester (Week 24)',
+      deviceStorageStatus: '100% Encrypted Local SQLite / IndexedDB',
+      lastSyncedDeviceTime: 'Just now'
+    };
+
+    const INITIAL_HEALTH_ENTRIES = [
+      {
+        id: 'entry-001',
+        timestamp: '2026-10-15T08:15:00Z',
+        dateFormatted: 'Today, 8:15 AM',
+        category: 'vital',
+        title: 'Morning Fetal Kick Count & BP',
+        severity: 'mild',
+        stage: '2nd Trimester · Week 24',
+        tags: ['Kick Count', 'Blood Pressure', 'Routine'],
+        notes: 'Counted 10 distinct movements within 35 minutes after warm breakfast. Resting blood pressure recorded with home cuff.',
+        vitals: { bpSystolic: 118, bpDiastolic: 76, pulse: 74, fetalKicksCount: 10 },
+        isUrgent: false,
+        source: 'quick-log'
+      },
+      {
+        id: 'entry-002',
+        timestamp: '2026-10-14T19:40:00Z',
+        dateFormatted: 'Yesterday, 7:40 PM',
+        category: 'symptom',
+        title: 'Mild Lower Back Tension & Pelvic Heaviness',
+        severity: 'mild',
+        stage: '2nd Trimester · Week 24',
+        tags: ['Backache', 'Posture', 'Standing Fatigue'],
+        notes: 'Developed after standing for approximately 40 minutes preparing dinner. Eased after resting on left lateral side with a cushion.',
+        vitals: { bpSystolic: null, bpDiastolic: null, pulse: 80 },
+        isUrgent: false,
+        source: 'voice'
+      },
+      {
+        id: 'entry-003',
+        timestamp: '2026-10-13T14:10:00Z',
+        dateFormatted: '13 Oct 2026, 2:10 PM',
+        category: 'mood',
+        title: 'Calm and Energized After Prenatal Walk',
+        severity: 'mild',
+        stage: '2nd Trimester · Week 24',
+        tags: ['Mindfulness', 'Energy', 'Gentle Walk'],
+        notes: 'Completed a 20-minute shaded walking loop with mother. Feeling well-hydrated with fresh coconut water.',
+        vitals: { pulse: 82 },
+        isUrgent: false,
+        source: 'typed'
+      },
+      {
+        id: 'entry-004',
+        timestamp: '2026-10-11T09:00:00Z',
+        dateFormatted: '11 Oct 2026, 9:00 AM',
+        category: 'note',
+        title: 'Questions for Dr. Radhika (Upcoming Ultrasound)',
+        severity: 'mild',
+        stage: '2nd Trimester · Week 23',
+        tags: ['Doctor Visit', 'Anomaly Scan', 'Iron Supplements'],
+        notes: '1. Ask if current iron chewable tablets can be taken with lemon water for better absorption. 2. Verify anomaly scan results schedule.',
+        isUrgent: false,
+        source: 'typed'
+      },
+      {
+        id: 'entry-005',
+        timestamp: '2026-10-09T22:30:00Z',
+        dateFormatted: '09 Oct 2026, 10:30 PM',
+        category: 'symptom',
+        title: 'Nighttime Heartburn / Acid Reflux',
+        severity: 'moderate',
+        stage: '2nd Trimester · Week 23',
+        tags: ['Heartburn', 'Digestion', 'Late Meal'],
+        notes: 'Experienced burning sensation behind chest bone after having spicy dal for dinner. Elevated head of bed with two extra pillows.',
+        isUrgent: false,
+        source: 'voice'
+      }
+    ];
+
+    const MOCK_LEARN_ARTICLES = [
+      {
+        id: 'art-01',
+        title: 'Understanding Red Flag Symptoms During Pregnancy',
+        category: 'Urgent Care & Triage',
+        categoryColor: 'rose',
+        readingTime: '4 min read',
+        summary: 'Clear guidance on when to seek immediate medical attention: sudden facial swelling, severe headaches, or reduced movements.',
+        tags: ['Red Flags', 'Safety', 'Emergency Care'],
+        urgentContext: true
+      },
+      {
+        id: 'art-02',
+        title: 'Maximizing Iron and Folate Absorption Naturally',
+        category: 'Nutrition & Diet',
+        categoryColor: 'emerald',
+        readingTime: '3 min read',
+        summary: 'Why pairing your green leafy vegetables and jaggery with Vitamin C (amla, lemon) doubles your body’s iron uptake.',
+        tags: ['Nutrition', 'Iron Deficiency', 'Traditional Foods'],
+        urgentContext: false
+      },
+      {
+        id: 'art-03',
+        title: 'Gentle Pelvic Floor and Breathing Exercises',
+        category: 'Physical Wellness',
+        categoryColor: 'purple',
+        readingTime: '5 min read',
+        summary: 'Step-by-step gentle movements to ease lower back tension, improve posture, and prepare for safe labor.',
+        tags: ['Exercise', 'Pelvic Health', 'Breathwork'],
+        urgentContext: false
+      },
+      {
+        id: 'art-04',
+        title: 'Recognizing Emotional Shifts & Asking for Support',
+        category: 'Mental Wellbeing',
+        categoryColor: 'blue',
+        readingTime: '4 min read',
+        summary: 'Hormonal fluctuations affect mood. Learn practical self-care rituals and how to speak openly with family or your Sakhi.',
+        tags: ['Emotional Health', 'Postpartum Preparation'],
+        urgentContext: false
+      }
+    ];
+
+    // --- SHARED COMPONENTS ---
+
+    // 1. Button
+    function Button({
+      children,
+      onClick,
+      type = 'button',
+      variant = 'primary',
+      size = 'md',
+      icon = null,
+      iconPosition = 'left',
+      helperText = null,
+      disabled = false,
+      isLoading = false,
+      fullWidth = false,
+      ariaLabel,
+      id,
+      className = '',
+      ...props
+    }) {
+      const baseStyles = 'inline-flex flex-col items-center justify-center font-medium rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed select-none active:scale-[0.98] shadow-sm';
+      const sizeStyles = {
+        sm: 'px-3 py-1.5 text-xs',
+        md: 'px-4 py-2.5 text-sm',
+        lg: 'px-5 py-3 text-base'
+      };
+      const variantStyles = {
+        primary: 'bg-rose-700 hover:bg-rose-800 text-white focus:ring-rose-500 border border-transparent shadow-rose-100',
+        secondary: 'bg-emerald-700 hover:bg-emerald-800 text-white focus:ring-emerald-500 border border-transparent',
+        outline: 'bg-white hover:bg-stone-50 text-stone-800 border border-stone-300 focus:ring-rose-500 hover:border-stone-400',
+        danger: 'bg-red-700 hover:bg-red-800 text-white focus:ring-red-500 border border-transparent shadow-red-100',
+        ghost: 'bg-transparent hover:bg-rose-50 text-stone-700 hover:text-rose-900 border border-transparent shadow-none',
+        warm: 'bg-amber-600 hover:bg-amber-700 text-white focus:ring-amber-500 border border-transparent'
+      };
+
+      const buttonId = id || (ariaLabel ? `btn-${ariaLabel.toLowerCase().replace(/[^a-z0-9]/g, '-')}` : undefined);
+      const helperId = helperText && buttonId ? `${buttonId}-helper` : undefined;
+
+      return (
+        <div className={`inline-flex flex-col ${fullWidth ? 'w-full' : 'w-auto'}`}>
+          <button
+            id={buttonId}
+            type={type}
+            onClick={onClick}
+            disabled={disabled || isLoading}
+            aria-label={ariaLabel}
+            aria-describedby={helperId}
+            aria-busy={isLoading}
+            className={`${baseStyles} ${sizeStyles[size] || sizeStyles.md} ${variantStyles[variant] || variantStyles.primary} ${fullWidth ? 'w-full' : ''} ${className}`}
+            {...props}
+          >
+            <span className="inline-flex items-center gap-2">
+              {isLoading ? (
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              ) : icon && iconPosition === 'left' ? (
+                <span className="flex-shrink-0">{icon}</span>
+              ) : null}
+              <span className="font-semibold tracking-wide">
+                {isLoading ? 'Processing...' : children}
+              </span>
+              {!isLoading && icon && iconPosition === 'right' ? (
+                <span className="flex-shrink-0">{icon}</span>
+              ) : null}
+            </span>
+          </button>
+          {helperText && (
+            <span id={helperId} className="mt-1 text-[11px] leading-tight text-stone-500 text-center font-normal">
+              {helperText}
+            </span>
+          )}
+        </div>
+      );
+    }
+
+    // 2. Card
+    function Card({
+      children,
+      as: Component = 'section',
+      variant = 'default',
+      className = '',
+      title = null,
+      subtitle = null,
+      headerAction = null,
+      footer = null,
+      helperText = null,
+      onClick = null,
+      role = undefined,
+      ariaLabel = undefined,
+      ...props
+    }) {
+      const baseCard = 'rounded-2xl transition-all duration-200 overflow-hidden';
+      const variantStyles = {
+        default: 'bg-white border border-stone-200/80 shadow-sm',
+        elevated: 'bg-white border border-stone-200/60 shadow-md hover:shadow-lg',
+        outlined: 'bg-stone-50/50 border border-stone-200 shadow-none',
+        interactive: 'bg-white border border-stone-200 hover:border-rose-400 hover:shadow-md cursor-pointer active:scale-[0.99]',
+        accent: 'bg-gradient-to-br from-rose-50/80 to-amber-50/50 border border-rose-200/70 shadow-sm',
+        warning: 'bg-amber-50/70 border border-amber-200 shadow-sm'
+      };
+      const isClickable = Boolean(onClick);
+
+      return (
+        <Component
+          className={`${baseCard} ${variantStyles[variant] || variantStyles.default} ${isClickable ? 'cursor-pointer hover:border-rose-300 transition-colors' : ''} ${className}`}
+          onClick={onClick}
+          role={role || (isClickable ? 'button' : undefined)}
+          tabIndex={isClickable ? 0 : undefined}
+          aria-label={ariaLabel || (typeof title === 'string' ? title : undefined)}
+          onKeyDown={isClickable ? (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              onClick(e);
+            }
+          } : undefined}
+          {...props}
+        >
+          {(title || subtitle || headerAction) && (
+            <header className="px-5 pt-4 pb-3 border-b border-stone-100 flex items-start justify-between gap-4">
+              <div>
+                {title && (
+                  <h2 className="text-base font-semibold text-stone-900 tracking-tight">
+                    {title}
+                  </h2>
+                )}
+                {subtitle && (
+                  <p className="text-xs text-stone-500 mt-0.5">
+                    {subtitle}
+                  </p>
+                )}
+              </div>
+              {headerAction && (
+                <div className="flex-shrink-0">
+                  {headerAction}
+                </div>
+              )}
+            </header>
+          )}
+          <div className="p-5">{children}</div>
+          {(footer || helperText) && (
+            <footer className="px-5 py-3 bg-stone-50/70 border-t border-stone-100 flex items-center justify-between text-xs text-stone-600">
+              <div>
+                {footer}
+                {helperText && (
+                  <p className="text-[11px] text-stone-500 italic mt-0.5">
+                    {helperText}
+                  </p>
+                )}
+              </div>
+            </footer>
+          )}
+        </Component>
+      );
+    }
+
+    // 3. Badge
+    function Badge({
+      children,
+      variant = 'default',
+      size = 'md',
+      showDot = false,
+      className = '',
+      srLabel = null,
+      ...props
+    }) {
+      const sizeStyles = {
+        sm: 'text-[11px] px-2 py-0.5 gap-1',
+        md: 'text-xs px-2.5 py-1 gap-1.5'
+      };
+      const variantStyles = {
+        default: 'bg-stone-100 text-stone-700 border-stone-200',
+        rose: 'bg-rose-50 text-rose-800 border-rose-200',
+        emerald: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+        amber: 'bg-amber-50 text-amber-800 border-amber-200',
+        danger: 'bg-red-50 text-red-800 border-red-200',
+        purple: 'bg-purple-50 text-purple-800 border-purple-200',
+        blue: 'bg-sky-50 text-sky-800 border-sky-200'
+      };
+      const dotColors = {
+        default: 'bg-stone-400',
+        rose: 'bg-rose-500',
+        emerald: 'bg-emerald-500',
+        amber: 'bg-amber-500',
+        danger: 'bg-red-600 animate-pulse',
+        purple: 'bg-purple-500',
+        blue: 'bg-sky-500'
+      };
+
+      return (
+        <span
+          className={`inline-flex items-center font-medium rounded-full border ${sizeStyles[size] || sizeStyles.md} ${variantStyles[variant] || variantStyles.default} ${className}`}
+          {...props}
+        >
+          {srLabel && <span className="sr-only">{srLabel}: </span>}
+          {showDot && (
+            <span className={`w-1.5 h-1.5 rounded-full ${dotColors[variant] || dotColors.default}`} aria-hidden="true" />
+          )}
+          <span>{children}</span>
+        </span>
+      );
+    }
+
+    // 4. DisclaimerBanner
+    function DisclaimerBanner() {
+      return null;
+    }
+
+    // 5. UrgentWarning
+    function UrgentWarning({
+      title = 'Red-Flag Medical Symptoms Detected',
+      description = 'Certain symptoms during pregnancy or acute illness require urgent clinical evaluation by a medical doctor.',
+      symptomsList = [
+        'Sudden heavy vaginal bleeding or fluid leaking',
+        'Severe persistent headache with blurred vision or spots',
+        'High fever above 101°F with chills or stiffness',
+        'Noticeable decrease or cessation in baby movements (after week 24)'
+      ],
+      emergencyNumber = '108',
+      onEmergencyClick = null,
+      className = ''
+    }) {
+      const handleCall = () => {
+        if (onEmergencyClick) {
+          onEmergencyClick();
+        } else {
+          alert('Initiating call to ' + emergencyNumber);
+        }
+      };
+
+      return (
+        <section
+          role="alert"
+          aria-live="assertive"
+          aria-label="Urgent medical alert banner"
+          className={`bg-red-50 border-2 border-red-500 rounded-2xl p-5 shadow-sm text-red-950 ${className}`}
+        >
+          <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+            <div className="flex items-start gap-3.5">
+              <div className="p-2.5 bg-red-600 text-white rounded-xl shadow-sm flex-shrink-0" aria-hidden="true">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+
+              <div className="space-y-2">
+                <div>
+                  <div className="inline-flex items-center gap-2 mb-1">
+                    <span className="bg-red-600 text-white text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full">
+                      Immediate Action Required
+                    </span>
+                    <span className="text-xs font-semibold text-red-700">
+                      Do not wait for appointment
+                    </span>
+                  </div>
+                  <h2 className="text-base sm:text-lg font-bold text-red-950">
+                    {title}
+                  </h2>
+                </div>
+
+                <p className="text-xs sm:text-sm text-red-900 leading-relaxed">
+                  {description}
+                </p>
+
+                {symptomsList && symptomsList.length > 0 && (
+                  <ul className="text-xs text-red-800 list-disc list-inside space-y-1 bg-white/70 p-3 rounded-lg border border-red-200">
+                    {symptomsList.map((item, idx) => (
+                      <li key={idx} className="font-medium">
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row md:flex-col gap-2.5 items-stretch flex-shrink-0 pt-1">
+              <Button
+                variant="danger"
+                size="md"
+                onClick={handleCall}
+                ariaLabel={`Call Emergency Helpline ${emergencyNumber} immediately`}
+                helperText="Connects to emergency dispatch"
+                icon={
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                }
+              >
+                Call Helpline ({emergencyNumber})
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => alert('ASHA Worker Contact: Smt. Sunita Devi - Phone: +91 98765 43210. Available for maternal escort.')}
+                ariaLabel="Contact local ASHA or Community Health Worker"
+                helperText="Local Community Health Escort"
+              >
+                Contact Local ASHA Worker
+              </Button>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    // 6. LanguageSelector
+    function LanguageSelector({ isOpen, onClose, currentLanguage = 'en', onSelectLanguage }) {
+      const dialogRef = useRef(null);
+
+      useEffect(() => {
+        const handleKeyDown = (e) => {
+          if (e.key === 'Escape' && isOpen) onClose();
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+      }, [isOpen, onClose]);
+
+      if (!isOpen) return null;
+
+      return (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="lang-modal-title"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm animate-fadeIn"
+          onClick={onClose}
+        >
+          <div
+            ref={dialogRef}
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-stone-200 overflow-hidden"
+          >
+            <div className="px-6 py-5 bg-stone-50 border-b border-stone-200 flex items-center justify-between">
+              <div>
+                <h2 id="lang-modal-title" className="text-lg font-bold text-stone-900">
+                  Select Your Language
+                </h2>
+                <p className="text-xs text-stone-500 mt-0.5">
+                  अपनी भाषा चुनें · আপনার ভাষা নির্বাচন করুন
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={onClose}
+                className="p-2 text-stone-400 hover:text-stone-700 rounded-xl hover:bg-stone-200/50 transition-colors focus:outline-none focus:ring-2 focus:ring-rose-500"
+                aria-label="Close language selector modal"
+              >
+                <span className="text-sm font-bold">✕ Close</span>
+              </button>
+            </div>
+
+            <div className="px-6 py-3 bg-rose-50/60 border-b border-rose-100/70 text-xs text-rose-900 flex items-center gap-2">
+              <svg className="w-4 h-4 text-rose-700 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z" />
+              </svg>
+              <span>
+                Voice input and screen speech dynamically adapt to your selected language.
+              </span>
+            </div>
+
+            <div className="p-6 max-h-[60vh] overflow-y-auto space-y-2.5">
+              {SUPPORTED_LANGUAGES.map((lang) => {
+                const isSelected = lang.code === currentLanguage;
+                return (
+                  <button
+                    key={lang.code}
+                    type="button"
+                    onClick={() => {
+                      onSelectLanguage(lang.code);
+                      onClose();
+                    }}
+                    className={`
+                      w-full text-left p-3.5 rounded-2xl border transition-all flex items-center justify-between
+                      ${isSelected
+                        ? 'border-rose-600 bg-rose-50/70 shadow-sm ring-2 ring-rose-500/20'
+                        : 'border-stone-200 hover:border-stone-300 hover:bg-stone-50'
+                      }
+                    `}
+                    aria-pressed={isSelected}
+                  >
+                    <div className="flex flex-col">
+                      <div className="flex items-center gap-2">
+                        <span className="text-base font-bold text-stone-900">
+                          {lang.native}
+                        </span>
+                        <span className="text-xs text-stone-500">
+                          ({lang.name})
+                        </span>
+                        {isSelected && (
+                          <Badge variant="rose" size="sm">Active</Badge>
+                        )}
+                      </div>
+                      <span className="text-[11px] text-stone-500 mt-0.5">
+                        {lang.region} · Speech Voice Ready
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {isSelected ? (
+                        <span className="w-6 h-6 rounded-full bg-rose-600 text-white flex items-center justify-center text-xs font-bold shadow-sm">
+                          ✓
+                        </span>
+                      ) : (
+                        <span className="text-xs font-medium text-stone-400">
+                          Select
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="px-6 py-4 bg-stone-50 border-t border-stone-200 flex items-center justify-between">
+              <p className="text-[11px] text-stone-500">
+                Selected language is saved locally on this phone.
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onClose}
+                ariaLabel="Cancel and keep current language"
+                helperText="Dismisses without changing"
+              >
+                Done
+              </Button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // 7. LoadingState
+    function LoadingState({
+      message = 'Loading your health records...',
+      helperText = 'Retrieving encrypted offline data from local device storage...',
+      variant = 'spinner',
+      count = 3,
+      className = ''
+    }) {
+      return (
+        <div role="status" aria-live="polite" className={`py-8 px-4 flex flex-col items-center justify-center text-center ${className}`}>
+          {variant === 'spinner' ? (
+            <div className="flex flex-col items-center">
+              <div className="relative w-12 h-12 mb-3">
+                <div className="absolute inset-0 rounded-full border-4 border-rose-100"></div>
+                <div className="absolute inset-0 rounded-full border-4 border-rose-600 border-t-transparent animate-spin"></div>
+              </div>
+              <p className="text-sm font-semibold text-stone-800">{message}</p>
+              {helperText && <p className="text-xs text-stone-500 mt-1 max-w-sm">{helperText}</p>}
+            </div>
+          ) : (
+            <div className="w-full max-w-2xl space-y-3">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-medium text-stone-500 animate-pulse">{message}</p>
+                <span className="text-[11px] text-stone-400">Encrypted Local Fetch</span>
+              </div>
+              {Array.from({ length: count }).map((_, i) => (
+                <div key={i} className="bg-white border border-stone-200/80 rounded-2xl p-4 animate-pulse space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="h-4 bg-stone-200 rounded-md w-1/3"></div>
+                    <div className="h-3 bg-stone-200 rounded-full w-16"></div>
+                  </div>
+                  <div className="h-3 bg-stone-100 rounded-md w-3/4"></div>
+                  <div className="h-3 bg-stone-100 rounded-md w-1/2"></div>
+                </div>
+              ))}
+            </div>
+          )}
+          <span className="sr-only">Data is currently loading. Please wait.</span>
+        </div>
+      );
+    }
+
+    // 8. EmptyState
+    function EmptyState({
+      title = 'No Health Entries Recorded Yet',
+      description = 'Your device health log is clean and empty. Record your first symptom, daily kick count, or question for your doctor.',
+      helperText = 'Everything is stored strictly on this device without requiring internet.',
+      actionLabel = 'Log First Entry',
+      actionHelperText = 'Opens quick logging form',
+      onAction = null,
+      icon = null,
+      className = ''
+    }) {
+      return (
+        <div
+          role="region"
+          aria-label="Empty state notification"
+          className={`bg-white border-2 border-dashed border-stone-200 rounded-3xl p-8 text-center flex flex-col items-center justify-center max-w-lg mx-auto ${className}`}
+        >
+          <div className="w-16 h-16 rounded-2xl bg-rose-50 text-rose-700 flex items-center justify-center mb-4 shadow-inner" aria-hidden="true">
+            {icon || (
+              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.75" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            )}
+          </div>
+          <h3 className="text-base sm:text-lg font-bold text-stone-900 mb-1">{title}</h3>
+          <p className="text-xs sm:text-sm text-stone-600 max-w-sm mb-4 leading-relaxed">{description}</p>
+          {onAction && actionLabel && (
+            <div className="flex flex-col items-center">
+              <Button
+                variant="primary"
+                size="md"
+                onClick={onAction}
+                ariaLabel={actionLabel}
+                helperText={actionHelperText}
+                icon={
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 4v16m8-8H4" />
+                  </svg>
+                }
+              >
+                {actionLabel}
+              </Button>
+            </div>
+          )}
+          {helperText && (
+            <p className="mt-4 text-[11px] text-stone-400">
+              🔒 {helperText}
+            </p>
+          )}
+        </div>
+      );
+    }
+
+    // --- REUSABLE PAGE HEADER ---
+    function PageHeader({
+      title,
+      description,
+      badge = null,
+      badgeVariant = 'rose',
+      onBack = null,
+      backLabel = 'Back to Home',
+      backHelperText = 'Returns to your main health overview',
+      action = null,
+      className = ''
+    }) {
+      return (
+        <header className={`mb-6 pb-4 border-b border-stone-200/80 ${className}`}>
+          {onBack && (
+            <div className="mb-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onBack}
+                ariaLabel={backLabel}
+                helperText={backHelperText}
+                icon={
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                  </svg>
+                }
+              >
+                {backLabel}
+              </Button>
+            </div>
+          )}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2.5 mb-1 flex-wrap">
+                <h1 className="text-xl sm:text-2xl font-bold text-stone-900 tracking-tight">
+                  {title}
+                </h1>
+                {badge && (
+                  <Badge variant={badgeVariant} size="sm">
+                    {badge}
+                  </Badge>
+                )}
+              </div>
+              {description && (
+                <p className="text-xs sm:text-sm text-stone-600 max-w-2xl leading-relaxed">
+                  {description}
+                </p>
+              )}
+            </div>
+            {action && (
+              <div className="flex-shrink-0 self-start sm:self-center">
+                {action}
+              </div>
+            )}
+          </div>
+        </header>
+      );
+    }
+
+    // --- GLOBAL ERROR AREA ---
+    function GlobalError({ error, onDismiss, onRetry = null, className = '' }) {
+      if (!error) return null;
+      const title = typeof error === 'object' ? error.title || 'An Error Occurred' : 'System Notice';
+      const message = typeof error === 'object' ? error.message : error;
+      const code = typeof error === 'object' ? error.code : null;
+
+      return (
+        <div
+          role="alert"
+          aria-live="assertive"
+          className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-2xl px-4 animate-slideDown ${className}`}
+        >
+          <div className="bg-red-50 border-2 border-red-500 rounded-2xl p-4 shadow-xl text-red-950 flex flex-col sm:flex-row items-start justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div className="p-2 bg-red-600 text-white rounded-xl flex-shrink-0 mt-0.5" aria-hidden="true">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-sm font-bold text-red-950">{title}</h2>
+                  {code && (
+                    <span className="text-[10px] font-mono bg-red-200/70 text-red-800 px-1.5 py-0.5 rounded">
+                      Code: {code}
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-red-900 leading-relaxed">{message}</p>
+                <p className="text-[11px] text-red-700">Your device data remains safe and stored locally.</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 self-end sm:self-center flex-shrink-0">
+              {onRetry && (
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={onRetry}
+                  ariaLabel="Retry failed operation"
+                  helperText="Re-attempts action"
+                >
+                  Retry
+                </Button>
+              )}
+              {onDismiss && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onDismiss}
+                  ariaLabel="Dismiss this error banner"
+                  helperText="Hides banner"
+                >
+                  Dismiss
+                </Button>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // --- TOP HEADER ---
+    function Header({ currentLanguage = 'en', onOpenLanguageSelector, onNavigateHome, onTriggerDemoError }) {
+      const currentLangObj = SUPPORTED_LANGUAGES.find(l => l.code === currentLanguage) || SUPPORTED_LANGUAGES[0];
+
+      return (
+        <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-stone-200/90 shadow-xs">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-2 sm:gap-4">
+            
+            {/* Logo */}
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={onNavigateHome}
+                className="flex items-center gap-3 text-left group focus:outline-none focus:ring-2 focus:ring-rose-500 rounded-xl p-1"
+                aria-label="SakhiCare Home - Return to main dashboard"
+              >
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-tr from-rose-700 via-rose-600 to-amber-500 flex items-center justify-center text-white shadow-md shadow-rose-200 group-hover:scale-105 transition-transform">
+                  <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                  </svg>
+                </div>
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-lg sm:text-xl font-extrabold text-stone-900 tracking-tight group-hover:text-rose-700 transition-colors">
+                      SakhiCare
+                    </span>
+                    <span className="text-[10px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-1.5 py-0.2 rounded-full hidden sm:inline-block">
+                      सखी
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-stone-500 hidden sm:block">
+                    Maternal & Holistic Women’s Health
+                  </p>
+                </div>
+              </button>
+            </div>
+
+            {/* Privacy + Language */}
+            <div className="flex items-center gap-2 sm:gap-4">
+              {/* Privacy Indicator */}
+              <div
+                className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-1.5 bg-emerald-50/90 border border-emerald-200/90 rounded-xl text-emerald-900 text-xs shadow-xs"
+                role="status"
+                aria-label="Device Privacy: Stored only on this device"
+              >
+                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" aria-hidden="true" />
+                <svg className="w-3.5 h-3.5 text-emerald-700 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                <div className="flex flex-col text-left">
+                  <span className="font-semibold text-[11px] sm:text-xs leading-tight">
+                    Stored only on this device
+                  </span>
+                  <span className="text-[9px] text-emerald-700 hidden md:inline leading-none">
+                    Zero Cloud Sync · Offline Safe
+                  </span>
+                </div>
+              </div>
+
+              {/* Language Selector Trigger */}
+              <div className="flex flex-col items-end">
+                <button
+                  type="button"
+                  onClick={onOpenLanguageSelector}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-2 bg-stone-100 hover:bg-rose-50 hover:border-rose-300 border border-stone-200 rounded-xl text-stone-800 text-xs font-semibold transition-all focus:outline-none focus:ring-2 focus:ring-rose-500"
+                  aria-label={`Current language is ${currentLangObj.name}. Click to change language.`}
+                >
+                  <svg className="w-3.5 h-3.5 text-rose-700 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                  </svg>
+                  <span>{currentLangObj.native}</span>
+                  <span className="text-stone-400 font-normal hidden sm:inline">({currentLangObj.name})</span>
+                  <span className="text-[10px] text-rose-700 ml-0.5">▼</span>
+                </button>
+                <span className="text-[10px] text-stone-400 mt-0.5 hidden lg:inline">
+                  Change Language
+                </span>
+              </div>
+
+              {/* Demo Error Trigger Button */}
+              {onTriggerDemoError && (
+                <button
+                  type="button"
+                  onClick={onTriggerDemoError}
+                  className="px-2 py-1 bg-stone-100 hover:bg-stone-200 border border-stone-300 rounded-lg text-[10px] font-medium text-stone-600 hidden xl:inline-block"
+                  title="Test Global Error Banner"
+                >
+                  Simulate Error
+                </button>
+              )}
+            </div>
+          </div>
+        </header>
+      );
+    }
+
+    // --- DESKTOP SIDEBAR ---
+    function Sidebar({ currentPath = '/', onNavigate, onEmergencyCall }) {
+      const navItems = [
+        {
+          path: '/',
+          label: 'Home',
+          badge: 'Daily',
+          badgeVariant: 'stone',
+          helperText: 'Overview, recent logs & quick actions',
+          icon: (
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+          )
+        },
+        {
+          path: '/talk',
+          label: 'Talk or Type',
+          badge: 'Voice AI',
+          badgeVariant: 'rose',
+          helperText: 'Speak or type symptoms in your language',
+          icon: (
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z" />
+            </svg>
+          )
+        },
+        {
+          path: '/tracker',
+          label: 'Health Tracker',
+          badge: 'Logs',
+          badgeVariant: 'emerald',
+          helperText: 'Review and add symptoms, cycle, & vitals',
+          icon: (
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+            </svg>
+          )
+        },
+        {
+          path: '/summary',
+          label: 'Clinical Summary',
+          badge: 'Report',
+          badgeVariant: 'purple',
+          helperText: 'One-page doctor brief & health trends',
+          icon: (
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+          )
+        },
+        {
+          path: '/learn',
+          label: 'Learn & Wellness',
+          badge: 'Guides',
+          badgeVariant: 'blue',
+          helperText: 'Maternal nutrition, red flags & self-care',
+          icon: (
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          )
+        }
+      ];
+
+      return (
+        <aside
+          aria-label="Desktop Primary Navigation"
+          className="hidden md:flex flex-col w-64 lg:w-72 bg-white border-r border-stone-200/90 min-h-[calc(100vh-4rem)] p-4 justify-between"
+        >
+          <div className="space-y-6">
+            <div>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-stone-400 px-3">
+                Main Navigation
+              </span>
+              <nav className="mt-2 space-y-1.5" aria-label="Main menu">
+                {navItems.map((item) => {
+                  const isActive = currentPath === item.path;
+                  return (
+                    <button
+                      key={item.path}
+                      type="button"
+                      onClick={() => onNavigate(item.path)}
+                      aria-current={isActive ? 'page' : undefined}
+                      className={`
+                        w-full text-left p-3 rounded-2xl transition-all duration-200 flex items-start gap-3 group
+                        ${isActive
+                          ? 'bg-rose-50 text-rose-950 font-semibold shadow-xs ring-1 ring-rose-200'
+                          : 'text-stone-700 hover:bg-stone-50 hover:text-stone-900'
+                        }
+                      `}
+                    >
+                      <div
+                        className={`
+                          p-2 rounded-xl flex-shrink-0 transition-colors
+                          ${isActive
+                            ? 'bg-rose-600 text-white shadow-sm shadow-rose-200'
+                            : 'bg-stone-100 text-stone-600 group-hover:bg-stone-200 group-hover:text-stone-900'
+                          }
+                        `}
+                        aria-hidden="true"
+                      >
+                        {item.icon}
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="text-sm font-semibold tracking-tight truncate">
+                            {item.label}
+                          </span>
+                          {item.badge && (
+                            <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${isActive ? 'bg-rose-200 text-rose-900' : 'bg-stone-100 text-stone-500'}`}>
+                              {item.badge}
+                            </span>
+                          )}
+                        </div>
+                        <p className={`text-xs mt-0.5 leading-snug line-clamp-1 ${isActive ? 'text-rose-800' : 'text-stone-500'}`}>
+                          {item.helperText}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </nav>
+            </div>
+
+            {/* Local Privacy Reassurance Card */}
+            <div className="p-3.5 bg-emerald-50/80 rounded-2xl border border-emerald-200/80 text-xs text-emerald-950">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span className="font-bold text-emerald-900">Local-First Vault</span>
+              </div>
+              <p className="text-[11px] text-emerald-800 leading-tight">
+                Encrypted SQLite/IndexedDB on this hardware. Never uploaded to remote servers.
+              </p>
+            </div>
+          </div>
+
+          {/* Emergency Card */}
+          <div className="pt-4 border-t border-stone-200/80 space-y-2">
+            <div className="bg-red-50/90 rounded-2xl p-3 border border-red-200 text-red-950">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-red-700 text-sm">🚨</span>
+                <span className="text-xs font-bold text-red-900">Emergency Support</span>
+              </div>
+              <p className="text-[11px] text-red-800 mb-2 leading-tight">
+                Immediate maternal ambulance & triage assistance.
+              </p>
+              <Button
+                variant="danger"
+                size="sm"
+                fullWidth
+                onClick={() => onEmergencyCall ? onEmergencyCall() : alert('Emergency Call 108 Triggered')}
+                ariaLabel="Call National Ambulance 108"
+                helperText="24/7 free toll helpline"
+              >
+                Call 108 Helpline
+              </Button>
+            </div>
+          </div>
+        </aside>
+      );
+    }
+
+    // --- MOBILE BOTTOM NAVIGATION ---
+    function MobileNav({ currentPath = '/', onNavigate }) {
+      const navItems = [
+        {
+          path: '/',
+          label: 'Home',
+          helperText: 'Overview',
+          icon: (
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+          )
+        },
+        {
+          path: '/talk',
+          label: 'Talk/Type',
+          helperText: 'Voice/Text',
+          icon: (
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z" />
+            </svg>
+          )
+        },
+        {
+          path: '/tracker',
+          label: 'Tracker',
+          helperText: 'Vitals & Log',
+          icon: (
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+            </svg>
+          )
+        },
+        {
+          path: '/summary',
+          label: 'Summary',
+          helperText: 'Doctor Brief',
+          icon: (
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+          )
+        },
+        {
+          path: '/learn',
+          label: 'Learn',
+          helperText: 'Guides',
+          icon: (
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          )
+        }
+      ];
+
+      return (
+        <nav
+          aria-label="Mobile Bottom Navigation"
+          className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-lg border-t border-stone-200 shadow-lg px-2 py-1 safe-area-pb"
+        >
+          <div className="flex items-center justify-around">
+            {navItems.map((item) => {
+              const isActive = currentPath === item.path;
+              return (
+                <button
+                  key={item.path}
+                  type="button"
+                  onClick={() => onNavigate(item.path)}
+                  aria-label={`${item.label}: ${item.helperText}`}
+                  aria-current={isActive ? 'page' : undefined}
+                  className={`
+                    flex flex-col items-center justify-center py-1.5 px-2 rounded-xl transition-all min-w-[58px] min-h-[54px]
+                    ${isActive
+                      ? 'text-rose-700 font-bold bg-rose-50/80 shadow-xs'
+                      : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
+                    }
+                  `}
+                >
+                  <div className={`p-1 rounded-lg ${isActive ? 'bg-rose-100/70 text-rose-800' : ''}`}>
+                    {item.icon}
+                  </div>
+                  <span className="text-[11px] leading-tight font-semibold mt-0.5 tracking-tight">
+                    {item.label}
+                  </span>
+                  <span className={`text-[9px] leading-none ${isActive ? 'text-rose-600 font-medium' : 'text-stone-400'}`}>
+                    {item.helperText}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </nav>
+      );
+    }
+
+    // --- VIEW 1: HOME ---
+    function HomeView({ onNavigate, entries, onToggleEmptyState }) {
+      const [showUrgentBanner, setShowUrgentBanner] = useState(false);
+      const [showLoadingDemo, setShowLoadingDemo] = useState(false);
+
+      const handleSimulateLoading = () => {
+        setShowLoadingDemo(true);
+        setTimeout(() => setShowLoadingDemo(false), 1200);
+      };
+
+      return (
+        <div className="space-y-6">
+          <PageHeader
+            title={`Namaste, ${MOCK_USER_PROFILE.name}`}
+            description="Here is your personal health overview. Everything recorded here is stored solely on your local device."
+            badge={MOCK_USER_PROFILE.currentStage}
+            badgeVariant="rose"
+            action={
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => onNavigate('/talk')}
+                  ariaLabel="Start Voice or Typed Health Note"
+                  helperText="Opens Talk or Type screen"
+                  icon={
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z" />
+                    </svg>
+                  }
+                >
+                  Talk or Type
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onNavigate('/tracker')}
+                  ariaLabel="Log new symptom or vital entry"
+                  helperText="Opens tracker form"
+                >
+                  + Log Entry
+                </Button>
+              </div>
+            }
+          />
+
+          <DisclaimerBanner dismissible={true} />
+
+          {/* Urgent Warning Simulation Box */}
+          {showUrgentBanner ? (
+            <div className="space-y-2">
+              <UrgentWarning onEmergencyClick={() => alert('Initiating priority emergency call: 108')} />
+              <div className="text-right">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowUrgentBanner(false)}
+                  ariaLabel="Close simulated urgent warning"
+                  helperText="Hides red-flag banner preview"
+                >
+                  Dismiss Urgent Alert Preview
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-between p-3 bg-stone-100 rounded-xl text-xs text-stone-600">
+              <span>Demo Tool: Preview clinical red-flag symptom alert</span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowUrgentBanner(true)}
+                ariaLabel="Simulate urgent clinical alert banner"
+                helperText="Tests high-contrast emergency warning"
+              >
+                Show Red-Flag Warning
+              </Button>
+            </div>
+          )}
+
+          {/* Quick Actions */}
+          <section aria-labelledby="quick-actions-title">
+            <h2 id="quick-actions-title" className="text-base font-bold text-stone-900 mb-3">
+              Quick Health Actions
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card
+                variant="interactive"
+                onClick={() => onNavigate('/talk')}
+                title="Talk or Type"
+                subtitle="Voice & Text Companion"
+                helperText="Speech transcribed on device"
+                className="border-rose-200 bg-gradient-to-br from-rose-50/60 to-white"
+              >
+                <p className="text-xs text-stone-600 mb-3">
+                  Describe symptoms naturally in Hindi, English, or your mother tongue.
+                </p>
+                <div className="flex items-center text-xs font-semibold text-rose-700">
+                  <span>Open Voice/Text Input →</span>
+                </div>
+              </Card>
+
+              <Card
+                variant="interactive"
+                onClick={() => onNavigate('/tracker')}
+                title="Log Today's Vitals"
+                subtitle="BP & Kick Counts"
+                helperText="Stored locally in device vault"
+              >
+                <p className="text-xs text-stone-600 mb-3">
+                  Record morning kicks, resting blood pressure, or physical sensations.
+                </p>
+                <div className="flex items-center text-xs font-semibold text-emerald-700">
+                  <span>Open Tracker →</span>
+                </div>
+              </Card>
+
+              <Card
+                variant="interactive"
+                onClick={() => onNavigate('/summary')}
+                title="Clinician Brief"
+                subtitle="1-Page Doctor Summary"
+                helperText="Ready for next ANM/Doctor visit"
+              >
+                <p className="text-xs text-stone-600 mb-3">
+                  Generate formatted medical notes and trend charts for appointments.
+                </p>
+                <div className="flex items-center text-xs font-semibold text-purple-700">
+                  <span>View Summary →</span>
+                </div>
+              </Card>
+
+              <Card
+                variant="interactive"
+                onClick={() => onNavigate('/learn')}
+                title="Maternal Guides"
+                subtitle="Week 24 Milestones"
+                helperText="Evidence-based care guides"
+              >
+                <p className="text-xs text-stone-600 mb-3">
+                  Nutrition tips, iron absorption hacks, and gentle pelvic movements.
+                </p>
+                <div className="flex items-center text-xs font-semibold text-sky-700">
+                  <span>Explore Library →</span>
+                </div>
+              </Card>
+            </div>
+          </section>
+
+          {/* Daily Snapshot */}
+          <section aria-labelledby="vitals-snapshot-title">
+            <Card
+              title="Daily Maternal Health Snapshot"
+              subtitle="Latest measurements recorded on this device"
+              headerAction={
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleSimulateLoading}
+                  ariaLabel="Simulate data reload"
+                  helperText="Tests accessible loading state"
+                >
+                  Refresh Vault
+                </Button>
+              }
+            >
+              {showLoadingDemo ? (
+                <LoadingState
+                  message="Reading encrypted records from local storage..."
+                  helperText="Validating on-device SHA integrity"
+                  variant="skeleton"
+                  count={2}
+                />
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="p-3 bg-stone-50 rounded-xl border border-stone-200">
+                    <span className="text-[11px] font-medium text-stone-500 uppercase">Resting BP</span>
+                    <p className="text-lg font-bold text-stone-900 mt-0.5">118 / 76 <span className="text-xs font-normal text-stone-500">mmHg</span></p>
+                    <span className="text-[10px] text-emerald-700 font-medium">✓ Normal Range</span>
+                  </div>
+                  <div className="p-3 bg-stone-50 rounded-xl border border-stone-200">
+                    <span className="text-[11px] font-medium text-stone-500 uppercase">Fetal Kicks (1 hr)</span>
+                    <p className="text-lg font-bold text-stone-900 mt-0.5">10 <span className="text-xs font-normal text-stone-500">movements</span></p>
+                    <span className="text-[10px] text-emerald-700 font-medium">✓ Active & Reassuring</span>
+                  </div>
+                  <div className="p-3 bg-stone-50 rounded-xl border border-stone-200">
+                    <span className="text-[11px] font-medium text-stone-500 uppercase">Hydration Target</span>
+                    <p className="text-lg font-bold text-stone-900 mt-0.5">2.2 / 3.0 <span className="text-xs font-normal text-stone-500">L</span></p>
+                    <span className="text-[10px] text-stone-500">2 glasses remaining</span>
+                  </div>
+                  <div className="p-3 bg-stone-50 rounded-xl border border-stone-200">
+                    <span className="text-[11px] font-medium text-stone-500 uppercase">Iron Supplement</span>
+                    <p className="text-lg font-bold text-stone-900 mt-0.5">Taken <span className="text-xs font-normal text-stone-500">with lemon</span></p>
+                    <span className="text-[10px] text-emerald-700 font-medium">✓ Completed Today</span>
+                  </div>
+                </div>
+              )}
+            </Card>
+          </section>
+
+          {/* Recent Health Entries */}
+          <section aria-labelledby="recent-entries-title" className="space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h2 id="recent-entries-title" className="text-base font-bold text-stone-900">
+                  Recent Health Log Entries ({entries.length})
+                </h2>
+                <p className="text-xs text-stone-500">
+                  Entries conforming to the shared HealthEntry schema
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onToggleEmptyState}
+                  ariaLabel={entries.length > 0 ? 'Preview empty state view' : 'Restore mock health entries'}
+                  helperText="Toggles empty vs filled view"
+                >
+                  {entries.length > 0 ? 'Test Empty State' : 'Restore Sample Entries'}
+                </Button>
+              </div>
+            </div>
+
+            {entries.length === 0 ? (
+              <EmptyState
+                title="No Health Records on this Device"
+                description="You have not logged any health entries yet. Start by logging your vitals or speaking with Sakhi."
+                actionLabel="+ Create First Health Entry"
+                actionHelperText="Opens symptom & vital tracker"
+                onAction={() => onNavigate('/tracker')}
+              />
+            ) : (
+              <div className="space-y-3">
+                {entries.slice(0, 3).map((entry) => (
+                  <Card
+                    key={entry.id}
+                    variant="outlined"
+                    className="bg-white hover:border-stone-300"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                      <div className="space-y-1.5">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-xs font-semibold text-stone-500">
+                            {entry.dateFormatted}
+                          </span>
+                          <Badge
+                            variant={entry.severity === 'moderate' ? 'amber' : 'emerald'}
+                            size="sm"
+                          >
+                            {entry.severity.toUpperCase()}
+                          </Badge>
+                          <Badge variant="stone" size="sm">
+                            {entry.category}
+                          </Badge>
+                          {entry.source && (
+                            <span className="text-[11px] text-stone-500 bg-stone-100 px-2 py-0.5 rounded-md">
+                              Source: {entry.source === 'voice' ? '🎙️ Voice Note' : '⌨️ Typed'}
+                            </span>
+                          )}
+                        </div>
+
+                        <h3 className="text-sm sm:text-base font-bold text-stone-900">
+                          {entry.title}
+                        </h3>
+
+                        <p className="text-xs text-stone-600 leading-relaxed">
+                          {entry.notes}
+                        </p>
+
+                        {entry.tags && entry.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 pt-1">
+                            {entry.tags.map((t, idx) => (
+                              <span
+                                key={idx}
+                                className="text-[10px] font-medium text-stone-600 bg-stone-100 px-2 py-0.5 rounded-full"
+                              >
+                                #{t}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex-shrink-0 self-end sm:self-center">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onNavigate('/tracker')}
+                          ariaLabel={`View full details for ${entry.title}`}
+                          helperText="Opens details in tracker"
+                        >
+                          View in Tracker →
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
+      );
+    }
+
+    // --- VIEW 2: TALK OR TYPE ---
+    function TalkView({ onNavigate }) {
+      const [mode, setMode] = useState('voice');
+      const [isRecording, setIsRecording] = useState(false);
+      const [textInput, setTextInput] = useState('');
+      const [recentTranscripts, setRecentTranscripts] = useState([
+        {
+          id: 'tx-1',
+          time: 'Today 8:15 AM',
+          mode: 'voice',
+          snippet: 'Baby moved about 10 times right after I had my warm milk and almonds.',
+          status: 'Captured locally'
+        },
+        {
+          id: 'tx-2',
+          time: 'Yesterday 7:40 PM',
+          mode: 'type',
+          snippet: 'My lower back feels tense whenever I stand by the kitchen counter for half an hour.',
+          status: 'Captured locally'
+        }
+      ]);
+
+      const samplePrompts = [
+        'I have mild lower back ache after cooking dinner.',
+        'Is occasional heartburn normal in the 24th week?',
+        'What should my daily water intake target be?'
+      ];
+
+      const handleToggleRecord = () => setIsRecording(!isRecording);
+
+      const handleAddSample = (promptText) => {
+        setTextInput(promptText);
+        setMode('type');
+      };
+
+      const handleSimulateSubmit = (e) => {
+        e.preventDefault();
+        if (!textInput.trim()) return;
+        const newTx = {
+          id: `tx-${Date.now()}`,
+          time: 'Just now',
+          mode: 'type',
+          snippet: textInput,
+          status: 'Saved to device vault'
+        };
+        setRecentTranscripts([newTx, ...recentTranscripts]);
+        setTextInput('');
+      };
+
+      return (
+        <div className="space-y-6">
+          <PageHeader
+            title="Talk or Type with Sakhi"
+            description="Share your symptoms, feelings, or questions in your preferred language. All speech and text are processed strictly on your device."
+            badge="Private Companion"
+            badgeVariant="rose"
+            onBack={() => onNavigate('/')}
+            backLabel="Back to Home Dashboard"
+            backHelperText="Returns to main overview"
+          />
+
+          <DisclaimerBanner dismissible={false} />
+
+          {/* Mode Switcher */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 max-w-md mx-auto">
+            <Button
+              variant={mode === 'voice' ? 'primary' : 'outline'}
+              size="md"
+              fullWidth
+              onClick={() => setMode('voice')}
+              ariaLabel="Switch to Voice Mode"
+              helperText="Speak freely in your mother tongue"
+              icon={
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z" />
+                </svg>
+              }
+            >
+              Voice Input Mode
+            </Button>
+
+            <Button
+              variant={mode === 'type' ? 'primary' : 'outline'}
+              size="md"
+              fullWidth
+              onClick={() => setMode('type')}
+              ariaLabel="Switch to Text Mode"
+              helperText="Type or paste your notes"
+              icon={
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              }
+            >
+              Type Notes Mode
+            </Button>
+          </div>
+
+          {/* Voice Mode */}
+          {mode === 'voice' && (
+            <Card
+              variant="accent"
+              className="text-center py-8 px-4"
+              title="Voice Companion Placeholder"
+              subtitle="On-device speech recognition & triage interface"
+            >
+              <div className="max-w-md mx-auto flex flex-col items-center space-y-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/80 border border-rose-200 rounded-full text-xs text-rose-900 shadow-xs">
+                  <span className={`w-2 h-2 rounded-full ${isRecording ? 'bg-red-500 animate-ping' : 'bg-stone-400'}`} />
+                  <span className="font-semibold">
+                    {isRecording ? 'Listening locally in your language...' : 'Microphone Ready (Tap to Speak)'}
+                  </span>
+                </div>
+
+                <div className="relative">
+                  {isRecording && <div className="absolute -inset-3 rounded-full bg-rose-400/30 animate-pulse" />}
+                  <button
+                    type="button"
+                    onClick={handleToggleRecord}
+                    className={`
+                      relative z-10 w-24 h-24 rounded-full flex flex-col items-center justify-center transition-all duration-300 shadow-lg focus:outline-none focus:ring-4 focus:ring-rose-400
+                      ${isRecording
+                        ? 'bg-red-600 text-white scale-105 shadow-red-200'
+                        : 'bg-rose-700 hover:bg-rose-800 text-white hover:scale-105 shadow-rose-200'
+                      }
+                    `}
+                    aria-label={isRecording ? 'Stop voice recording' : 'Start voice recording in your language'}
+                  >
+                    <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      {isRecording ? (
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+                      ) : (
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z" />
+                      )}
+                    </svg>
+                    <span className="text-[10px] font-bold uppercase tracking-wider mt-1">
+                      {isRecording ? 'Tap to Stop' : 'Tap to Speak'}
+                    </span>
+                  </button>
+                </div>
+
+                <p className="text-xs text-stone-600 max-w-sm">
+                  Press the button to speak. Your voice is transcribed securely on your device without leaving your phone.
+                </p>
+
+                <div className="p-3.5 bg-stone-100/90 rounded-2xl border border-stone-200 text-left w-full text-xs text-stone-700 space-y-1">
+                  <div className="flex items-center gap-2 font-bold text-stone-900">
+                    <span>⚡ Hackathon Placeholder:</span>
+                    <Badge variant="stone" size="sm">Speech-to-Text Engine</Badge>
+                  </div>
+                  <p className="text-[11px] text-stone-600">
+                    In this shell version, live audio hardware access is abstracted. In production, this connects to the local Whisper/WebSpeech model.
+                  </p>
+                </div>
+              </div>
+            </Card>
+          )}
+
+          {/* Type Mode */}
+          {mode === 'type' && (
+            <Card
+              title="Type Your Health Query or Notes"
+              subtitle="Describe any sensations, cycle dates, or doctor questions"
+            >
+              <form onSubmit={handleSimulateSubmit} className="space-y-4">
+                <div>
+                  <label htmlFor="health-text-input" className="block text-xs font-semibold text-stone-800 mb-1">
+                    What are you feeling today? (Plain English or native transliteration)
+                  </label>
+                  <textarea
+                    id="health-text-input"
+                    rows={4}
+                    value={textInput}
+                    onChange={(e) => setTextInput(e.target.value)}
+                    placeholder="Example: I've noticed mild swelling in my ankles after lunch. No headache or vision issues..."
+                    className="w-full p-3.5 rounded-2xl border border-stone-300 focus:ring-2 focus:ring-rose-500 focus:border-rose-500 text-sm text-stone-900 placeholder:text-stone-400"
+                  />
+                  <div className="flex items-center justify-between mt-1 text-[11px] text-stone-500">
+                    <span>Visible helper text: Be as detailed as you like.</span>
+                    <span>{textInput.length} characters</span>
+                  </div>
+                </div>
+
+                <div>
+                  <span className="text-[11px] font-semibold text-stone-500 block mb-1.5">
+                    Suggested Prompts (Click to populate text):
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    {samplePrompts.map((prompt, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => handleAddSample(prompt)}
+                        className="text-xs bg-stone-100 hover:bg-rose-50 hover:text-rose-800 text-stone-700 px-3 py-1.5 rounded-xl border border-stone-200 transition-colors text-left"
+                        aria-label={`Insert sample prompt: ${prompt}`}
+                      >
+                        "{prompt}"
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2 border-t border-stone-100">
+                  <span className="text-xs text-stone-500">
+                    🔒 Captured entries remain inside your encrypted browser storage.
+                  </span>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    size="md"
+                    disabled={!textInput.trim()}
+                    ariaLabel="Save typed health note to local device"
+                    helperText="Stores entry in device log"
+                    icon={
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                      </svg>
+                    }
+                  >
+                    Save to Device Log
+                  </Button>
+                </div>
+              </form>
+            </Card>
+          )}
+
+          {/* AI Symptom Triage Placeholder */}
+          <section aria-labelledby="triage-placeholder-title">
+            <Card
+              variant="outlined"
+              title="Symptom Analysis & Triage Engine"
+              subtitle="Clean placeholder section for upcoming algorithmic triage"
+              helperText="Logic will be connected during backend integration"
+            >
+              <div className="p-4 bg-stone-50 rounded-2xl border border-stone-200 space-y-2">
+                <div className="flex items-center gap-2">
+                  <Badge variant="purple" size="sm">Coming in Next Phase</Badge>
+                  <span className="text-xs font-semibold text-stone-700">Offline Triage Engine</span>
+                </div>
+                <p className="text-xs text-stone-600 leading-relaxed">
+                  Per specifications, algorithmic symptom analysis and severity calculations are decoupled from this UI shell.
+                  When connected, this container dynamically displays clinical red-flag checks, safe home care advice, and triage urgency levels.
+                </p>
+              </div>
+            </Card>
+          </section>
+
+          {/* Transcripts List */}
+          <section aria-labelledby="recent-transcripts-title">
+            <h2 id="recent-transcripts-title" className="text-base font-bold text-stone-900 mb-3">
+              Session Transcripts on This Device ({recentTranscripts.length})
+            </h2>
+            <div className="space-y-3">
+              {recentTranscripts.map((item) => (
+                <div
+                  key={item.id}
+                  className="p-3.5 bg-white border border-stone-200/80 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-xs"
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-stone-800">
+                        {item.mode === 'voice' ? '🎙️ Voice Note' : '⌨️ Typed Note'}
+                      </span>
+                      <span className="text-[11px] text-stone-400">· {item.time}</span>
+                      <Badge variant="emerald" size="sm">{item.status}</Badge>
+                    </div>
+                    <p className="text-xs text-stone-600 italic">
+                      "{item.snippet}"
+                    </p>
+                  </div>
+                  <div className="self-end sm:self-center">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onNavigate('/tracker')}
+                      ariaLabel="Add this transcript to Health Tracker"
+                      helperText="Transfers note to tracker"
+                    >
+                      Transfer to Tracker →
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+      );
+    }
+
+    // --- VIEW 3: TRACKER ---
+    function TrackerView({ onNavigate, entries, onAddEntry }) {
+      const [selectedFilter, setSelectedFilter] = useState('all');
+      const [isFormOpen, setIsFormOpen] = useState(false);
+
+      const [newTitle, setNewTitle] = useState('');
+      const [newCategory, setNewCategory] = useState('symptom');
+      const [newSeverity, setNewSeverity] = useState('mild');
+      const [newNotes, setNewNotes] = useState('');
+      const [newBpSys, setNewBpSys] = useState('');
+      const [newBpDia, setNewBpDia] = useState('');
+
+      const filterTabs = [
+        { id: 'all', label: 'All Records', helper: 'All device logs' },
+        { id: 'symptom', label: 'Symptoms', helper: 'Pain, aches, nausea' },
+        { id: 'cycle', label: 'Cycle & Ovulation', helper: 'Periods & dates' },
+        { id: 'vital', label: 'Vitals & Kicks', helper: 'BP & movements' },
+        { id: 'mood', label: 'Mood & Wellbeing', helper: 'Mental state' },
+        { id: 'note', label: 'Notes', helper: 'Doctor questions' }
+      ];
+
+      const filteredEntries = selectedFilter === 'all'
+        ? entries
+        : entries.filter(e => e.category === selectedFilter);
+
+      const handleCreateEntry = (e) => {
+        e.preventDefault();
+        if (!newTitle.trim()) return;
+
+        const createdEntry = {
+          id: `entry-${Date.now()}`,
+          timestamp: new Date().toISOString(),
+          dateFormatted: 'Today, Just now',
+          category: newCategory,
+          title: newTitle,
+          severity: newSeverity,
+          stage: '2nd Trimester · Week 24',
+          tags: [newCategory, newSeverity],
+          notes: newNotes || 'No additional notes provided.',
+          vitals: {
+            bpSystolic: newBpSys ? parseInt(newBpSys, 10) : null,
+            bpDiastolic: newBpDia ? parseInt(newBpDia, 10) : null,
+            pulse: null
+          },
+          isUrgent: newSeverity === 'severe',
+          source: 'typed'
+        };
+
+        onAddEntry(createdEntry);
+        setNewTitle('');
+        setNewNotes('');
+        setNewBpSys('');
+        setNewBpDia('');
+        setIsFormOpen(false);
+      };
+
+      return (
+        <div className="space-y-6">
+          <PageHeader
+            title="Health & Symptom Tracker"
+            description="Review logged symptoms, monitor vitals, and keep track of daily pregnancy observations in your local device vault."
+            badge={`${entries.length} Total Logs`}
+            badgeVariant="emerald"
+            onBack={() => onNavigate('/')}
+            backLabel="Back to Home Dashboard"
+            backHelperText="Returns to main overview"
+            action={
+              <Button
+                variant="primary"
+                size="md"
+                onClick={() => setIsFormOpen(!isFormOpen)}
+                ariaLabel={isFormOpen ? 'Close new entry form' : 'Open new entry form'}
+                helperText={isFormOpen ? 'Collapses entry fields' : 'Add symptom or measurement'}
+                icon={
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d={isFormOpen ? "M6 18L18 6M6 6l12 12" : "M12 4v16m8-8H4"} />
+                  </svg>
+                }
+              >
+                {isFormOpen ? 'Close Form' : '+ New Health Entry'}
+              </Button>
+            }
+          />
+
+          <DisclaimerBanner dismissible={true} />
+
+          {/* Schema & Logic Placeholder Notice */}
+          <Card
+            variant="outlined"
+            title="Health Tracking Architecture Placeholder"
+            subtitle="Specification compliance note for Hackathon Shell"
+          >
+            <div className="p-3.5 bg-stone-50 rounded-2xl text-xs text-stone-600 space-y-1">
+              <p className="font-semibold text-stone-800">
+                📌 Isolated Tracking Logic Placeholder:
+              </p>
+              <p>
+                Per project constraints, automatic cycle predictive math and symptom trend regression logic are not bundled here.
+                All mock records below strictly implement the shared <code className="text-rose-700 bg-rose-50 px-1 py-0.5 rounded font-mono">HealthEntry</code> data schema for seamless module pairing.
+              </p>
+            </div>
+          </Card>
+
+          {/* Form */}
+          {isFormOpen && (
+            <Card
+              variant="elevated"
+              title="Create New Health Entry"
+              subtitle="All fields are saved securely to your local device database"
+            >
+              <form onSubmit={handleCreateEntry} className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="entry-title" className="block text-xs font-semibold text-stone-800 mb-1">
+                      Entry Title / Observation Name *
+                    </label>
+                    <input
+                      id="entry-title"
+                      type="text"
+                      required
+                      value={newTitle}
+                      onChange={(e) => setNewTitle(e.target.value)}
+                      placeholder="e.g. Mild back pain, Evening kick count"
+                      className="w-full p-2.5 rounded-xl border border-stone-300 text-sm focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                    />
+                    <span className="text-[11px] text-stone-500 mt-0.5 block">Visible helper: A clear short name</span>
+                  </div>
+
+                  <div>
+                    <label htmlFor="entry-category" className="block text-xs font-semibold text-stone-800 mb-1">
+                      Category *
+                    </label>
+                    <select
+                      id="entry-category"
+                      value={newCategory}
+                      onChange={(e) => setNewCategory(e.target.value)}
+                      className="w-full p-2.5 rounded-xl border border-stone-300 text-sm focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                    >
+                      <option value="symptom">Symptom Log (Physical sensations)</option>
+                      <option value="cycle">Cycle & Ovulation</option>
+                      <option value="vital">Vitals & Kicks (BP, pulse, kicks)</option>
+                      <option value="mood">Mood & Emotional Wellbeing</option>
+                      <option value="note">Personal Health Note / Doctor Query</option>
+                    </select>
+                    <span className="text-[11px] text-stone-500 mt-0.5 block">Select the best classification</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label htmlFor="entry-severity" className="block text-xs font-semibold text-stone-800 mb-1">
+                      Severity Level
+                    </label>
+                    <select
+                      id="entry-severity"
+                      value={newSeverity}
+                      onChange={(e) => setNewSeverity(e.target.value)}
+                      className="w-full p-2.5 rounded-xl border border-stone-300 text-sm focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                    >
+                      <option value="mild">Mild (Comfortably manageable)</option>
+                      <option value="moderate">Moderate (Interferes with activity)</option>
+                      <option value="severe">Severe (Urgent clinical review)</option>
+                    </select>
+                    <span className="text-[11px] text-stone-500 mt-0.5 block">Indicate discomfort level</span>
+                  </div>
+
+                  <div>
+                    <label htmlFor="entry-bp-sys" className="block text-xs font-semibold text-stone-800 mb-1">
+                      BP Systolic (mmHg)
+                    </label>
+                    <input
+                      id="entry-bp-sys"
+                      type="number"
+                      value={newBpSys}
+                      onChange={(e) => setNewBpSys(e.target.value)}
+                      placeholder="e.g. 120"
+                      className="w-full p-2.5 rounded-xl border border-stone-300 text-sm focus:ring-2 focus:ring-rose-500"
+                    />
+                    <span className="text-[11px] text-stone-500 mt-0.5 block">Optional upper reading</span>
+                  </div>
+
+                  <div>
+                    <label htmlFor="entry-bp-dia" className="block text-xs font-semibold text-stone-800 mb-1">
+                      BP Diastolic (mmHg)
+                    </label>
+                    <input
+                      id="entry-bp-dia"
+                      type="number"
+                      value={newBpDia}
+                      onChange={(e) => setNewBpDia(e.target.value)}
+                      placeholder="e.g. 80"
+                      className="w-full p-2.5 rounded-xl border border-stone-300 text-sm focus:ring-2 focus:ring-rose-500"
+                    />
+                    <span className="text-[11px] text-stone-500 mt-0.5 block">Optional lower reading</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="entry-notes" className="block text-xs font-semibold text-stone-800 mb-1">
+                    Detailed Observation Notes
+                  </label>
+                  <textarea
+                    id="entry-notes"
+                    rows={3}
+                    value={newNotes}
+                    onChange={(e) => setNewNotes(e.target.value)}
+                    placeholder="What triggered it? How long did it last? What relieved it?"
+                    className="w-full p-2.5 rounded-xl border border-stone-300 text-sm focus:ring-2 focus:ring-rose-500"
+                  />
+                  <span className="text-[11px] text-stone-500 mt-0.5 block">Visible helper: Helpful context for your doctor</span>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 pt-3 border-t border-stone-100">
+                  <Button
+                    variant="outline"
+                    size="md"
+                    onClick={() => setIsFormOpen(false)}
+                    ariaLabel="Cancel creating new health entry"
+                    helperText="Discards changes"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    size="md"
+                    ariaLabel="Confirm and commit health entry to device log"
+                    helperText="Saves entry locally"
+                  >
+                    Save Health Entry
+                  </Button>
+                </div>
+              </form>
+            </Card>
+          )}
+
+          {/* Filter Chips */}
+          <div className="flex flex-wrap gap-2 pb-2 border-b border-stone-200">
+            {filterTabs.map((tab) => {
+              const isSelected = selectedFilter === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setSelectedFilter(tab.id)}
+                  className={`
+                    px-3 py-2 rounded-xl text-xs font-semibold transition-all flex flex-col items-start
+                    ${isSelected
+                      ? 'bg-rose-700 text-white shadow-sm ring-2 ring-rose-500/20'
+                      : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                    }
+                  `}
+                  aria-pressed={isSelected}
+                  aria-label={`Filter by ${tab.label}: ${tab.helper}`}
+                >
+                  <span>{tab.label}</span>
+                  <span className={`text-[10px] ${isSelected ? 'text-rose-100' : 'text-stone-400'}`}>
+                    {tab.helper}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Entries */}
+          {filteredEntries.length === 0 ? (
+            <EmptyState
+              title={`No ${selectedFilter} entries found`}
+              description="There are currently no records logged in this category on your device."
+              actionLabel="+ Log New Entry"
+              actionHelperText="Opens entry form"
+              onAction={() => setIsFormOpen(true)}
+            />
+          ) : (
+            <div className="space-y-3">
+              {filteredEntries.map((entry) => (
+                <Card key={entry.id} variant="default" className="hover:border-stone-300">
+                  <div className="space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2 mb-1">
+                          <span className="text-xs font-bold text-stone-900">{entry.title}</span>
+                          <Badge
+                            variant={
+                              entry.severity === 'severe' ? 'danger' :
+                              entry.severity === 'moderate' ? 'amber' : 'emerald'
+                            }
+                            size="sm"
+                          >
+                            {entry.severity.toUpperCase()}
+                          </Badge>
+                          <Badge variant="stone" size="sm">{entry.category}</Badge>
+                        </div>
+                        <span className="text-xs text-stone-500">
+                          Logged: {entry.dateFormatted} · {entry.stage || 'General'}
+                        </span>
+                      </div>
+                      <span className="text-[11px] text-stone-500 bg-stone-100 px-2 py-0.5 rounded self-start">
+                        ID: {entry.id}
+                      </span>
+                    </div>
+
+                    <p className="text-xs sm:text-sm text-stone-700 leading-relaxed bg-stone-50/70 p-3 rounded-xl border border-stone-100">
+                      {entry.notes}
+                    </p>
+
+                    {entry.vitals && (entry.vitals.bpSystolic || entry.vitals.fetalKicksCount) && (
+                      <div className="flex flex-wrap gap-2 pt-1 text-xs">
+                        {entry.vitals.bpSystolic && (
+                          <span className="bg-emerald-50 text-emerald-900 border border-emerald-200 px-2.5 py-1 rounded-lg font-medium">
+                            📊 Blood Pressure: {entry.vitals.bpSystolic}/{entry.vitals.bpDiastolic} mmHg
+                          </span>
+                        )}
+                        {entry.vitals.fetalKicksCount && (
+                          <span className="bg-rose-50 text-rose-900 border border-rose-200 px-2.5 py-1 rounded-lg font-medium">
+                            👶 Kick Count: {entry.vitals.fetalKicksCount} in 1 hr
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // --- VIEW 4: SUMMARY ---
+    function SummaryView({ onNavigate, entries }) {
+      const [copiedStatus, setCopiedStatus] = useState(false);
+
+      const handlePrint = () => window.print();
+
+      const handleCopyClipboard = () => {
+        const textSummary = `
+SakhiCare Clinician Summary Report
+Patient: ${MOCK_USER_PROFILE.name} (${MOCK_USER_PROFILE.currentStage})
+Date: ${new Date().toLocaleDateString()}
+Storage: 100% On-Device Encrypted
+
+Key Vitals Trend:
+- Blood Pressure: Stable (~118/76 mmHg)
+- Fetal Kicks: Active (Average 10 kicks / 35-45 min session)
+- Hydration: 2.2L / day avg
+
+Reported Symptoms (Last 7 Days):
+- Mild Lower Back Pain (associated with standing >30m)
+- Nighttime Acid Reflux (managed with elevation & dietary changes)
+
+Doctor Questions Prepared:
+1. Iron chewable tablet absorption with citrus water
+2. Routine anomaly scan scheduling confirmation
+        `.trim();
+
+        navigator.clipboard?.writeText(textSummary);
+        setCopiedStatus(true);
+        setTimeout(() => setCopiedStatus(false), 2500);
+      };
+
+      return (
+        <div className="space-y-6">
+          <PageHeader
+            title="Clinician Health Summary"
+            description="A concise, structured summary ready to share with your Doctor, ANM, or Gynaecologist during your next appointment."
+            badge="Ready for Doctor Visit"
+            badgeVariant="purple"
+            onBack={() => onNavigate('/')}
+            backLabel="Back to Home Dashboard"
+            backHelperText="Returns to main overview"
+            action={
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCopyClipboard}
+                  ariaLabel="Copy text brief to clipboard"
+                  helperText="For messaging or email"
+                >
+                  {copiedStatus ? '✓ Copied to Clipboard!' : 'Copy Text Brief'}
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={handlePrint}
+                  ariaLabel="Print or Export 1-Page Medical PDF"
+                  helperText="Generates offline printable sheet"
+                  icon={
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                    </svg>
+                  }
+                >
+                  Print / Save PDF
+                </Button>
+              </div>
+            }
+          />
+
+          <DisclaimerBanner dismissible={false} />
+
+          {/* Printable Sheet */}
+          <div className="bg-white border-2 border-stone-300 rounded-3xl p-6 sm:p-8 shadow-sm print:border-none print:shadow-none space-y-6">
+            <div className="border-b-2 border-stone-900 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl font-black text-rose-800 tracking-tight">
+                    SakhiCare
+                  </span>
+                  <span className="text-xs font-semibold px-2 py-0.5 bg-stone-100 rounded text-stone-700">
+                    Patient Pre-Consultation Brief
+                  </span>
+                </div>
+                <h2 className="text-lg font-bold text-stone-900 mt-1">
+                  Patient: {MOCK_USER_PROFILE.name} (Age 28)
+                </h2>
+                <p className="text-xs text-stone-500">
+                  Current Stage: <strong>{MOCK_USER_PROFILE.currentStage}</strong> · Generated from Encrypted On-Device Logs
+                </p>
+              </div>
+
+              <div className="text-left sm:text-right">
+                <span className="text-xs font-semibold text-stone-500 block">Report Window:</span>
+                <span className="text-sm font-bold text-stone-800">Last 14 Days (Oct 2026)</span>
+                <Badge variant="emerald" size="sm" showDot className="mt-1">Device Verified</Badge>
+              </div>
+            </div>
+
+            {/* 1. Vitals */}
+            <section aria-labelledby="vitals-trend-title" className="space-y-2">
+              <h3 id="vitals-trend-title" className="text-sm font-bold uppercase tracking-wider text-stone-800">
+                1. Physiological Vitals Trend
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="p-3 bg-stone-50 rounded-xl border border-stone-200">
+                  <span className="text-[11px] font-semibold text-stone-500 block">Blood Pressure (Resting)</span>
+                  <p className="text-base font-bold text-stone-900">118 / 76 mmHg</p>
+                  <span className="text-[10px] text-emerald-700 font-medium">Normotensive · No spikes logged</span>
+                </div>
+                <div className="p-3 bg-stone-50 rounded-xl border border-stone-200">
+                  <span className="text-[11px] font-semibold text-stone-500 block">Fetal Kicks Count (1-Hour)</span>
+                  <p className="text-base font-bold text-stone-900">10 movements / 35 min</p>
+                  <span className="text-[10px] text-emerald-700 font-medium">Consistent daily activity</span>
+                </div>
+                <div className="p-3 bg-stone-50 rounded-xl border border-stone-200">
+                  <span className="text-[11px] font-semibold text-stone-500 block">Resting Heart Rate</span>
+                  <p className="text-base font-bold text-stone-900">74 - 82 bpm</p>
+                  <span className="text-[10px] text-emerald-700 font-medium">Within pregnancy baseline</span>
+                </div>
+              </div>
+            </section>
+
+            {/* 2. Symptom Table */}
+            <section aria-labelledby="symptom-table-title" className="space-y-2">
+              <h3 id="symptom-table-title" className="text-sm font-bold uppercase tracking-wider text-stone-800">
+                2. Symptom Observations & Timeline
+              </h3>
+              <div className="overflow-x-auto rounded-xl border border-stone-200">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-stone-100 text-stone-700 border-b border-stone-200">
+                    <tr>
+                      <th className="p-3 font-semibold">Date & Time</th>
+                      <th className="p-3 font-semibold">Observation</th>
+                      <th className="p-3 font-semibold">Severity</th>
+                      <th className="p-3 font-semibold">Trigger & Relief Context</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-stone-200">
+                    {entries.filter(e => e.category === 'symptom' || e.category === 'vital').map(item => (
+                      <tr key={item.id} className="hover:bg-stone-50">
+                        <td className="p-3 font-medium text-stone-600 whitespace-nowrap">{item.dateFormatted}</td>
+                        <td className="p-3 font-bold text-stone-900">{item.title}</td>
+                        <td className="p-3">
+                          <Badge variant={item.severity === 'moderate' ? 'amber' : 'emerald'} size="sm">
+                            {item.severity}
+                          </Badge>
+                        </td>
+                        <td className="p-3 text-stone-600 max-w-xs">{item.notes}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            {/* 3. Questions */}
+            <section aria-labelledby="doctor-questions-title" className="space-y-2">
+              <h3 id="doctor-questions-title" className="text-sm font-bold uppercase tracking-wider text-stone-800">
+                3. Questions Prepared for Doctor / ANM
+              </h3>
+              <ul className="list-disc list-inside space-y-1.5 text-xs text-stone-700 bg-stone-50 p-4 rounded-xl border border-stone-200">
+                <li className="leading-relaxed">
+                  <strong>Iron Supplementation:</strong> Can chewable iron tablets be accompanied with fresh lemon water for better absorption without worsening evening heartburn?
+                </li>
+                <li className="leading-relaxed">
+                  <strong>Routine Anomaly Scan:</strong> Scheduling dates for the targeted anomaly ultrasound scan between weeks 24 and 26.
+                </li>
+                <li className="leading-relaxed">
+                  <strong>Postural Relief:</strong> Safe stretching recommendations for lower back strain when standing during chores.
+                </li>
+              </ul>
+            </section>
+
+            {/* Signature */}
+            <div className="pt-6 border-t border-stone-200 flex flex-col sm:flex-row sm:items-center justify-between text-xs text-stone-500 gap-4">
+              <div>
+                <p>Clinician Notes / Advice Given:</p>
+                <div className="w-64 border-b border-stone-300 mt-6"></div>
+              </div>
+              <div>
+                <p>Doctor / ANM Signature & Stamp:</p>
+                <div className="w-48 border-b border-stone-300 mt-6"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // --- VIEW 5: LEARN ---
+    function LearnView({ onNavigate }) {
+      const [selectedTag, setSelectedTag] = useState('All');
+      const [searchQuery, setSearchQuery] = useState('');
+      const [activeArticle, setActiveArticle] = useState(null);
+
+      const tags = ['All', 'Red Flags', 'Nutrition', 'Pelvic Health', 'Emotional Health'];
+
+      const filteredArticles = MOCK_LEARN_ARTICLES.filter(art => {
+        const matchesTag = selectedTag === 'All' || art.tags.includes(selectedTag);
+        const matchesQuery = !searchQuery.trim() ||
+          art.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          art.summary.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesTag && matchesQuery;
+      });
+
+      return (
+        <div className="space-y-6">
+          <PageHeader
+            title="Maternal & Women’s Health Knowledge"
+            description="Evidence-based care guides, nutrition hacks, and essential red-flag symptom indicators tailored for your journey."
+            badge="Evidence-Based"
+            badgeVariant="blue"
+            onBack={() => onNavigate('/')}
+            backLabel="Back to Home Dashboard"
+            backHelperText="Returns to main overview"
+          />
+
+          <DisclaimerBanner dismissible={true} />
+
+          {/* Search & Tags */}
+          <div className="space-y-3">
+            <div>
+              <label htmlFor="search-guides" className="block text-xs font-semibold text-stone-700 mb-1">
+                Search Health Guides & Safe Practices
+              </label>
+              <div className="relative">
+                <input
+                  id="search-guides"
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="e.g. Iron absorption, backache, headache, nutrition..."
+                  className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-stone-300 text-sm focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                />
+                <div className="absolute left-3.5 top-3 text-stone-400" aria-hidden="true">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+              </div>
+              <span className="text-[11px] text-stone-500 mt-1 block">
+                Filter articles across clinical topics and traditional maternal wisdom.
+              </span>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {tags.map((tag) => {
+                const isSelected = selectedTag === tag;
+                return (
+                  <button
+                    key={tag}
+                    type="button"
+                    onClick={() => setSelectedTag(tag)}
+                    className={`
+                      px-3 py-1.5 rounded-full text-xs font-medium transition-all
+                      ${isSelected
+                        ? 'bg-rose-700 text-white shadow-xs ring-2 ring-rose-400/30'
+                        : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
+                      }
+                    `}
+                    aria-pressed={isSelected}
+                    aria-label={`Filter articles by category ${tag}`}
+                  >
+                    {tag === 'Red Flags' ? '🚨 ' : ''}{tag}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Active Reader */}
+          {activeArticle && (
+            <Card
+              variant="accent"
+              title={activeArticle.title}
+              subtitle={`${activeArticle.category} · ${activeArticle.readingTime}`}
+              headerAction={
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setActiveArticle(null)}
+                  ariaLabel="Close reader view"
+                  helperText="Returns to guide list"
+                >
+                  ✕ Close Guide
+                </Button>
+              }
+            >
+              <div className="space-y-4 text-xs sm:text-sm text-stone-800 leading-relaxed max-w-2xl">
+                <p className="font-semibold text-rose-900 bg-rose-50 p-3 rounded-xl border border-rose-200">
+                  {activeArticle.summary}
+                </p>
+
+                <div className="space-y-3">
+                  <h4 className="font-bold text-stone-900 text-sm">Key Practical Takeaways for Home Care:</h4>
+                  <ul className="list-disc list-inside space-y-2 text-stone-700">
+                    <li><strong>Stay Consistent:</strong> Small daily habits like hydration and mindful rest yield compounding benefits.</li>
+                    <li><strong>Never Hesitate to Ask:</strong> Bring any unusual sensation up with your ASHA worker or doctor during routine antenatal checkups.</li>
+                    <li><strong>Safe Family Sharing:</strong> You can discuss these tips with your partner or elder family members to coordinate healthy meal preparation.</li>
+                  </ul>
+                </div>
+
+                <div className="pt-4 border-t border-stone-200 flex items-center justify-between">
+                  <span className="text-[11px] text-stone-500">
+                    Curated in consultation with community obstetric guidelines.
+                  </span>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => setActiveArticle(null)}
+                    ariaLabel="Finished reading guide"
+                    helperText="Back to list"
+                  >
+                    Done Reading
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          )}
+
+          {/* Guides Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {filteredArticles.map((article) => (
+              <Card
+                key={article.id}
+                variant="default"
+                className="hover:border-rose-300 transition-all flex flex-col justify-between"
+              >
+                <div className="space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <Badge
+                      variant={article.urgentContext ? 'danger' : article.categoryColor || 'blue'}
+                      size="sm"
+                      showDot={article.urgentContext}
+                    >
+                      {article.category}
+                    </Badge>
+                    <span className="text-[11px] text-stone-500 font-medium">
+                      ⏱️ {article.readingTime}
+                    </span>
+                  </div>
+
+                  <h3 className="text-base font-bold text-stone-900">
+                    {article.title}
+                  </h3>
+
+                  <p className="text-xs text-stone-600 leading-relaxed">
+                    {article.summary}
+                  </p>
+
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {article.tags.map((t, idx) => (
+                      <span
+                        key={idx}
+                        className="text-[10px] font-medium text-stone-500 bg-stone-100 px-2 py-0.5 rounded-md"
+                      >
+                        #{t}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-4 mt-4 border-t border-stone-100 flex items-center justify-between">
+                  <span className="text-[11px] text-stone-400">
+                    Safe Educational Guide
+                  </span>
+                  <Button
+                    variant={article.urgentContext ? 'danger' : 'outline'}
+                    size="sm"
+                    onClick={() => setActiveArticle(article)}
+                    ariaLabel={`Read guide: ${article.title}`}
+                    helperText="Opens complete article"
+                  >
+                    Read Article →
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    // --- MAIN APP CONTROLLER ---
+    function App() {
+      const [currentPath, setCurrentPath] = useState(() => {
+        const hash = window.location.hash.replace('#', '');
+        return ['/', '/talk', '/tracker', '/summary', '/learn'].includes(hash) ? hash : '/';
+      });
+
+      const [currentLanguage, setCurrentLanguage] = useState('en');
+      const [isLanguageModalOpen, setIsLanguageModalOpen] = useState(false);
+      const [globalError, setGlobalError] = useState(null);
+      const [entries, setEntries] = useState(INITIAL_HEALTH_ENTRIES);
+
+      useEffect(() => {
+        const handleHashChange = () => {
+          const hash = window.location.hash.replace('#', '');
+          if (['/', '/talk', '/tracker', '/summary', '/learn'].includes(hash)) {
+            setCurrentPath(hash);
+          }
+        };
+        window.addEventListener('hashchange', handleHashChange);
+        return () => window.removeEventListener('hashchange', handleHashChange);
+      }, []);
+
+      const handleNavigate = (path) => {
+        setCurrentPath(path);
+        window.location.hash = path;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      };
+
+      const handleTriggerDemoError = () => {
+        setGlobalError({
+          title: 'Local Vault Sync Warning',
+          message: 'IndexedDB transaction took longer than expected. Local encrypted cache remains intact.',
+          code: 'ERR_LOCAL_STORAGE_WARN_04'
+        });
+      };
+
+      const handleAddEntry = (newEntry) => {
+        setEntries([newEntry, ...entries]);
+      };
+
+      const handleToggleEmptyState = () => {
+        setEntries(prev => prev.length > 0 ? [] : INITIAL_HEALTH_ENTRIES);
+      };
+
+      const handleEmergencyCall = () => {
+        alert('🚨 Emergency Protocol Triggered: Connecting to National Maternal & Ambulance Helpline: 108 / 102.');
+      };
+
+      return (
+        <div className="min-h-screen bg-stone-100/70 text-stone-900 font-sans flex flex-col selection:bg-rose-100 selection:text-rose-900">
+          
+          {/* Global Error Banner */}
+          <GlobalError
+            error={globalError}
+            onDismiss={() => setGlobalError(null)}
+            onRetry={() => {
+              alert('Retrying local storage verification...');
+              setGlobalError(null);
+            }}
+          />
+
+          {/* Top Header */}
+          <Header
+            currentLanguage={currentLanguage}
+            onOpenLanguageSelector={() => setIsLanguageModalOpen(true)}
+            onNavigateHome={() => handleNavigate('/')}
+            onTriggerDemoError={handleTriggerDemoError}
+          />
+
+          {/* Main Body */}
+          <div className="flex-1 max-w-7xl w-full mx-auto flex">
+            {/* Desktop Sidebar */}
+            <Sidebar
+              currentPath={currentPath}
+              onNavigate={handleNavigate}
+              onEmergencyCall={handleEmergencyCall}
+            />
+
+            {/* Responsive Main Content */}
+            <main
+              id="main-content"
+              role="main"
+              className="flex-1 p-4 sm:p-6 lg:p-8 pb-24 md:pb-12 max-w-5xl w-full focus:outline-none"
+              tabIndex={-1}
+            >
+              {currentPath === '/' && (
+                <HomeView
+                  onNavigate={handleNavigate}
+                  entries={entries}
+                  onToggleEmptyState={handleToggleEmptyState}
+                />
+              )}
+
+              {currentPath === '/talk' && (
+                <TalkView onNavigate={handleNavigate} />
+              )}
+
+              {currentPath === '/tracker' && (
+                <TrackerView
+                  onNavigate={handleNavigate}
+                  entries={entries}
+                  onAddEntry={handleAddEntry}
+                />
+              )}
+
+              {currentPath === '/summary' && (
+                <SummaryView
+                  onNavigate={handleNavigate}
+                  entries={entries}
+                />
+              )}
+
+              {currentPath === '/learn' && (
+                <LearnView onNavigate={handleNavigate} />
+              )}
+            </main>
+          </div>
+
+          {/* Mobile Bottom Navigation */}
+          <MobileNav
+            currentPath={currentPath}
+            onNavigate={handleNavigate}
+          />
+
+          {/* Language Selector Modal */}
+          <LanguageSelector
+            isOpen={isLanguageModalOpen}
+            onClose={() => setIsLanguageModalOpen(false)}
+            currentLanguage={currentLanguage}
+            onSelectLanguage={(langCode) => setCurrentLanguage(langCode)}
+          />
+
+          {/* Accessibility skip link */}
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 z-50 bg-rose-700 text-white px-4 py-2 rounded-xl shadow-lg text-xs font-semibold"
+          >
+            Skip directly to main health content
+          </a>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>

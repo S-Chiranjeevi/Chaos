@@ -6,9 +6,16 @@ import { deleteMyInsights } from '../models/insightsStorage.js'
 export function PrivacyControls({ onDataDeleted }) {
   const [deletedAll, setDeletedAll] = useState(false)
   const [deletedInsights, setDeletedInsights] = useState(false)
+  const [error, setError] = useState('')
 
   function removeAllData() {
-    deleteAllLocalHealthData()
+    const result = deleteAllLocalHealthData()
+    if (result && !result.ok) {
+      setError(result.error || 'Your browser could not remove the saved information. Please try again.')
+      setDeletedAll(false)
+      return
+    }
+    setError('')
     setDeletedAll(true)
     setDeletedInsights(false)
     onDataDeleted?.()
@@ -16,10 +23,15 @@ export function PrivacyControls({ onDataDeleted }) {
   }
 
   function removeOnlyInsights() {
-    deleteMyInsights()
-    setDeletedInsights(true)
-    setDeletedAll(false)
-    window.dispatchEvent(new CustomEvent('sakhicare:insightsDeleted'))
+    try {
+      deleteMyInsights()
+      setDeletedInsights(true)
+      setDeletedAll(false)
+      setError('')
+      window.dispatchEvent(new CustomEvent('sakhicare:insightsDeleted'))
+    } catch {
+      setError('Could not remove insights. Please try again.')
+    }
   }
 
   return (
@@ -53,8 +65,9 @@ export function PrivacyControls({ onDataDeleted }) {
           className="delete-data-button"
           type="button"
           onClick={removeAllData}
+          aria-label="Delete all SakhiCare health data saved on this device"
         >
-          <Trash2 size={16} /> Delete all my data
+          <Trash2 size={16} aria-hidden="true" /> Delete all my data
         </button>
       </div>
 
@@ -69,6 +82,8 @@ export function PrivacyControls({ onDataDeleted }) {
           <Check size={16} /> All SakhiCare data stored on this device has been deleted.
         </p>
       )}
+
+      {error && <p className="delete-error" role="alert">{error}</p>}
     </div>
   )
 }
