@@ -63,6 +63,12 @@ export function App() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [globalError, setGlobalError] = useState(null);
 
+  function handleDataDeleted() {
+    StorageService.clearAllPcosData();
+    setLastSharedEntry(null);
+    setRefreshKey((value) => value + 1);
+  }
+
   useEffect(() => {
     const handleEntryUpdate = (event) => {
       setLastSharedEntry(event.detail);
@@ -118,11 +124,6 @@ export function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function handleDataDeleted() {
-    StorageService.clearAllPcosData();
-    setLastSharedEntry(null);
-    setRefreshKey((value) => value + 1);
-  }
 
   function handleTriggerDemoError() {
     setGlobalError({
