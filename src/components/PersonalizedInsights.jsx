@@ -199,7 +199,7 @@ export function PersonalizedInsights({
 
   const copyDoctorSummaryText = () => {
     const lines = [
-      'SakhiCare — Doctor Consultation Preparation Notes',
+      'Luna Her — Doctor Consultation Preparation Notes',
       `Date: ${new Date().toLocaleDateString()}`,
       `Communication Style: ${preferences.communicationStyle}`,
       '--------------------------------------------------',
@@ -605,7 +605,7 @@ export function PersonalizedInsights({
       {/* Non-Diagnostic Medical Disclaimer Footer */}
       <div className="insights-disclaimer-box">
         <Shield size={16} className="disclaimer-shield" />
-        <span>{DISCLAIMER} SakhiCare helps you prepare for doctor conversations; it does not provide diagnoses or prescriptions.</span>
+        <span>{DISCLAIMER} Luna Her helps you prepare for doctor conversations; it does not provide diagnoses or prescriptions.</span>
       </div>
 
       {/* Doctor Summary Modal */}

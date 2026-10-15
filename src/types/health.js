@@ -1,5 +1,5 @@
 /**
- * SakhiCare Shared Health Data Model
+ * Luna Her Shared Health Data Model
  * 
  * Defines standard schemas compatible with downstream symptom checkers,
  * cycle loggers, clinical summary generators, and offline encrypted storage.

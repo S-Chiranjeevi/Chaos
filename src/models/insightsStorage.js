@@ -1,5 +1,5 @@
 /**
- * SakhiCare - Local Insights Storage & Tracking Model
+ * Luna Her - Local Insights Storage & Tracking Model
  * 
  * Manages local persistence for personalized insights, doctor summaries,
  * user preferences, and feedback while respecting strict privacy rules.
@@ -7,6 +7,14 @@
  */
 
 const STORAGE_KEYS = {
+  INSIGHTS: 'lunaher_ai_insights',
+  RECORDS: 'lunaher_insight_records',
+  DOCTOR_SUMMARY: 'lunaher_doctor_summary',
+  PREFERENCES: 'lunaher_user_preferences',
+  FEEDBACK: 'lunaher_insights_feedback',
+}
+
+const LEGACY_STORAGE_KEYS = {
   INSIGHTS: 'sakhicare_ai_insights',
   RECORDS: 'sakhicare_insight_records',
   DOCTOR_SUMMARY: 'sakhicare_doctor_summary',
@@ -20,11 +28,11 @@ function getStorage() {
   return null
 }
 
-function safeGet(key, fallback) {
+function safeGet(key, fallback, legacyKey = null) {
   const storage = getStorage()
   if (!storage) return fallback
   try {
-    const val = storage.getItem(key)
+    const val = storage.getItem(key) || (legacyKey ? storage.getItem(legacyKey) : null)
     return val ? JSON.parse(val) : fallback
   } catch {
     return fallback
@@ -219,13 +227,14 @@ export function recordInsightFeedback(insightId, feedbackType) {
 }
 
 /**
- * Deletes all SakhiCare insights, records, doctor summary, and preferences
+ * Deletes all Luna Her insights, records, doctor summary, and preferences
  * Complete local data deletion for user privacy.
  */
 export function deleteMyInsights() {
   const storage = getStorage()
   if (!storage) return
-  Object.values(STORAGE_KEYS).forEach((key) => {
+  const allKeys = [...Object.values(STORAGE_KEYS), ...Object.values(LEGACY_STORAGE_KEYS)]
+  allKeys.forEach((key) => {
     try {
       storage.removeItem(key)
     } catch {

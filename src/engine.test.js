@@ -51,7 +51,7 @@ test('integrated extractor reads a regional-language example', () => {
   assert.ok(result.symptoms.some((symptom) => symptom.defId === 'irregular_periods'))
 })
 
-test('privacy control deletes only SakhiCare local data', () => {
+test('privacy control deletes only Luna Her local data', () => {
   const items = new Map([
     ['sakhicare_latest_entry', 'private health entry'],
     ['sakhicare_cycle_tracker', 'private cycle data'],

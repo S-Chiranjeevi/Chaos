@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * Header - Slim top bar for LunaHer.
+ * Header - Slim top bar for Luna Her.
  * Logo & brand have been moved to the sidebar Navigation.
  * Language selector has been moved to the sidebar Navigation.
  */

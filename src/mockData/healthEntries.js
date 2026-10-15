@@ -1,5 +1,5 @@
 /**
- * SakhiCare Mock Health Entries
+ * Luna Her Mock Health Entries
  * Compatible with the shared HealthEntry schema.
  * Fully device-local mock entries illustrating maternal & women's health logs.
  */

@@ -94,6 +94,8 @@ export function App() {
       setActivePage(PATH_TO_PAGE[window.location.pathname] || 'home');
     };
 
+    window.addEventListener('lunaher:healthEntryUpdate', handleEntryUpdate);
+    window.addEventListener('lunaher:dataDeleted', handleDataDeleted);
     window.addEventListener('sakhicare:healthEntryUpdate', handleEntryUpdate);
     window.addEventListener('sakhicare:dataDeleted', handleDataDeleted);
     window.addEventListener('pcos_saathi:data_change', handleStorageChange);
@@ -101,6 +103,8 @@ export function App() {
     window.addEventListener('hashchange', handleHistoryChange);
 
     return () => {
+      window.removeEventListener('lunaher:healthEntryUpdate', handleEntryUpdate);
+      window.removeEventListener('lunaher:dataDeleted', handleDataDeleted);
       window.removeEventListener('sakhicare:healthEntryUpdate', handleEntryUpdate);
       window.removeEventListener('sakhicare:dataDeleted', handleDataDeleted);
       window.removeEventListener('pcos_saathi:data_change', handleStorageChange);

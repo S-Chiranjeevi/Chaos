@@ -1,5 +1,5 @@
 /**
- * SakhiCare Early Warning and Repeated Pattern Detection Service
+ * Luna Her Early Warning and Repeated Pattern Detection Service
  *
  * Rules-based, deterministic analysis of menstrual cycle and symptom history.
  *
@@ -30,8 +30,10 @@ export const WARNING_TYPES = {
 }
 
 // Local storage keys
-const STORAGE_KEY_DISMISSED = 'sakhicare_dismissed_warnings'
-const STORAGE_KEY_DOCTOR_SUMMARY = 'sakhicare_doctor_summary_warnings'
+const STORAGE_KEY_DISMISSED = 'lunaher_dismissed_warnings'
+const STORAGE_KEY_DOCTOR_SUMMARY = 'lunaher_doctor_summary_warnings'
+const LEGACY_STORAGE_KEY_DISMISSED = 'sakhicare_dismissed_warnings'
+const LEGACY_STORAGE_KEY_DOCTOR_SUMMARY = 'sakhicare_doctor_summary_warnings'
 
 /**
  * Normalizes input entries into structured cycle logs and symptom logs
@@ -182,7 +184,7 @@ export function detectEarlyWarnings(inputData = {}, options = {}) {
       },
       urgency: URGENCY_LEVELS.INFO,
       suggestedAction: 'Log your current or most recent period to begin tracking your personal health baseline.',
-      whyAmISeeingThis: 'SakhiCare uses repeated, multi-entry patterns rather than single occurrences to provide meaningful health observations.',
+      whyAmISeeingThis: 'Luna Her uses repeated, multi-entry patterns rather than single occurrences to provide meaningful health observations.',
       canDismiss: true,
     })
     return finalizeWarnings(warnings, dismissedIds, doctorSummaryIds, includeDismissed)

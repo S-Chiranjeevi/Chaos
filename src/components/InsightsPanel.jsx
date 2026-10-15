@@ -6,14 +6,27 @@ import { UrgentCareBanner } from './UrgentCareBanner.jsx'
 import { detectRedFlags } from '../services/safetyRules.js'
 import { validateOutput } from '../services/outputValidator.js'
 
-const DISMISSED_KEY = 'sakhicare_dismissed_insights'
-const SUMMARY_KEY = 'sakhicare_doctor_insights'
-const load = (key) => { try { return JSON.parse(localStorage.getItem(key) || '[]') } catch { return [] } }
-const save = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)) } catch { /* Device storage is optional. */ } }
+const DISMISSED_KEY = 'lunaher_dismissed_insights'
+const SUMMARY_KEY = 'lunaher_doctor_insights'
+const load = (key, fallbackKey) => {
+  try {
+    const val = localStorage.getItem(key) || (fallbackKey ? localStorage.getItem(fallbackKey) : null)
+    return JSON.parse(val || '[]')
+  } catch {
+    return []
+  }
+}
+const save = (key, value) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(value))
+    if (key === DISMISSED_KEY) localStorage.setItem('sakhicare_dismissed_insights', JSON.stringify(value))
+    if (key === SUMMARY_KEY) localStorage.setItem('sakhicare_doctor_insights', JSON.stringify(value))
+  } catch { /* Device storage is optional. */ }
+}
 
 export function InsightsPanel({ healthHistory = [], periodLogs = [], symptomLogs = [] }) {
-  const [dismissedIds, setDismissedIds] = useState(() => load(DISMISSED_KEY))
-  const [summaryInsights, setSummaryInsights] = useState(() => load(SUMMARY_KEY))
+  const [dismissedIds, setDismissedIds] = useState(() => load(DISMISSED_KEY, 'sakhicare_dismissed_insights'))
+  const [summaryInsights, setSummaryInsights] = useState(() => load(SUMMARY_KEY, 'sakhicare_doctor_insights'))
   const safetyWarnings = useMemo(() => detectRedFlags({ healthHistory, periodLogs, symptomLogs }), [healthHistory, periodLogs, symptomLogs])
   const insights = useMemo(() => createPersonalizedInsights({ healthHistory, periodLogs, symptomLogs, dismissedInsightIds: dismissedIds }), [healthHistory, periodLogs, symptomLogs, dismissedIds])
   const validationResults = insights.map((insight) => ({ insight, validation: validateOutput(insight) }))

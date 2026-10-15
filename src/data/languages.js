@@ -1,5 +1,5 @@
 /**
- * Multilingual Configuration for SakhiCare
+ * Multilingual Configuration for Luna Her
  * Supports: English, Hindi (हिन्दी), Kannada (ಕನ್ನಡ), Tamil (தமிழ்), Malayalam (മലയാളം)
  */
 

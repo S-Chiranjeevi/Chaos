@@ -20,7 +20,7 @@ export function HealthEntryExport({ healthEntry }) {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `sakhicare-health-entry-${healthEntry.id}.json`
+    a.download = `luna-her-health-entry-${healthEntry.id}.json`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
@@ -28,7 +28,7 @@ export function HealthEntryExport({ healthEntry }) {
   }
 
   function handleDownloadSummary() {
-    const summaryText = `SAKHICARE HEALTH SUMMARY REPORT
+    const summaryText = `LUNA HER HEALTH SUMMARY REPORT
 Generated: ${new Date(healthEntry.timestamp).toLocaleString()}
 Language: ${healthEntry.language.toUpperCase()}
 Input Mode: ${healthEntry.inputMode}
@@ -56,7 +56,7 @@ This summary was organized using LunaHer. It is educational information for self
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `sakhicare-doctor-prep-${healthEntry.id}.txt`
+    a.download = `luna-her-doctor-prep-${healthEntry.id}.txt`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
@@ -101,7 +101,7 @@ This summary was organized using LunaHer. It is educational information for self
               <span className="meta-badge id">ID: {healthEntry.id}</span>
               <span className="meta-badge lang">Language: {healthEntry.language.toUpperCase()}</span>
               <span className="meta-badge mode">Input: {healthEntry.inputMode}</span>
-              <span className="meta-badge status">Event: sakhicare:healthEntryUpdate ✓</span>
+              <span className="meta-badge status">Event: lunaher:healthEntryUpdate ✓</span>
             </div>
 
             <div className="transcript-review-box">

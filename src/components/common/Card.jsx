@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * Reusable Card component for SakhiCare.
+ * Reusable Card component for Luna Her.
  * Provides accessible container semantics, elevation styles, and clear slots.
  */
 export function Card({

@@ -1,5 +1,5 @@
 /**
- * Early Warning and Pattern Detection Service for SakhiCare
+ * Early Warning and Pattern Detection Service for Luna Her
  * 
  * Analyzes period logs and symptom logs to detect repeated patterns,
  * increasing severity, prolonged duration, and critical red flags.
