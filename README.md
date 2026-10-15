@@ -1,10 +1,14 @@
-# SakhiCare
+# Luna Her
 
-SakhiCare is an educational symptom-understanding website. It summarizes symptom patterns in plain language and helps people prepare questions for a healthcare professional. It does not diagnose conditions or recommend medicines or dosages.
+Luna Her is an educational symptom-understanding website. It summarizes symptom patterns in plain language and helps people prepare questions for a healthcare professional. It does not diagnose conditions or recommend medicines or dosages.
 
 ## Run locally
 
-Install dependencies with `npm install`, then start the development server with `npm run dev`.
+Install dependencies with `npm install`, copy `.env.example` to `.env.local`, add your Gemini key to `GEMINI_API_KEY`, then run `npm run dev`. The local API starts on port 4174 and Vite proxies `/api` requests to it.
+
+For a production-style local run, use `npm run build` and then `npm start`. The Node server serves the built site and the Gemini endpoint from the same origin. Set `GEMINI_API_KEY` in the server environment for deployment. Never put the key in a `VITE_*` variable or client-side source: Gemini requests go through `/api/analyze-symptoms`, and the key is read only by the server.
+
+The symptom checker supports English, Hindi, Kannada, Tamil, Malayalam, Telugu, and automatic language detection for typed input. Voice input uses the browser Speech Recognition API where available. If Gemini is unavailable or has not been configured, Luna Her falls back to its local rules and clearly labels that result as limited. Symptom descriptions are sent to Google Gemini when the API is configured; the app also stores submitted entries locally in the browser.
 
 ## Rules engine and examples
 
