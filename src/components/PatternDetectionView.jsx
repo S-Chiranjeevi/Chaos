@@ -356,11 +356,9 @@ export function PatternDetectionView({ initialPeriodLogs = [], initialSymptomLog
         )}
       </div>
 
-<<<<<<< HEAD
-=======
       {/* Personalized, explainable insight layer uses the same local tracker data. */}
       <InsightsPanel periodLogs={periodLogs} symptomLogs={symptomLogs} />
->>>>>>> origin/main
+
 
       {/* DOCTOR SUMMARY BASKET */}
       {doctorSummaryItems.length > 0 && (

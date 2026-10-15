@@ -2776,7 +2776,23 @@
 
 .callout-icon {
   color: #667f64;
-=======
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.rotterdam-callout strong {
+  display: block;
+  font-size: 14.5px;
+  margin-bottom: 4px;
+}
+
+.rotterdam-callout p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+/* ==========================================================================
    DOCTOR SUMMARY STYLES
    ========================================================================== */
 
@@ -2871,22 +2887,8 @@
 
 .summary-disclaimer-banner .banner-icon {
   color: var(--accent-rose);
->>>>>>> origin/main
   flex-shrink: 0;
   margin-top: 2px;
-}
-
-<<<<<<< HEAD
-.rotterdam-callout strong {
-  display: block;
-  font-size: 14.5px;
-  margin-bottom: 4px;
-}
-
-.rotterdam-callout p {
-  margin: 0;
-  font-size: 13px;
-  line-height: 1.65;
 }
 
 /* SPECIALISTS */
