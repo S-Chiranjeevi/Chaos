@@ -1,46 +1,45 @@
-import React, { useState } from 'react'
-import { PageHeader } from '../components/layout/PageHeader.jsx'
+import React, { useEffect, useState } from 'react'
+import { FileText, MessageSquareText } from 'lucide-react'
+import { DisclaimerBanner } from '../components/DisclaimerBanner.jsx'
 import { DoctorSummary } from '../components/DoctorSummary.jsx'
-import { DisclaimerBanner } from '../components/common/DisclaimerBanner.jsx'
-import { t } from '../data/translations.js'
+import { readLocalData, STORAGE_KEYS } from '../services/localStorage.js'
 
-export function DoctorSummaryPage({ onNavigate, currentLanguage = 'en' }) {
-  const [notification, setNotification] = useState('')
-
-  function handleCopySuccess() {
-    setNotification('Summary successfully copied to clipboard!')
-    setTimeout(() => setNotification(''), 3000)
+function createSummaryData(entry) {
+  return {
+    narrative: `I would like to talk about: “${entry.rawTranscript || entry.notes || 'the changes I have noticed'}”.`,
+    mainSymptoms: (entry.symptoms || []).map((symptom) => ({
+      symptom: symptom.symptom,
+      duration: symptom.duration || 'Not added',
+      frequency: symptom.frequency || 'Not added',
+      severity: symptom.severity || 'Not added',
+    })),
+    cycleHistory: [],
+    averageCycleLength: 'No cycle dates have been added to this summary.',
+    repeatedPatterns: [],
+    redFlags: entry.assessment?.redFlags || [],
+    suggestedSpecialist: '',
+    questionsForDoctor: entry.assessment?.questionsForDoctor || [],
+    personalizedInsights: [],
+    userNotes: '',
+    disclaimer: 'This is information, not a diagnosis.',
   }
+}
 
-  return (
-    <div className="space-y-6 doctor-summary-page-root">
-      {/* Page Header */}
-      <PageHeader
-        title={t('summaryLabels.title', currentLanguage)}
-        description="A structured, self-advocacy report combining your cycle history, symptoms, repeated patterns, and doctor questions."
-        badge="Ready for Doctor Visit"
-        badgeVariant="purple"
-        onBack={() => onNavigate('/')}
-        backLabel="Back to Home Dashboard"
-        backHelperText="Returns to main overview"
-      />
+export function DoctorSummaryPage({ healthEntry, refreshKey, onNavigate, currentLanguage = 'en' }) {
+  const [state, setState] = useState({ loading: true, entry: null, error: null })
+  const [notification, setNotification] = useState('')
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      const result = readLocalData(STORAGE_KEYS.latestEntry, null)
+      setState({ loading: false, entry: healthEntry || result.value, error: healthEntry ? null : result.error })
+    }, 0)
+    return () => window.clearTimeout(timer)
+  }, [healthEntry, refreshKey])
 
-      <DisclaimerBanner dismissible={false} />
-
-      {notification && (
-        <div className="p-3 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-xl text-sm font-semibold flex items-center justify-between">
-          <span>{notification}</span>
-          <button type="button" onClick={() => setNotification('')} className="text-emerald-600 hover:text-emerald-900">×</button>
-        </div>
-      )}
-
-      {/* Main Doctor Summary Component */}
-      <DoctorSummary
-        currentLanguage={currentLanguage}
-        onCopySuccess={handleCopySuccess}
-      />
-    </div>
-  )
+  const entry = state.entry
+  return <div className="page-stack"><header className="page-heading"><p className="eyebrow">You choose what to share</p><h1 data-page-heading tabIndex="-1">Doctor summary</h1><p>Use your own words to help remember what you want to discuss at a health visit.</p></header><DisclaimerBanner />
+    {state.loading ? <div className="state-card" role="status"><span className="loading-spinner" aria-hidden="true" />Loading your saved note. Please wait.</div> : state.error ? <div className="state-card state-card-error" role="alert"><strong>We could not open your saved note</strong><p>{state.error}</p><button className="button button-secondary" type="button" onClick={() => onNavigate('talk')}>Write a new note</button></div> : entry ? <><div className="summary-intro"><FileText size={21} aria-hidden="true" /><p>Check your notes before sharing. The summary tools can help you prepare a clear copy.</p></div>{notification && <p className="summary-notice" role="status">{notification}</p>}<DoctorSummary key={entry.id} initialData={createSummaryData(entry)} currentLanguage={currentLanguage} onCopySuccess={() => setNotification('Your summary is copied. You can paste it into your notes.')} /></> : <div className="empty-panel"><span className="empty-icon"><MessageSquareText size={26} aria-hidden="true" /></span><h2>No note to summarize yet</h2><p>First, describe what you have noticed. You can review and save it before making a summary.</p><button className="button button-primary" type="button" onClick={() => onNavigate('talk')}>Describe my symptoms</button></div>}
+  </div>
 }
 
 export default DoctorSummaryPage

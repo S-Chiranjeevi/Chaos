@@ -4,21 +4,22 @@
    ========================================================================== */
 
 /* Design Tokens */
+:root,
 .light-theme {
   --bg-primary: #fcf9f7;
   --bg-secondary: #f5eeea;
-  --bg-card: rgba(255, 255, 255, 0.88);
-  --bg-card-subtle: rgba(255, 255, 255, 0.6);
+  --bg-card: rgba(255, 255, 255, 0.95);
+  --bg-card-subtle: rgba(255, 255, 255, 0.75);
   --text-primary: #1e1b29;
   --text-secondary: #575366;
   --text-muted: #8b8699;
-  --border-light: rgba(142, 120, 150, 0.15);
-  --border-card: rgba(214, 187, 203, 0.35);
-  --primary-color: #9333ea;
-  --primary-hover: #7e22ce;
-  --primary-gradient: linear-gradient(135deg, #a855f7 0%, #ec4899 50%, #f43f5e 100%);
-  --hero-glow: radial-gradient(circle at 50% 20%, rgba(244, 63, 94, 0.12) 0%, rgba(168, 85, 247, 0.08) 50%, transparent 80%);
-  --accent-rose: #f43f5e;
+  --border-light: rgba(142, 120, 150, 0.2);
+  --border-card: rgba(214, 187, 203, 0.45);
+  --primary-color: #be123c;
+  --primary-hover: #9f1239;
+  --primary-gradient: linear-gradient(135deg, #e11d48 0%, #be123c 50%, #881337 100%);
+  --hero-glow: radial-gradient(circle at 50% 20%, rgba(244, 63, 94, 0.12) 0%, rgba(190, 18, 60, 0.08) 50%, transparent 80%);
+  --accent-rose: #be123c;
   --accent-blush: #ffe4e6;
   --accent-sage: #059669;
   --accent-sage-bg: #ecfdf5;

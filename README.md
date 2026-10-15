@@ -1,92 +1,100 @@
-# SakhiCare Frontend Shell (Hackathon Edition)
+# PCOS Saathi — Master Project Architecture & Frontend Shell
 
-A responsive, accessible, privacy-first frontend shell built for **SakhiCare** using **React** and **Tailwind CSS**. Designed specifically for a 5-hour hackathon timeframe, providing a clean architecture that can be extended with offline speech recognition, symptom triage models, and encrypted device databases.
-
----
-
-## 🌟 Key Architecture & Features
-
-### 1. Responsive Shell Layout
-- **Mobile (< 768px)**: Optimized single-column layout with fixed bottom navigation bar (`MobileNav`) adhering to mobile touch targets (min 48px), safe-area insets, and compact sticky top header.
-- **Tablet (768px – 1024px)**: Fluid responsive grid cards with balanced touch-first navigation.
-- **Desktop (≥ 1024px)**: Fixed left navigation sidebar (`Sidebar`) with expanded titles, visible helper text, active indicators, device vault status, and emergency helpline quick triggers.
-
-### 2. Top Header (`Header.jsx`)
-- **SakhiCare Logo**: Warm maternal embrace emblem with brand name and bilingual badge (*सखी*).
-- **Current Language Selector**: Displays active language (e.g., *English*, *हिन्दी*, *বাংলা*, *தமிழ்*, *తెలుగు*, *मराठी*) with visible click action triggering the `LanguageSelector` dialog.
-- **Privacy Indicator**: High-visibility badge with a green status indicator: **“Stored only on this device”** with tooltip/subtext reassuring users that zero health data is sent to external servers.
-- **Error Simulation Trigger**: Header button to immediately preview the `GlobalError` area.
-
-### 3. Mobile Bottom Navigation (`MobileNav.jsx`)
-Features all 5 core routes with visible labels and helper text:
-1. **Home (`/`)**: Daily overview & quick action hub
-2. **Talk or Type (`/talk`)**: Dual-mode voice & text health companion
-3. **Tracker (`/tracker`)**: Symptom, cycle, and vital logs
-4. **Summary (`/summary`)**: Clinician-ready 1-page pre-consultation brief
-5. **Learn (`/learn`)**: Curated maternal guides & wellness library
-
-### 4. Desktop Sidebar Navigation (`Sidebar.jsx`)
-- Full navigation items with visible labels and clear secondary helper text for cognitive accessibility.
-- Local-First Vault indicator.
-- Priority Emergency Assistance card with direct trigger for National Ambulance / Maternal Helpline (`108` / `102`).
-
-### 5. Shared Component Library (`src/components/common/`)
-- [Button.jsx](file:///c:/Users/spurv/OneDrive/Documents/choas/src/components/common/Button.jsx): Accessible button with variants (`primary`, `secondary`, `outline`, `danger`, `ghost`, `warm`), loading spinner states, and visible helper text.
-- [Card.jsx](file:///c:/Users/spurv/OneDrive/Documents/choas/src/components/common/Card.jsx): Elevated semantic containers with header, subtitle, actions, and footer slots.
-- [Badge.jsx](file:///c:/Users/spurv/OneDrive/Documents/choas/src/components/common/Badge.jsx): Color-coded badges with optional status dots and screen-reader accessibility labels.
-- [DisclaimerBanner.jsx](file:///c:/Users/spurv/OneDrive/Documents/choas/src/components/common/DisclaimerBanner.jsx): Prominent medical safety disclaimer and on-device privacy guarantee with an expandable details drawer.
-- [UrgentWarning.jsx](file:///c:/Users/spurv/OneDrive/Documents/choas/src/components/common/UrgentWarning.jsx): High-contrast red-flag clinical warning with one-touch emergency call trigger (`108`) and ASHA escort contact.
-- [LanguageSelector.jsx](file:///c:/Users/spurv/OneDrive/Documents/choas/src/components/common/LanguageSelector.jsx): Accessible modal dialog supporting major Indian languages with native scripts and regional speech indicators.
-- [LoadingState.jsx](file:///c:/Users/spurv/OneDrive/Documents/choas/src/components/common/LoadingState.jsx): Accessible ARIA live status with spinner and animated skeleton card variants.
-- [EmptyState.jsx](file:///c:/Users/spurv/OneDrive/Documents/choas/src/components/common/EmptyState.jsx): Friendly, non-intimidating empty state with actionable CTAs and visible helper hints.
-
-### 6. Reusable Page Header (`PageHeader.jsx`)
-- Main `<h1>` heading, description, category/stage badge.
-- Fully labeled back button with visible text (*"Back to Home Dashboard"*) and helper text (*"Returns to main overview"*).
-
-### 7. Global Error Area (`GlobalError.jsx`)
-- Accessible notification banner (`role="alert"`, `aria-live="assertive"`).
-- Displays error code, explanation, retry button with helper text, and dismiss action.
+> **Role:** Lead Architect  
+> **Status:** Final Architectural Baseline (Hackathon Edition)  
+> **Documentation:** [docs/architecture.md](docs/architecture.md) · [docs/api_contract.md](docs/api_contract.md) · [docs/integration_checklist.md](docs/integration_checklist.md)  
+> **Core Invariant:** Zero remote database (No MongoDB, PostgreSQL, Firebase). 100% offline-first local persistence via `localStorage`/`IndexedDB`.
 
 ---
 
-## 📁 Shared `HealthEntry` Data Format
+## 🌟 Architectural Overview
 
-The mock data in [healthEntries.js](file:///c:/Users/spurv/OneDrive/Documents/choas/src/mockData/healthEntries.js) conforms to the standard specification in [health.js](file:///c:/Users/spurv/OneDrive/Documents/choas/src/types/health.js):
+**PCOS Saathi** is an empathetic, multilingual, privacy-first companion designed to help women navigate Polycystic Ovary Syndrome (PCOS) and reproductive health.
 
+The application is decomposed into **7 distinct product areas**, connected via a decoupled event bus, persisting strictly to **6 canonical `localStorage` keys**, and operating with a zero-database architecture.
+
+### Key Architecture Documents
+- 📘 **[Master System Architecture](docs/architecture.md)**: Full system topology, component responsibilities, folder structure, event communication bus, storage architecture, privacy guarantees, and fallback mode.
+- 📜 **[API & Schema Contracts](docs/api_contract.md)**: JSON Schema / TypeScript / Pydantic specifications for the 6 shared objects, Client EventBus contract, and optional stateless FastAPI endpoints.
+- ✅ **[9-Developer Integration Checklist](docs/integration_checklist.md)**: Individual parallel sprint assignments, target files, acceptance criteria, and ground rules for the other 9 team members.
+
+---
+
+## 🗺️ The 7 Product Areas
+
+1. **Home (`/`)**: Daily health overview, triage hub, quick actions, active red flag alerts, and empty-state simulation.
+2. **Talk or Type (`/talk`)**: Multilingual voice/text input across 5 languages (English, हिन्दी, ಕನ್ನಡ, தமிழ், മലയാളം) with deterministic symptom extraction.
+3. **My Health Tracker (`/tracker`)**: Cycle calendar, flow levels, pain ratings (0-10), symptom correlation, and vitals logging.
+4. **Early Warnings & Insights (`/insights`, `/patterns`)**: Deterministic rules-based pattern detection (e.g. 3 irregular cycles, rapid hirsutism shifts) and urgent red-flag clinical alerts.
+5. **Doctor Summary (`/summary`)**: 1-Page clinician pre-consultation report, cycle metrics, symptom frequency table, printable PDF sheet, and clipboard copy.
+6. **Learn and Myths (`/learn`)**: Interactive Myth-vs-Fact cards, evidence-based lifestyle guides, and non-diagnostic reassurance.
+7. **Privacy Controls (`/privacy`)**: Zero-cloud vault status, AI opt-in toggle, raw JSON backup export/restore, and emergency data eradication.
+
+---
+
+## 📦 Required LocalStorage Keys
+
+All modules communicate with the client-side database through [`src/services/storageService.js`](src/services/storageService.js) using these 6 canonical keys:
+
+| LocalStorage Key | Data Structure | Purpose |
+| :--- | :--- | :--- |
+| `pcos_saathi_health_entries` | `HealthEntry[]` | Structured logs of symptoms, voice transcripts, and user notes |
+| `pcos_saathi_cycle_entries` | `CycleEntry[]` | Menstrual period logs, flow levels, and cycle dates |
+| `pcos_saathi_insights` | `Insight[]` | Generated patterns (irregularities, clusters, severities) |
+| `pcos_saathi_doctor_summary` | `DoctorSummary` | Most recently compiled 1-page clinician brief |
+| `pcos_saathi_preferences` | `Preferences` | Language (`en`, `hi`, `kn`, `ta`, `ml`), theme, reminders |
+| `pcos_saathi_ai_consent` | `AiConsent` | Explicit opt-in flags; `telemetryAllowed` is **always false** |
+
+---
+
+## 🧬 Canonical Shared Data Models
+
+Defined and validated in [`src/models/pcosSaathiSchemas.js`](src/models/pcosSaathiSchemas.js):
+
+- **`HealthEntry`**: Structured record of speech/typed symptoms, severity, duration, and notes.
+- **`CycleEntry`**: Period start/end dates, cycle length, period duration, flow level, pain score (0-10), and notes.
+- **`Insight`**: Deterministic observation (cycle regularity, symptom progression, cluster correlation) with confidence score and evidence references.
+- **`DoctorSummary`**: Clinician pre-consultation dossier with symptom frequency matrix, cycle metrics, and doctor questions.
+- **`RedFlag`**: Acute clinical warning with emergency directive and `108` helpline trigger.
+- **`SafetyResult`**: Content sanitization verifying non-diagnostic posture and zero drug prescriptions.
+
+---
+
+## ⚡ Inter-Component Communication
+
+Components communicate without coupling through [`src/services/eventBus.js`](src/services/eventBus.js):
 ```javascript
-{
-  id: "entry-001",
-  timestamp: "2026-10-15T08:15:00Z",
-  dateFormatted: "Today, 8:15 AM",
-  category: "vital", // "symptom" | "cycle" | "vital" | "mood" | "note"
-  title: "Morning Fetal Kick Count & BP",
-  severity: "mild", // "mild" | "moderate" | "severe"
-  stage: "2nd Trimester · Week 24",
-  tags: ["Kick Count", "Blood Pressure", "Routine"],
-  notes: "Counted 10 distinct movements within 35 minutes after warm breakfast.",
-  vitals: {
-    bpSystolic: 118,
-    bpDiastolic: 76,
-    pulse: 74,
-    fetalKicksCount: 10
-  },
-  isUrgent: false,
-  source: "quick-log" // "voice" | "typed" | "quick-log"
-}
+import { emitEvent, useStorageSubscription, EVENTS } from '../services/eventBus.js';
+import { StorageService } from '../services/storageService.js';
+import { STORAGE_KEYS } from '../models/pcosSaathiSchemas.js';
+
+// In any component:
+const healthEntries = useStorageSubscription(
+  STORAGE_KEYS.HEALTH_ENTRIES,
+  () => StorageService.getHealthEntries()
+);
 ```
+
+---
+
+## 🛡️ Privacy & Safety Guarantees
+
+1. **Zero External Database**: No MongoDB, Firebase, Supabase, or SQLite server code.
+2. **Zero Cloud Telemetry**: User symptoms and audio remain 100% on the device hardware.
+3. **Strict No-Prescription Rule**: No medication or dosage suggestions are ever generated.
+4. **Mandatory Medical Disclaimer**: Prominently displayed across all advisory surfaces.
+5. **Instant Data Purge**: Single-click irreversible deletion of all local records.
 
 ---
 
 ## 🚀 How to Run
 
-### Option 1: Instant Standalone Browser Launch (Zero Installation Required)
-Simply open [demo.html](file:///c:/Users/spurv/OneDrive/Documents/choas/demo.html) directly in any modern web browser (Edge, Chrome, Firefox, Safari). It bundles the full React 18 and Tailwind CSS application via CDN with zero build steps or npm installations needed!
+### Option 1: Zero-Install Standalone Browser Runner
+Open [`demo.html`](demo.html) directly in any modern browser. It bundles React 18, Tailwind CSS, all components, and offline storage simulation with zero build or npm steps.
 
 ### Option 2: Vite Development Server
-When running with Node.js installed:
 ```bash
 npm install
 npm run dev
 ```
-Then navigate to `http://localhost:3000`.
+Open `http://localhost:3000`.
