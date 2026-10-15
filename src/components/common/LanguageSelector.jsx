@@ -5,10 +5,11 @@ import { Badge } from './Badge.jsx';
 export const SUPPORTED_LANGUAGES = [
   { code: 'en', name: 'English', native: 'English', region: 'India (Default)', speechReady: true },
   { code: 'hi', name: 'Hindi', native: 'हिन्दी', region: 'भारत', speechReady: true },
-  { code: 'bn', name: 'Bengali', native: 'বাংলা', region: 'ভারত / পশ্চিমবঙ্গ', speechReady: true },
+  { code: 'kn', name: 'Kannada', native: 'ಕನ್ನಡ', region: 'ಕರ್ನಾಟಕ', speechReady: true },
   { code: 'ta', name: 'Tamil', native: 'தமிழ்', region: 'இந்தியா / தமிழ்நாடு', speechReady: true },
   { code: 'te', name: 'Telugu', native: 'తెలుగు', region: 'భారతదేశం / ఆంధ్రప్రదేశ్', speechReady: true },
-  { code: 'mr', name: 'Marathi', native: 'मराठी', region: 'भारत / महाराष्ट्र', speechReady: true }
+  { code: 'mr', name: 'Marathi', native: 'मराठी', region: 'भारत / महाराष्ट्र', speechReady: true },
+  { code: 'bn', name: 'Bengali', native: 'বাংলা', region: 'ভারত / পশ্চিমবঙ্গ', speechReady: true }
 ];
 
 /**

@@ -69,7 +69,7 @@ function App() {
       case 'talk': return <TalkOrTypePage key={currentLanguage} currentLanguage={currentLanguage} onHealthEntryCreated={setLastSharedEntry} />
       case 'tracker': return <HealthTrackerPage latestEntry={lastSharedEntry} />
       case 'insights': return <InsightsPage onNavigate={navigate} healthEntry={lastSharedEntry} refreshKey={refreshKey} />
-      case 'doctor': return <DoctorSummaryPage onNavigate={navigate} healthEntry={lastSharedEntry} refreshKey={refreshKey} />
+      case 'doctor': return <DoctorSummaryPage onNavigate={navigate} healthEntry={lastSharedEntry} refreshKey={refreshKey} currentLanguage={currentLanguage} />
       case 'learn': return <LearnPage />
       case 'privacy': return <div className="page-stack"><header className="page-heading"><p className="eyebrow">Your information belongs to you</p><h1 data-page-heading tabIndex="-1">Privacy</h1><p>See what stays on this device and remove your saved SakhiCare information whenever you choose.</p></header><PrivacyControls onDataDeleted={handleDataDeleted} /></div>
       default: return <Home onNavigate={navigate} />

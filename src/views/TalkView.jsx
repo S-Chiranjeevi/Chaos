@@ -21,9 +21,7 @@ export function TalkView({ onNavigate, currentLanguage = 'en' }) {
 
       {/* Main Talk or Type Engine */}
       <TalkOrType
-        onHealthEntryCreated={(entry) => {
-          console.log('HealthEntry captured:', entry);
-        }}
+        onHealthEntryCreated={() => {}}
       />
     </div>
   );

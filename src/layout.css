@@ -90,6 +90,7 @@
 .detail-list li span { color: var(--layout-muted); text-align: right; }
 .summary-intro { display: flex; align-items: flex-start; gap: 10px; color: var(--layout-green-dark); }
 .summary-intro p { margin: 0; line-height: 1.55; }
+.summary-notice { margin: 0; padding: 12px 14px; border: 1px solid #bfd7ca; border-radius: 12px; background: #edf5f1; color: #244f46; font-size: 14px; }
 .state-card { display: flex; align-items: center; gap: 11px; color: var(--layout-muted); }
 .loading-spinner { width: 19px; height: 19px; border: 2px solid #dce9e1; border-top-color: var(--layout-green); border-radius: 50%; animation: sakhi-spin .8s linear infinite; }
 @keyframes sakhi-spin { to { transform: rotate(360deg); } }
