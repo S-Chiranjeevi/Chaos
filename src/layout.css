@@ -158,7 +158,6 @@
   .disclaimer-banner p { font-size: 13px; }
   .sakhi-layout .talk-card { padding: 18px 14px; border-radius: 20px; }
   .sakhi-layout .tracker-card, .sakhi-layout .privacy-card { padding: 18px; }
-  .sakhi-layout .state-preview-bar { padding: 10px; }
   .detail-list li { flex-direction: column; gap: 4px; }
   .detail-list li span { text-align: left; }
   .sakhi-layout .storage-save-error { flex-direction: column; }

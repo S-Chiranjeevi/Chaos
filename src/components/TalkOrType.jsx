@@ -24,7 +24,6 @@ import { UrgentCareBanner } from './UrgentCareBanner.jsx'
 import { SymptomCards } from './SymptomCards.jsx'
 import { AssessmentView } from './AssessmentView.jsx'
 import { HealthEntryExport } from './HealthEntryExport.jsx'
-import { StatePreviewBar } from './StatePreviewBar.jsx'
 import { FollowUpQuestions } from './FollowUpQuestions.jsx'
 import { TailoredSuggestions } from './TailoredSuggestions.jsx'
 
@@ -436,75 +435,8 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
     if (onHealthEntryCreated) onHealthEntryCreated(updatedEntry)
   }
 
-  // Force state directly for Hackathon judge testing
-  function handleJudgeStateSelect(targetState) {
-    setCurrentState(targetState)
-    if (targetState === 'recording') {
-      setMicActive(true)
-      setRecordingStatusMessage(strings.listening) // "Listening…"
-    } else {
-      setMicActive(false)
-    }
-
-    if (targetState === 'empty') {
-      setInputText('')
-      setRecordingStatusMessage('')
-    } else if (targetState === 'typing' && !inputText) {
-      setInputText(examples[0].text)
-      setRecordingStatusMessage('')
-    } else if (targetState === 'transcribing') {
-      setRecordingStatusMessage('Transcribing voice input...')
-      setInterimSpokenText('My periods have been irregular for two or three months...')
-    } else if (targetState === 'processing') {
-      setRecordingStatusMessage('')
-    } else if (targetState === 'followup') {
-      const sample = 'My periods have been irregular for two or three months, and I have breakouts on my jawline.'
-      if (!inputText) setInputText(sample)
-      const localResult = extractSymptoms(sample, { preferredLanguage: selectedLang })
-      const questions = generateFollowUpQuestions({ text: sample, symptoms: localResult.symptoms, language: selectedLang })
-      setFollowUpQuestions(questions)
-      setCandidateResult(localResult)
-      setLocalParsedResult(localResult)
-      setRecordingStatusMessage('')
-    } else if (targetState === 'results') {
-      const sample = 'My periods come every 2–3 months, and I have acne and severe pain.'
-      if (!inputText) setInputText(sample)
-      const localResult = extractSymptoms(sample, { preferredLanguage: selectedLang })
-      const parsed = assessWithSafety(sample, localResult, localResult)
-      const synth = synthesizeSuggestions({
-        inputText: sample,
-        symptoms: parsed.symptoms,
-        followUpAnswers: {
-          cycle_duration: '3_to_6m',
-          cycle_gap: 'gap_long',
-          androgen_signs: ['jawline_acne'],
-          pain_profile: 'pain_severe',
-        },
-        language: selectedLang,
-      })
-      setTailoredSuggestions(synth)
-      setExtractedResult(parsed)
-      setSymptomsList(parsed.symptoms)
-      const mockEntry = createHealthEntry({
-        language: selectedLang,
-        inputMode: 'speech',
-        rawTranscript: 'My periods come every 2–3 months, and I have acne and severe pain.',
-        symptoms: parsed.symptoms,
-        tailoredSuggestions: synth,
-      })
-      setHealthEntry(mockEntry)
-      publishHealthEntry(mockEntry)
-    }
-  }
-
   return (
     <div className="talk-or-type-module">
-      {/* HACKATHON STATE TESTER */}
-      <StatePreviewBar
-        currentState={currentState}
-        onSelectState={handleJudgeStateSelect}
-      />
-
       {/* MAIN CARD */}
       <div className="talk-card bg-white/95 rounded-3xl border border-stone-200/90 p-6 md:p-8 shadow-sm backdrop-blur-xl relative overflow-hidden transition-all">
         {/* TOP CONTROLS: LANGUAGE PICKER & STATUS BADGE */}

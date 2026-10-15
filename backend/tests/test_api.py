@@ -155,3 +155,76 @@ def test_cors_headers():
     )
     assert response.status_code == 200
     assert response.headers.get("access-control-allow-origin") == "http://localhost:5173"
+
+
+def test_apiverve_forecast_validation():
+    """Verify APIVerve endpoint strictly validates input parameter constraints."""
+    # Invalid date
+    res = client.post("/api/cycle/apiverve-forecast", json={"last_period": "not-a-date"})
+    assert res.status_code == 422
+
+    # Cycle length out of range (< 21)
+    res = client.post("/api/cycle/apiverve-forecast", json={"last_period": "2026-03-01", "cycle_length": 15})
+    assert res.status_code == 422
+
+    # Period length out of range (> 10)
+    res = client.post("/api/cycle/apiverve-forecast", json={"last_period": "2026-03-01", "period_length": 15})
+    assert res.status_code == 422
+
+    # Cycle count out of range (> 12)
+    res = client.post("/api/cycle/apiverve-forecast", json={"last_period": "2026-03-01", "cycles": 20})
+    assert res.status_code == 422
+
+
+def test_apiverve_forecast_missing_key_error(monkeypatch):
+    """Verify transparent 503 error when APIVERVE_API_KEY is not configured."""
+    from app.services.apiverve_service import apiverve_service
+    monkeypatch.setattr(apiverve_service, "api_key", "")
+    
+    res = client.post(
+        "/api/cycle/apiverve-forecast",
+        json={"last_period": "2026-03-01", "cycle_length": 28, "period_length": 5, "cycles": 3}
+    )
+    assert res.status_code == 503
+    data = res.json()
+    assert "error" in data["detail"] or "message" in data["detail"]
+
+
+def test_apiverve_forecast_successful_integration():
+    """Verify successful live API call when valid API key is present."""
+    from app.core.config import settings
+    if not settings.has_apiverve:
+        pytest.skip("APIVERVE_API_KEY not configured in environment")
+
+    res = client.post(
+        "/api/cycle/apiverve-forecast",
+        json={
+            "last_period": "2026-03-01",
+            "cycle_length": 28,
+            "period_length": 5,
+            "cycles": 3
+        }
+    )
+    assert res.status_code == 200
+    body = res.json()
+    assert body["status"] == "ok"
+    assert body["source"] == "apiverve_live_api"
+    assert "data" in body
+    d = body["data"]
+    assert d["last_period_date"] == "2026-03-01"
+    assert d["cycle_length"] == 28
+    assert d["period_length"] == 5
+    assert len(d["cycles"]) == 3
+
+    c1 = d["cycles"][0]
+    assert "period" in c1
+    assert "start_date" in c1["period"]
+    assert "end_date" in c1["period"]
+    assert "ovulation" in c1
+    assert "date" in c1["ovulation"]
+    assert "fertile_window" in c1
+    assert "start_date" in c1["fertile_window"]
+
+    # Security invariant: API key must NEVER be leaked in response
+    assert settings.APIVERVE_API_KEY not in res.text
+
