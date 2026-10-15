@@ -37,12 +37,44 @@ export const LANGUAGES = [
     badge: 'த',
   },
   {
+    code: 'hinglish',
+    name: 'Hinglish',
+    nativeName: 'Hinglish (Hindi in English)',
+    speechCode: 'hi-IN',
+    flag: '🇮🇳',
+    badge: 'Hi-En',
+  },
+  {
+    code: 'te',
+    name: 'Telugu',
+    nativeName: 'తెలుగు',
+    speechCode: 'te-IN',
+    flag: '🇮🇳',
+    badge: 'తె',
+  },
+  {
     code: 'ml',
     name: 'Malayalam',
     nativeName: 'മലയാളം',
     speechCode: 'ml-IN',
     flag: '🇮🇳',
     badge: 'മ',
+  },
+  {
+    code: 'mr',
+    name: 'Marathi',
+    nativeName: 'मराठी',
+    speechCode: 'mr-IN',
+    flag: '🇮🇳',
+    badge: 'म',
+  },
+  {
+    code: 'bn',
+    name: 'Bengali',
+    nativeName: 'বাংলা',
+    speechCode: 'bn-IN',
+    flag: '🇮🇳',
+    badge: 'বা',
   },
 ]
 
@@ -67,6 +99,45 @@ export const EXAMPLE_PROMPTS = {
       title: 'Heavier bleeding',
       text: 'My bleeding is heavier than usual.',
       tag: 'Bleeding change',
+    },
+  ],
+  hinglish: [
+    {
+      title: 'Periods late + chehre pe baal',
+      text: 'Mere periods 2-3 mahine late aate hain aur chin par unwanted baal aa rahe hain.',
+      tag: 'Hormonal & Period',
+    },
+    {
+      title: 'Weight badh raha + pimples',
+      text: 'Pet par charbi badh rahi hai, weight kam nahi ho raha aur jawline pe dard bhare pimples hain.',
+      tag: 'Metabolic & Skin',
+    },
+    {
+      title: 'Tez pet dard',
+      text: 'Periods ke time par bohot tez pet dard aur excessive bleeding ho rahi hai.',
+      tag: 'Urgent attention',
+    },
+    {
+      title: 'Dark neck + thakan',
+      text: 'Gale pe kaalapan aa gaya hai aur din bhar bohot thakan rehti hai.',
+      tag: 'Insulin / Fatigue',
+    },
+  ],
+  te: [
+    {
+      title: 'నెలసరి ఆలస్యం',
+      text: 'నాకు పీరియడ్స్ సమయానికి రావడం లేదు, 2-3 నెలలకొకసారి మాత్రమే వస్తున్నాయి.',
+      tag: 'రుతుచక్రం',
+    },
+    {
+      title: 'మొటిమలు మరియు ముఖంపై వెంట్రుకలు',
+      text: 'నాకు గడ్డంపై అవాంఛిత రోమాలు మరియు మొటిమలు వస్తున్నాయి.',
+      tag: 'హార్మోన్ మార్పులు',
+    },
+    {
+      title: 'తీవ్రమైన నొప్పి',
+      text: 'నాకు విపరీతమైన కడుపు నొప్పి మరియు అధిక రక్తస్రావం ఉంది.',
+      tag: 'అత్యవసరం',
     },
   ],
   hi: [

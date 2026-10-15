@@ -64,6 +64,12 @@ export function App() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [globalError, setGlobalError] = useState(null);
 
+  function handleDataDeleted() {
+    StorageService.clearAllPcosData();
+    setLastSharedEntry(null);
+    setRefreshKey((value) => value + 1);
+  }
+
   useEffect(() => {
     const handleEntryUpdate = (event) => {
       setLastSharedEntry(event.detail);
@@ -102,7 +108,7 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    document.title = `${PAGE_TITLES[activePage]} · PCOS Saathi`;
+    document.title = `${PAGE_TITLES[activePage]} · LunaHer`;
     if (activePage !== 'home') {
       requestAnimationFrame(() => document.querySelector('[data-page-heading]')?.focus());
     }
@@ -119,11 +125,6 @@ export function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  function handleDataDeleted() {
-    StorageService.clearAllPcosData();
-    setLastSharedEntry(null);
-    setRefreshKey((value) => value + 1);
-  }
 
   function handleTriggerDemoError() {
     setGlobalError({
@@ -204,7 +205,7 @@ export function App() {
           <main id="main-content" className="page-content" tabIndex="-1">
             {renderPage()}
             <footer className="page-footer">
-              <span>PCOS Saathi · A gentle, private place to begin</span>
+              <span>LunaHer · A gentle, private place to begin</span>
               <button type="button" onClick={() => navigate('privacy')}>
                 Privacy choices
               </button>

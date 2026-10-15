@@ -29,7 +29,7 @@ export const TRANSLATIONS = {
     disclaimer: {
       standard: 'This is information, not a diagnosis.',
       pcosGuidance: 'These symptoms can sometimes occur with PCOS, but they can also have other causes.',
-      full: 'SakhiCare is an informational tool and does not provide clinical diagnosis or treatment. Always consult a certified medical practitioner or gynecologist for diagnosis and clinical care.'
+      full: 'LunaHer is an informational tool and does not provide clinical diagnosis or treatment. Always consult a certified medical practitioner or gynecologist for diagnosis and clinical care.'
     },
     nav: {
       home: 'Home',

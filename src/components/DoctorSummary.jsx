@@ -87,7 +87,7 @@ export function DoctorSummary({
     if (savedEntry && savedEntry.symptoms && savedEntry.symptoms.length > 0) {
       return {
         ...DEFAULT_DOCTOR_SUMMARY,
-        narrative: `I am sharing a summary of symptoms recorded in SakhiCare: "${savedEntry.rawTranscript}". I would like to discuss possible causes and whether further evaluation is appropriate.`,
+        narrative: `I am sharing a summary of symptoms recorded in LunaHer: "${savedEntry.rawTranscript}". I would like to discuss possible causes and whether further evaluation is appropriate.`,
         mainSymptoms: savedEntry.symptoms.map((s) => ({
           symptom: s.symptom,
           duration: s.duration || 'Not specified',
@@ -184,7 +184,7 @@ ${summaryData.personalizedInsights?.map((ins) => `   * ${ins}`).join('\n') || ' 
 8. PERSONAL NOTES:
    ${summaryData.userNotes || 'None added.'}
 
-NOTE: SakhiCare is an educational self-advocacy tool and does not provide clinical diagnosis.`
+NOTE: LunaHer is an educational self-advocacy tool and does not provide clinical diagnosis.`
   }, [summaryData])
 
   function handleCopy() {

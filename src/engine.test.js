@@ -70,3 +70,27 @@ test('privacy control deletes only SakhiCare local data', () => {
   delete globalThis.window
   delete globalThis.localStorage
 })
+
+test('extractSymptoms parses Hinglish descriptions into structured cards and Rotterdam pillars', () => {
+  const parsed = extractSymptoms('Mere periods 2-3 mahine late aate hain aur chin par unwanted baal aa rahe hain.')
+  assert.ok(parsed.hasPcosIndicators)
+  assert.equal(parsed.rotterdamPillars.ovulatory, true)
+  assert.equal(parsed.rotterdamPillars.androgenic, true)
+  assert.ok(parsed.symptoms.length >= 2)
+  assert.ok(parsed.recommendedTests.length > 0)
+  assert.ok(parsed.questionsForDoctor.length > 0)
+})
+
+test('extractSymptoms identifies metabolic insulin resistance marker (Acanthosis Nigricans / Dark Neck)', () => {
+  const parsed = extractSymptoms('Gale pe kaalapan hai aur pet par charbi badh rahi hai')
+  assert.equal(parsed.rotterdamPillars.metabolic, true)
+  const acanthosis = parsed.symptoms.find((s) => s.defId === 'acanthosis_nigricans')
+  assert.ok(acanthosis)
+})
+
+test('extractSymptoms identifies Tamil regional inputs', () => {
+  const parsed = extractSymptoms('எனக்கு மாதவிடாய் தாமதம் மற்றும் முகத்தில் முடி வளர்கிறது')
+  assert.equal(parsed.rotterdamPillars.ovulatory, true)
+  assert.equal(parsed.rotterdamPillars.androgenic, true)
+})
+
