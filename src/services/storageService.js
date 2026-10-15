@@ -13,6 +13,7 @@ import {
   createInsight,
   createDoctorSummary,
 } from '../models/pcosSaathiSchemas.js';
+import { mongoService } from './mongoService.js';
 
 // Safe wrapper around window.localStorage
 function getStorage() {
@@ -64,6 +65,13 @@ export const StorageService = {
     const updated = [entry, ...existing.filter((e) => e.id !== entry.id)];
     getStorage().setItem(STORAGE_KEYS.HEALTH_ENTRIES, JSON.stringify(updated));
     notifyDataChange(STORAGE_KEYS.HEALTH_ENTRIES, updated);
+
+    // Background asynchronous sync to MongoDB
+    try {
+      mongoService.saveHealthEntry(entry);
+    } catch (e) {
+      // offline silent fallback
+    }
     return entry;
   },
 
@@ -98,6 +106,13 @@ export const StorageService = {
     );
     getStorage().setItem(STORAGE_KEYS.CYCLE_ENTRIES, JSON.stringify(updated));
     notifyDataChange(STORAGE_KEYS.CYCLE_ENTRIES, updated);
+
+    // Background asynchronous sync to MongoDB
+    try {
+      mongoService.saveCycleEntry(entry);
+    } catch (e) {
+      // offline silent fallback
+    }
     return entry;
   },
 
@@ -149,6 +164,13 @@ export const StorageService = {
     const summary = createDoctorSummary(summaryData);
     getStorage().setItem(STORAGE_KEYS.DOCTOR_SUMMARY, JSON.stringify(summary));
     notifyDataChange(STORAGE_KEYS.DOCTOR_SUMMARY, summary);
+
+    // Background asynchronous sync to MongoDB
+    try {
+      mongoService.saveDoctorSummary(summary);
+    } catch (e) {
+      // offline silent fallback
+    }
     return summary;
   },
 
@@ -310,7 +332,43 @@ export const StorageService = {
     storage.removeItem('sakhicare_latest_entry');
     storage.removeItem('sakhicare_cycle_tracker');
 
+    // Purge remote MongoDB records
+    try {
+      mongoService.purgeAll();
+    } catch (e) {
+      // offline silent fallback
+    }
+
     notifyDataChange('all_purged', null);
     return true;
+  },
+
+  // =========================================================================
+  // FULL MONGODB SYNCHRONIZATION
+  // =========================================================================
+  async syncWithMongoDB() {
+    const payload = {
+      health_entries: this.getHealthEntries(),
+      cycle_entries: this.getCycleEntries(),
+      doctor_summaries: this.getDoctorSummary() ? [this.getDoctorSummary()] : [],
+      insights: this.getInsights(),
+    };
+    const result = await mongoService.syncAll(payload);
+    if (result.success && result.data?.remote_data) {
+      const storage = getStorage();
+      const remoteHealth = result.data.remote_data.health_entries || [];
+      if (remoteHealth.length > 0) {
+        const localHealth = this.getHealthEntries();
+        const mergedHealth = [...localHealth];
+        remoteHealth.forEach((rh) => {
+          if (!mergedHealth.some((lh) => lh.id === rh.id)) {
+            mergedHealth.push(rh);
+          }
+        });
+        storage.setItem(STORAGE_KEYS.HEALTH_ENTRIES, JSON.stringify(mergedHealth));
+        notifyDataChange(STORAGE_KEYS.HEALTH_ENTRIES, mergedHealth);
+      }
+    }
+    return result;
   },
 };
