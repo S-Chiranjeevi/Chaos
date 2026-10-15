@@ -63,6 +63,7 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
   // Primary state
   const [selectedLang, setSelectedLang] = useState(initialLanguage)
   const [inputText, setInputText] = useState('')
+  const [geminiConsent, setGeminiConsent] = useState(false)
   const [currentState, setCurrentState] = useState('empty') // 'empty' | 'typing' | 'recording' | 'transcribing' | 'processing' | 'followup' | 'results' | 'permission-denied' | 'unsupported-browser' | 'network-error'
   
   // Audio & Speech status
@@ -77,7 +78,6 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
   const [healthEntry, setHealthEntry] = useState(null)
   const [analysisFallbackMessage, setAnalysisFallbackMessage] = useState('')
   const [storageSaveError, setStorageSaveError] = useState('')
-
   // Follow-up Q&A and Tailored Suggestions State
   const [followUpQuestions, setFollowUpQuestions] = useState([])
   const [followUpAnswers, setFollowUpAnswers] = useState({})
@@ -246,8 +246,8 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
       return
     }
 
-    // Routine & soon patterns: Try online analysis if service is configured
-    try {
+    // Gemini is optional. Local symptom extraction remains available without it.
+    if (geminiConsent) try {
       const response = await requestSymptomAnalysis({ text: input, language: selectedLang })
       const validation = validateOutput(response)
       if (validation.valid) {
@@ -255,12 +255,20 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
         candidate = {
           ...localResult,
           ...backendResult,
-          symptoms: localResult.symptoms,
+          requestType: backendResult.requestType || 'symptoms',
+          answer: backendResult.answer || '',
+          summary: backendResult.summary || '',
+          explanation: backendResult.explanation || '',
+          symptoms: Array.isArray(backendResult.extractedSymptoms) && backendResult.extractedSymptoms.length
+            ? backendResult.extractedSymptoms.map((name, index) => ({ id: `gemini-${index}`, symptom: name, severity: 'Moderate', duration: 'Not specified', frequency: 'Not specified' }))
+            : localResult.symptoms,
           detectedLanguage: backendResult.detectedLanguage || backendResult.detected_language || localResult.detectedLanguage,
-          possibleRelationships: Array.isArray(backendResult.possibleRelationships)
-            ? backendResult.possibleRelationships
-            : backendResult.possible_relation ? [backendResult.possible_relation] : localResult.possibleRelationships,
-          recommendedSpecialist: backendResult.recommendedSpecialist || backendResult.recommended_specialist || localResult.recommendedSpecialist,
+          possibleRelationships: Array.isArray(backendResult.possibleTopics)
+            ? backendResult.possibleTopics
+            : Array.isArray(backendResult.possibleRelationships)
+              ? backendResult.possibleRelationships
+              : backendResult.possible_relation ? [backendResult.possible_relation] : localResult.possibleRelationships,
+          recommendedSpecialist: backendResult.recommendedDoctor || backendResult.recommendedSpecialist || backendResult.recommended_specialist || localResult.recommendedSpecialist,
           urgency: localResult.urgency === 'urgent' ? 'urgent' : backendResult.urgency,
           redFlags: localResult.redFlags.length ? localResult.redFlags : backendResult.redFlags || backendResult.red_flags || [],
           lifestyleTips: backendResult.lifestyleTips || backendResult.self_care_tips || localResult.lifestyleTips,
@@ -275,6 +283,27 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
       }
     }
 
+    if (localResult.symptoms.length === 0) {
+      if (!candidate.answer) {
+        candidate = {
+          ...localResult,
+          requestType: 'general',
+          summary: 'General health question',
+          answer: geminiConsent
+            ? 'An AI answer is unavailable right now. Please try again shortly.'
+            : 'Select the optional Gemini AI response to ask a general health question. Without it, LunaHer can still organize symptoms using on-device guidance.',
+          explanation: '',
+        }
+      }
+      const parsed = assessWithSafety(input, candidate, localResult)
+      setExtractedResult(parsed)
+      setSymptomsList([])
+      setHealthEntry(null)
+      setCurrentState('results')
+      setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)
+      return
+    }
+
     setCandidateResult(candidate)
     setLocalParsedResult(localResult)
 
@@ -286,14 +315,12 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
     })
     setFollowUpQuestions(questions)
 
-    // Transition to follow-up questions state!
     setCurrentState('followup')
     setTimeout(() => {
       document.getElementById('followup-questions-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }, 100)
   }
 
-  // Handle submitting answers to follow-up questions
   async function handleFollowUpSubmit(answers = {}, notes = {}) {
     setFollowUpAnswers(answers)
     setCustomNotes(notes)
@@ -303,9 +330,8 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
     const baseCandidate = candidateResult || extractSymptoms(input, { preferredLanguage: selectedLang })
     const baseLocal = localParsedResult || baseCandidate
 
-    // Try optional online synthesis if backend is running
     let onlineSuggestions = null
-    try {
+    if (geminiConsent) try {
       const response = await requestSymptomAnalysis({
         text: input,
         language: selectedLang,
@@ -315,11 +341,8 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
       if (validation.valid && validation.output) {
         onlineSuggestions = validation.output
       }
-    } catch {
-      // Graceful offline fallback
-    }
+    } catch {}
 
-    // Synthesize tailored suggestions from symptoms + follow-up answers
     const synthesized = synthesizeSuggestions({
       inputText: input,
       symptoms: baseLocal.symptoms,
@@ -329,7 +352,6 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
 
     setTailoredSuggestions(synthesized)
 
-    // Merge tailored doctor questions & self-care tips into parsed candidate
     const mergedQuestions = [
       ...new Set([
         ...synthesized.questionsForDoctor,
@@ -388,10 +410,13 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
     })
 
     setHealthEntry(newEntry)
-    const saveResult = publishHealthEntry(newEntry)
-    setStorageSaveError(saveResult?.ok ? '' : saveResult?.error || 'Your note could not be saved on this device.')
-
-    if (onHealthEntryCreated) onHealthEntryCreated(newEntry)
+    if (newEntry) {
+      const saveResult = publishHealthEntry(newEntry)
+      setStorageSaveError(saveResult?.ok ? '' : saveResult?.error || 'Your note could not be saved on this device.')
+      if (onHealthEntryCreated) onHealthEntryCreated(newEntry)
+    } else {
+      setStorageSaveError('')
+    }
 
     setCurrentState('results')
     setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)
@@ -548,6 +573,12 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
           </div>
         )}
 
+        {storageSaveError && (
+          <div className="state-alert-banner alert-unsupported p-3.5 bg-amber-50 border border-amber-200 rounded-2xl mb-4 text-xs text-amber-900" role="alert">
+            {storageSaveError}
+          </div>
+        )}
+
         {/* RECORDING / TRANSCRIBING LIVE OVERLAY / PROMPT */}
         {(currentState === 'recording' || recordingStatusMessage) && (
           <div className={`recording-banner p-4 bg-gradient-to-r from-rose-50 to-pink-50 border border-rose-300 rounded-2xl mb-4 flex items-center justify-between gap-4 ${micActive ? 'is-recording ring-2 ring-rose-300' : ''}`}>
@@ -629,6 +660,16 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
             </div>
           </div>
 
+          <label className="flex items-start gap-2 rounded-xl border border-stone-200 bg-white p-3 text-xs leading-relaxed text-stone-600">
+            <input
+              type="checkbox"
+              className="mt-0.5 h-4 w-4 shrink-0 accent-rose-700"
+              checked={geminiConsent}
+              onChange={(event) => setGeminiConsent(event.target.checked)}
+            />
+            <span><strong className="text-stone-800">Optional Gemini AI response.</strong> If selected, your message is sent to Google Gemini for processing. Leave this unchecked to use on-device symptom guidance.</span>
+          </label>
+
           {/* INPUT BAR FOOTER & REVIEW MESSAGE */}
           <div className="input-bar-footer flex flex-wrap items-center justify-between gap-3 pt-1">
             <div className="input-hints text-xs text-stone-500">
@@ -640,7 +681,7 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
               )}
               {inputText.length === 0 && (
                 <span className="empty-hint text-stone-500 text-xs">
-                  Speak or type freely. Stored solely on your device.
+                  Speak or type freely. It stays on-device unless you choose Gemini below.
                 </span>
               )}
             </div>
@@ -741,9 +782,9 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
           {/* SECTION HEADER */}
           <div className="results-hero-strip">
             <div className="strip-title-group">
-              <span className="strip-badge">Clinical Understanding</span>
-              <h2>Organized Symptom Overview</h2>
-              <p>Your inputs have been categorized into actionable health details below.</p>
+              <span className="strip-badge">{extractedResult.requestType === 'general' ? 'Health Information' : 'Clinical Understanding'}</span>
+              <h2>{extractedResult.requestType === 'general' ? (extractedResult.summary || 'Your answer') : 'Organized Symptom Overview'}</h2>
+              <p>{extractedResult.requestType === 'general' ? 'A clear, general answer to your question.' : 'Your inputs have been categorized into actionable health details below.'}</p>
             </div>
             <div className="strip-urgency">
               <span className={`urgency-badge ${extractedResult.urgency}`}>
@@ -756,6 +797,14 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
             </div>
           </div>
 
+          {extractedResult.requestType === 'general' ? (
+            <div className="mx-4 mt-4 rounded-xl border border-stone-200 bg-stone-50 p-4 text-sm leading-relaxed text-stone-700 sm:mx-6" role="status">
+              <p className="whitespace-pre-line">{extractedResult.answer}</p>
+              {extractedResult.explanation && <p className="mt-3 text-stone-600">{extractedResult.explanation}</p>}
+              <p className="mt-3 border-t border-stone-200 pt-3 text-xs text-stone-500">This is general health information, not a diagnosis. For personal medical advice, speak with a qualified healthcare professional.</p>
+            </div>
+          ) : (
+          <>
           <div className="mx-4 mt-4 grid gap-3 rounded-xl border border-stone-200 bg-stone-50 p-4 text-sm text-stone-700 sm:mx-6 sm:grid-cols-2">
             <div><strong>Detected language:</strong> {(LANGUAGES.find((language) => language.code === extractedResult.detectedLanguage)?.name) || extractedResult.detectedLanguage || 'English'}</div>
             <div><strong>Recommended specialist:</strong> {extractedResult.recommendedSpecialist || 'Consider booking an appointment with a gynecologist.'}</div>
@@ -780,6 +829,8 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
           <HealthEntryExport
             healthEntry={healthEntry}
           />
+          </>
+          )}
         </section>
       )}
     </div>

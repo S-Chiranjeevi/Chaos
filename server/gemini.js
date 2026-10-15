@@ -1,5 +1,5 @@
 export const MAX_NOTE_LENGTH = 1500
-export const API_ROOT = 'https://generativelanguage.googleapis.com/v1beta/models'
+export const API_ROOT = 'https://generativelanguage.googleapis.com/v1beta/interactions'
 
 const responseSchema = {
   type: 'OBJECT',
@@ -52,24 +52,41 @@ function cleanList(value, maxItems = 8) {
 }
 
 export async function generateResponse({ text, language, apiKey, model, signal }) {
-  const upstream = await fetch(`${API_ROOT}/${encodeURIComponent(model)}:generateContent`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
-    body: JSON.stringify({
-      contents: [{ role: 'user', parts: [{ text: makePrompt(text, language) }] }],
-      generationConfig: { responseFormat: { text: { mimeType: 'application/json', schema: responseSchema } }, temperature: 0.2, maxOutputTokens: 1800 },
-    }),
-    signal,
-  })
-  const result = await upstream.json().catch(() => ({}))
-  if (!upstream.ok) {
-    if (upstream.status === 429) throw Object.assign(new Error('Gemini is busy or the project has reached its request limit. Please try again shortly.'), { status: 429 })
-    if (upstream.status === 401 || upstream.status === 403) throw Object.assign(new Error('Gemini rejected the server API key. Check the key and its Gemini API access.'), { status: 502 })
-    console.error('Gemini request failed with status', upstream.status)
-    throw Object.assign(new Error('Gemini could not complete the response. Please try again.'), { status: 502 })
+  const requestModel = async (selectedModel) => {
+    const upstream = await fetch(API_ROOT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+      body: JSON.stringify({
+        model: selectedModel,
+        input: makePrompt(text, language),
+        response_format: { type: 'text', mime_type: 'application/json', schema: responseSchema },
+      }),
+      signal,
+    })
+    return { upstream, result: await upstream.json().catch(() => ({})) }
   }
 
-  const generatedText = result?.candidates?.[0]?.content?.parts?.map((part) => part.text || '').join('').trim() || ''
+  let { upstream, result } = await requestModel(model)
+  if (upstream.status === 503 && model === 'gemini-3.8-flash') {
+    ({ upstream, result } = await requestModel('gemini-3.6-flash'))
+  }
+  if (!upstream.ok) {
+    const upstreamDetail = typeof result?.error?.message === 'string' ? result.error.message.slice(0, 300) : ''
+    if (upstream.status === 429) throw Object.assign(new Error('Gemini is busy or the project has reached its request limit. Please try again shortly.'), { status: 429 })
+    if (upstream.status === 503) throw Object.assign(new Error('Gemini is temporarily busy. Please try again shortly.'), { status: 503 })
+    if (upstream.status === 401 || upstream.status === 403) throw Object.assign(new Error('Gemini rejected the server API key. Check the key and its Gemini API access.'), { status: 502 })
+    console.error('Gemini request failed with status', upstream.status, upstreamDetail)
+    const message = upstream.status === 400
+      ? 'Gemini rejected the server configuration. Check the API key and selected model.'
+      : upstream.status === 404
+        ? 'The selected Gemini model is not available to this API key.'
+      : 'Gemini could not complete the response. Please try again.'
+    throw Object.assign(new Error(message), { status: 502 })
+  }
+
+  const generatedText = typeof result?.output_text === 'string'
+    ? result.output_text.trim()
+    : result?.candidates?.[0]?.content?.parts?.map((part) => part.text || '').join('').trim() || ''
   if (!generatedText) throw Object.assign(new Error('Gemini could not safely process that message. Please rephrase it or speak with a healthcare professional.'), { status: 502 })
   let generated
   try { generated = JSON.parse(generatedText) } catch { throw Object.assign(new Error('Gemini returned an unreadable result. Please try again.'), { status: 502 }) }
