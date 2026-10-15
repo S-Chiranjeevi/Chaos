@@ -196,8 +196,13 @@ def detect_language(text: str, default_lang: str = "en") -> str:
     return default_lang or "en"
 
 
-def local_analyze(text: str, language: str = "en", age: int | None = None) -> AnalyzeResponse:
-    """Execute deterministic local clinical extraction and guideline-aligned response."""
+def local_analyze(
+    text: str,
+    language: str = "en",
+    age: int | None = None,
+    follow_up_answers: dict[str, Any] | None = None,
+) -> AnalyzeResponse:
+    """Execute deterministic local clinical extraction, follow-up generation, and suggestion synthesis."""
     detected_lang = detect_language(text, default_lang=language)
     detected_symptoms: List[str] = []
     red_flags: List[str] = []
@@ -295,13 +300,74 @@ def local_analyze(text: str, language: str = "en", age: int | None = None) -> An
         "Maintain a daily cycle and symptom log to share with your healthcare provider.",
     ]
 
-    # Empathetic reply text
-    reply_text = (
-        f"Thank you for sharing what you are experiencing. Based on your description, we noted: {', '.join(detected_symptoms)}. "
-        f"{possible_relation} "
-        f"We recommend scheduling a consultation with a {recommended_specialist} to discuss these patterns. "
-        "Remember, this is educational information to help you prepare for a doctor visit, not a diagnosis."
-    )
+    # Generate structured follow-up questions to clarify context
+    follow_up_questions: List[Dict[str, Any]] = []
+    if has_irregular_cycle or (not has_androgenic and not has_metabolic):
+        follow_up_questions.append({
+            "id": "cycle_duration",
+            "title": "Duration of Irregularity",
+            "question": "How long have your menstrual cycles been irregular, delayed, or unpredictable?",
+            "hint": "Helps determine whether this is a recent temporary shift or a recurring pattern.",
+            "allow_multiple": False,
+            "options": [
+                {"id": "under_2m", "label": "Recent (Last 1–2 months)"},
+                {"id": "3_to_6m", "label": "3 to 6 months"},
+                {"id": "over_6m", "label": "Over 6 months / 1+ year"},
+                {"id": "since_puberty", "label": "Irregular since my teenage years"},
+            ],
+        })
+        follow_up_questions.append({
+            "id": "cycle_gap",
+            "title": "Typical Cycle Length",
+            "question": "What is the typical gap between your periods?",
+            "hint": "A normal menstrual cycle length is usually between 21 and 35 days.",
+            "allow_multiple": False,
+            "options": [
+                {"id": "gap_normal", "label": "21 to 35 days (Regular range)"},
+                {"id": "gap_long", "label": "36 to 50 days (Longer cycles)"},
+                {"id": "gap_very_long", "label": "More than 50–60 days or skips completely"},
+                {"id": "gap_random", "label": "Completely unpredictable / random"},
+            ],
+        })
+
+    if has_androgenic or has_irregular_cycle:
+        follow_up_questions.append({
+            "id": "androgen_signs",
+            "title": "Skin & Hair Changes",
+            "question": "Have you noticed any of these skin or hair changes recently?",
+            "hint": "Clinicians evaluate androgen sensitivity under Rotterdam guidelines.",
+            "allow_multiple": True,
+            "options": [
+                {"id": "jawline_acne", "label": "Deep or cystic acne along jawline & chin"},
+                {"id": "facial_hair", "label": "Coarse dark hair on chin, upper lip, or abdomen"},
+                {"id": "hair_thinning", "label": "Hair thinning or shedding on scalp"},
+                {"id": "dark_patches", "label": "Dark, velvety skin patches on neck/underarms"},
+                {"id": "no_skin_hair", "label": "None of these apply to me"},
+            ],
+        })
+
+    # If user provided follow-up answers, synthesize tailored suggestions
+    synthesized_suggestions = None
+    if follow_up_answers:
+        answered_notes = []
+        cycle_dur = follow_up_answers.get("cycle_duration")
+        if cycle_dur == "3_to_6m":
+            answered_notes.append("Cycle delays lasting 3 to 6 months")
+            questions_for_doctor.insert(0, "My cycles have been delayed for 3 to 6 months. Would you recommend a pelvic ultrasound to check ovarian morphology?")
+        elif cycle_dur == "over_6m":
+            answered_notes.append("Cycle delays lasting over 6 months")
+            questions_for_doctor.insert(0, "My cycles have exceeded 45–60 days for over 6 months. Could we evaluate baseline reproductive hormone levels (LH, FSH, Estradiol)?")
+
+        androgen_ans = follow_up_answers.get("androgen_signs")
+        if isinstance(androgen_ans, list) and any(a in ("jawline_acne", "facial_hair", "hair_thinning") for a in androgen_ans):
+            answered_notes.append("Co-occurring androgenic skin/hair changes")
+            questions_for_doctor.append("Because I have noticeable skin/hair changes, could we check Total and Free Testosterone and DHEA-S?")
+            self_care_tips.insert(0, "Use gentle, non-comedogenic skincare and avoid aggressive scrubbing that disrupts inflamed skin barriers.")
+
+        synthesized_suggestions = {
+            "summary": f"Based on your input and follow-up answers ({'; '.join(answered_notes) if answered_notes else 'provided'}), we tailored your clinical questions and lifestyle tips.",
+            "answered_count": len([k for k, v in follow_up_answers.items() if v]),
+        }
 
     return AnalyzeResponse(
         detected_language=detected_lang,
@@ -314,4 +380,6 @@ def local_analyze(text: str, language: str = "en", age: int | None = None) -> An
         self_care_tips=self_care_tips,
         disclaimer=DISCLAIMER,
         reply_text=reply_text,
+        follow_up_questions=follow_up_questions[:3],
+        synthesized_suggestions=synthesized_suggestions,
     )

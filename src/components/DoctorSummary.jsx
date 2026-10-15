@@ -85,15 +85,26 @@ export function DoctorSummary({
     if (initialData) return initialData
     const savedEntry = getLatestHealthEntry()
     if (savedEntry && savedEntry.symptoms && savedEntry.symptoms.length > 0) {
+      const tailored = savedEntry.tailoredSuggestions
+      const customQuestions = tailored?.questionsForDoctor?.length
+        ? tailored.questionsForDoctor
+        : DEFAULT_DOCTOR_SUMMARY.questionsForDoctor
+
+      const clarifiedNarrative = tailored?.summaryNarrative
+        ? `I am sharing a summary of symptoms and follow-up details recorded in LunaHer: "${tailored.summaryNarrative}". I would like to discuss possible causes and whether further evaluation is appropriate.`
+        : `I am sharing a summary of symptoms recorded in LunaHer: "${savedEntry.rawTranscript}". I would like to discuss possible causes and whether further evaluation is appropriate.`
+
       return {
         ...DEFAULT_DOCTOR_SUMMARY,
-        narrative: `I am sharing a summary of symptoms recorded in LunaHer: "${savedEntry.rawTranscript}". I would like to discuss possible causes and whether further evaluation is appropriate.`,
+        narrative: clarifiedNarrative,
         mainSymptoms: savedEntry.symptoms.map((s) => ({
           symptom: s.symptom,
           duration: s.duration || 'Not specified',
           frequency: s.frequency || 'Not specified',
           severity: s.severity || 'Moderate',
         })),
+        questionsForDoctor: customQuestions,
+        suggestedSpecialist: tailored?.recommendedSpecialist || DEFAULT_DOCTOR_SUMMARY.suggestedSpecialist,
         disclaimer: DISCLAIMER,
         personalizedInsights: [...new Set([...DEFAULT_DOCTOR_SUMMARY.personalizedInsights, ...selectedInsights])],
       }
