@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
+import { Globe } from 'lucide-react';
 import Header from './components/layout/Header.jsx';
 import GlobalError from './components/layout/GlobalError.jsx';
-import { LanguageSelector } from './components/common/LanguageSelector.jsx';
+import { LanguageSelector, SUPPORTED_LANGUAGES } from './components/common/LanguageSelector.jsx';
 import { BottomNavigation } from './components/BottomNavigation.jsx';
 import { Navigation } from './components/Navigation.jsx';
 import { DoctorSummaryPage } from './pages/DoctorSummaryPage.jsx';
@@ -187,8 +188,10 @@ export function App() {
         }}
       />
 
-      {/* Header — slim bar, branding & language now live in the sidebar */}
-      <Header onNavigateHome={() => navigate('home')} />
+      {/* Header */}
+      <Header
+        onNavigateHome={() => navigate('home')}
+      />
 
       <div className="app-body">
         <Navigation
@@ -202,6 +205,17 @@ export function App() {
             {renderPage()}
             <footer className="page-footer">
               <span>LunaHer · A gentle place to begin</span>
+              <button
+                type="button"
+                onClick={() => setLanguageDialogOpen(true)}
+                className="page-footer-language-btn"
+                aria-label={`Current language is ${SUPPORTED_LANGUAGES.find((l) => l.code === currentLanguage)?.name || 'English'}. Click to change language.`}
+              >
+                <Globe size={14} aria-hidden="true" />
+                <span>
+                  Language: <strong>{SUPPORTED_LANGUAGES.find((l) => l.code === currentLanguage)?.native || 'English'}</strong> ({SUPPORTED_LANGUAGES.find((l) => l.code === currentLanguage)?.name || 'English'})
+                </span>
+              </button>
             </footer>
           </main>
         </div>
