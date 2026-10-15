@@ -3,31 +3,28 @@ import {
   Mic,
   MicOff,
   Globe,
-  Send,
   RotateCcw,
   AlertCircle,
-  Volume2,
   Sparkles,
   ArrowRight,
   Info,
-  CheckCircle2,
   Loader2,
-  HelpCircle,
   Radio,
   FileCheck,
 } from 'lucide-react'
 import { LANGUAGES, EXAMPLE_PROMPTS, UI_STRINGS } from '../data/languages.js'
 import { speechService } from '../services/speechService.js'
 import { extractSymptoms } from '../services/symptomExtractor.js'
+import { requestSymptomAnalysis } from '../services/apiClient.js'
 import { createHealthEntry, publishHealthEntry } from '../models/healthEntry.js'
 import { SymptomCards } from './SymptomCards.jsx'
 import { AssessmentView } from './AssessmentView.jsx'
 import { HealthEntryExport } from './HealthEntryExport.jsx'
 import { StatePreviewBar } from './StatePreviewBar.jsx'
 
-export function TalkOrType({ onHealthEntryCreated }) {
+export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
   // Primary state
-  const [selectedLang, setSelectedLang] = useState('en')
+  const [selectedLang, setSelectedLang] = useState(initialLanguage)
   const [inputText, setInputText] = useState('')
   const [currentState, setCurrentState] = useState('empty') // 'empty' | 'typing' | 'recording' | 'transcribing' | 'processing' | 'results' | 'permission-denied' | 'unsupported-browser' | 'network-error'
   
@@ -41,6 +38,7 @@ export function TalkOrType({ onHealthEntryCreated }) {
   const [extractedResult, setExtractedResult] = useState(null)
   const [symptomsList, setSymptomsList] = useState([])
   const [healthEntry, setHealthEntry] = useState(null)
+  const [analysisFallbackMessage, setAnalysisFallbackMessage] = useState('')
 
   const textareaRef = useRef(null)
   const resultsRef = useRef(null)
@@ -118,7 +116,7 @@ export function TalkOrType({ onHealthEntryCreated }) {
         setCurrentState('recording')
         setRecordingStatusMessage(strings.listening) // "Listening…"
       },
-      onResult: ({ fullTranscript, finalTranscript, interimTranscript }) => {
+      onResult: ({ finalTranscript, interimTranscript }) => {
         setCurrentState('transcribing')
         setInterimSpokenText(interimTranscript)
         if (finalTranscript) {
@@ -129,7 +127,7 @@ export function TalkOrType({ onHealthEntryCreated }) {
           setInterimSpokenText('')
         }
       },
-      onNoMatch: ({ message }) => {
+      onNoMatch: () => {
         setMicActive(false)
         setRecordingStatusMessage(strings.couldNotHear) // "We could not hear you. Try again."
         setCurrentState('typing')
@@ -161,7 +159,7 @@ export function TalkOrType({ onHealthEntryCreated }) {
   }
 
   // Submit / Understand my symptoms
-  function handleUnderstandSymptoms(e) {
+  async function handleUnderstandSymptoms(e) {
     if (e) e.preventDefault()
     if (!inputText.trim()) {
       textareaRef.current?.focus()
@@ -175,41 +173,56 @@ export function TalkOrType({ onHealthEntryCreated }) {
     }
 
     setCurrentState('processing')
+    setAnalysisFallbackMessage('')
 
-    // Simulate clinical assessment extraction
-    setTimeout(() => {
-      const parsed = extractSymptoms(inputText)
-      setExtractedResult(parsed)
-      setSymptomsList(parsed.symptoms)
-
-      // Build standardized HealthEntry
-      const newEntry = createHealthEntry({
-        language: selectedLang,
-        inputMode,
-        rawTranscript: inputText.trim(),
-        symptoms: parsed.symptoms,
-        assessment: {
-          statement: parsed.disclaimer,
-          urgency: parsed.urgency,
-          topics: parsed.topics,
-          questionsForDoctor: parsed.questionsForDoctor,
-          redFlags: parsed.redFlags,
-        },
-      })
-
-      setHealthEntry(newEntry)
-      publishHealthEntry(newEntry)
-
-      if (onHealthEntryCreated) {
-        onHealthEntryCreated(newEntry)
+    const localResult = extractSymptoms(inputText, { preferredLanguage: selectedLang })
+    let parsed = localResult
+    try {
+      parsed = await requestSymptomAnalysis({ text: inputText.trim(), language: selectedLang })
+      parsed = {
+        ...localResult,
+        ...parsed,
+        symptoms: Array.isArray(parsed.symptoms) ? parsed.symptoms : localResult.symptoms,
+        detectedLanguage: parsed.detectedLanguage || localResult.detectedLanguage,
+        possibleRelationships: Array.isArray(parsed.possibleRelationships) ? parsed.possibleRelationships : localResult.possibleRelationships,
+        recommendedSpecialist: parsed.recommendedSpecialist || localResult.recommendedSpecialist,
+        // Local rules retain the safety floor even if an optional service responds.
+        disclaimer: localResult.disclaimer,
+        urgency: localResult.urgency === 'urgent' ? 'urgent' : parsed.urgency,
+        redFlags: localResult.redFlags.length ? localResult.redFlags : parsed.redFlags,
+        lifestyleTips: Array.isArray(parsed.lifestyleTips) && parsed.lifestyleTips.length ? parsed.lifestyleTips : localResult.lifestyleTips,
+        questionsForDoctor: Array.isArray(parsed.questionsForDoctor) && parsed.questionsForDoctor.length ? parsed.questionsForDoctor : localResult.questionsForDoctor,
       }
+    } catch {
+      setAnalysisFallbackMessage('We could not reach the online analysis service, so SakhiCare used private on-device symptom guidance instead.')
+    }
 
-      setCurrentState('results')
+    setExtractedResult(parsed)
+    setSymptomsList(parsed.symptoms)
 
-      setTimeout(() => {
-        resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      }, 100)
-    }, 750)
+    // Build and save the shared local HealthEntry regardless of backend availability.
+    const newEntry = createHealthEntry({
+      language: parsed.detectedLanguage || selectedLang,
+      inputMode,
+      rawTranscript: inputText.trim(),
+      symptoms: parsed.symptoms,
+      assessment: {
+        statement: parsed.disclaimer,
+        urgency: parsed.urgency,
+        topics: parsed.topics,
+        questionsForDoctor: parsed.questionsForDoctor,
+        redFlags: parsed.redFlags,
+      },
+    })
+
+    setHealthEntry(newEntry)
+    publishHealthEntry(newEntry)
+
+    if (onHealthEntryCreated) onHealthEntryCreated(newEntry)
+
+    setCurrentState('results')
+
+    setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)
   }
 
   // Symptom Card Operations
@@ -374,6 +387,14 @@ export function TalkOrType({ onHealthEntryCreated }) {
             >
               Retry Voice
             </button>
+          </div>
+        )}
+
+        {analysisFallbackMessage && (
+          <div className="state-alert-banner alert-unsupported" role="status">
+            <Info size={20} className="alert-icon" />
+            <div className="alert-text"><strong>Using on-device guidance</strong><p>{analysisFallbackMessage}</p></div>
+            <button type="button" className="alert-dismiss-btn" onClick={() => handleUnderstandSymptoms()}>Retry online analysis</button>
           </div>
         )}
 
@@ -553,6 +574,12 @@ export function TalkOrType({ onHealthEntryCreated }) {
                   : 'Routine consultation'}
               </span>
             </div>
+          </div>
+
+          <div className="mx-4 mt-4 grid gap-3 rounded-xl border border-stone-200 bg-stone-50 p-4 text-sm text-stone-700 sm:mx-6 sm:grid-cols-2">
+            <div><strong>Detected language:</strong> {(LANGUAGES.find((language) => language.code === extractedResult.detectedLanguage)?.name) || extractedResult.detectedLanguage || 'English'}</div>
+            <div><strong>Recommended specialist:</strong> {extractedResult.recommendedSpecialist || 'Consider booking an appointment with a gynecologist.'}</div>
+            <div className="sm:col-span-2"><strong>Possible relationships:</strong><ul className="mt-1 list-disc pl-5">{(extractedResult.possibleRelationships || extractedResult.topics || []).map((item) => <li key={item}>{item}</li>)}</ul></div>
           </div>
 
           {/* 1. EXTRACTED SYMPTOM CARDS */}
