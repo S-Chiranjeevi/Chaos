@@ -1,11 +1,12 @@
 # SakhiCare (सखी केयर) ✿
-### Multilingual PCOS Symptom Understanding & Clinical Care Navigator
+### Multilingual PCOS & Women's Health Symptom Care Navigator
 
 > **Hackathon Theme:** Build a tool that turns everyday descriptions of symptoms—including regional-language inputs—into understandable information and guidance toward appropriate care, particularly for PCOS. It should not present itself as diagnosing.
 
 [![Vite](https://img.shields.io/badge/Vite-8.x-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
 [![React](https://img.shields.io/badge/React-19.x-61DAFB?logo=react&logoColor=black)](https://react.dev/)
-[![Tests](https://img.shields.io/badge/Tests-15%20Passing-success)](https://nodejs.org/api/test.html)
+[![TailwindCSS](https://img.shields.io/badge/Tailwind-3.x-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Tests](https://img.shields.io/badge/Tests-Passing-success)](https://nodejs.org/api/test.html)
 [![Privacy](https://img.shields.io/badge/Privacy-100%25%20Client--Side-green)](https://github.com/S-Chiranjeevi/Chaos)
 [![Medical Disclaimer](https://img.shields.io/badge/Medical%20Framing-Non--Diagnostic-important)](https://github.com/S-Chiranjeevi/Chaos)
 
@@ -27,6 +28,7 @@ Major systemic barriers include:
 
 **SakhiCare** bridges the gap between everyday lived experiences and evidence-based clinical medicine. It empowers women to express how they feel naturally—through **voice or text in 9 regional languages and dialects**—and transforms those narratives into:
 - Structured health symptom cards (duration, frequency, severity).
+- Early Warning & Pattern Detection rules engine with evidence cards.
 - Educational grounding under the **Rotterdam 2003 International Consensus**.
 - Safe clinical triage (Routine Consultation vs. Urgent Red Flags).
 - Clear care navigation (which specialist to consult: Gynecologist, Endocrinologist, Dermatologist, Dietitian).
@@ -36,102 +38,96 @@ Major systemic barriers include:
 
 ---
 
-## ✨ Key Features
+## 🌟 Key Architecture & Features
 
-### 1. 🎙️ "Talk or Type" Multilingual Input
+### 1. 🎙️ "Talk or Type" Multilingual Input (`/talk`)
 - **Speech-to-Text & Typed Input:** Uses the Web Speech API and responsive text entry.
 - **9 Languages & Dialects Supported:**
-  - **English**
-  - **Hindi (हिंदी)**
-  - **Hinglish (Colloquial Hindi-English)**
-  - **Telugu (తెలుగు)**
-  - **Tamil (தமிழ்)**
-  - **Kannada (ಕನ್ನಡ)**
-  - **Malayalam (മലയാളം)**
-  - **Marathi (मराठी)**
-  - **Bengali (বাংলা)**
+  - English, Hindi (हिंदी), Hinglish, Telugu (తెలుగు), Tamil (தமிழ்), Kannada (ಕನ್ನಡ), Malayalam (മലയാളം), Marathi (मराठी), Bengali (বাংলা).
 - **One-Click Vernacular Chips:** Realistic presets for common expressions (e.g., missed cycles, facial hair, dark neck, painful cramps).
 
-### 2. 🩻 Interactive Anatomical Body Explorer
+### 2. ⚠️ Early Warning & Pattern Detection (`/patterns`)
+- **Rules-Based, Deterministic Engine:** Operates 100% locally on device without black-box AI hallucinations.
+- **Analyzes Repeated Symptoms & Worsening Trends:**
+  - Repeated irregular cycles & long gaps (>35 days)
+  - Repeated pelvic discomfort
+  - Repeated acne breakouts across consecutive cycles
+  - Repeated hair changes (facial hirsutism, scalp shedding)
+  - Increasing pain severity (mild → moderate → severe)
+  - Increasing bleeding volume
+  - Multiple concurrent symptoms (metabolic, ovulatory, androgenic)
+  - Insufficient tracking data explanations
+- **Structured Warning Cards:**
+  - Distinct urgency levels (Urgent: Red, Soon: Amber, Informational: Blue/Green)
+  - Full transparent evidence breakdown
+  - Plain-language explanation ("Why am I seeing this?")
+  - Actionable next steps and one-click add to Doctor Summary Basket
+  - Non-urgent warning dismissal
+
+### 3. 🩻 Interactive Anatomical Body Explorer
 - Visual SVG silhouette with pulsing interactive hotspots:
   - **Crown / Scalp:** Hair shedding, diffuse part thinning (androgenic alopecia pathway).
   - **Jawline & Face:** Hormonal cystic acne and hirsutism.
   - **Neck & Skin Folds:** Acanthosis Nigricans (cutaneous marker of hyperinsulinemia).
   - **Abdomen:** Central visceral adiposity and intense glycemic sugar cravings.
   - **Pelvis:** Oligomenorrhea, irregular ovulation, and ovarian morphology.
-- Connects colloquial phrases to clinical terminology and specific doctor inquiries.
 
-### 3. 🔬 Rotterdam 2003 Diagnostic Consensus Matrix
+### 4. 🔬 Rotterdam 2003 Diagnostic Consensus Matrix
 - Educates users on the 3 international clinical pillars:
   1. **Ovulatory Dysfunction** (oligo/anovulation, cycles >35 days).
   2. **Hyperandrogenism** (clinical hirsutism/acne or elevated biochemical testosterone/DHEA-S).
   3. **Polycystic Ovarian Morphology** (≥20 follicles per ovary or volume >10 mL on pelvic ultrasound).
 - Explicitly explains why at least 2 of 3 pillars + exclusion of mimics (thyroid, prolactin) are required, and why digital tools cannot diagnose.
 
-### 4. 🚨 Safe Clinical Triage & Red-Flag Detection
+### 5. 🚨 Safe Clinical Triage & Red-Flag Detection
 - Automatically identifies acute medical emergencies:
   - Severe sudden pelvic pain (potential ovarian torsion or ruptured cyst).
   - Heavy soaking bleeding accompanied by dizziness/fainting (hemorrhagic risk).
 - Provides immediate, high-priority **Urgent Medical Attention** notices with emergency contact prompts.
 
-### 5. 🩺 Specialist Care Navigator
-- Guides users to the most appropriate healthcare professional based on their symptoms:
-  - **Gynecologist (OB-GYN):** First point of contact for cycle irregularity and pelvic ultrasounds.
-  - **Endocrinologist:** For insulin resistance, Acanthosis Nigricans, and metabolic management.
-  - **Dermatologist:** For cystic acne vulgaris and medical management of hirsutism.
-  - **Clinical Dietitian:** For evidence-based low-glycemic, anti-inflammatory lifestyle nutrition.
+### 6. 🩺 Specialist Care Navigator
+- Guides users to the most appropriate healthcare professional:
+  - **Gynecologist (OB-GYN):** Cycle irregularity and pelvic ultrasounds.
+  - **Endocrinologist:** Insulin resistance, Acanthosis Nigricans, and metabolic management.
+  - **Dermatologist:** Cystic acne vulgaris and medical management of hirsutism.
+  - **Clinical Dietitian:** Evidence-based low-glycemic, anti-inflammatory lifestyle nutrition.
 
-### 6. 📝 Doctor Visit Preparation Kit
-- Generates a clinical consultation summary:
-  - Primary symptom summary and timeline.
-  - Key questions to ask during the consultation.
-  - Recommended laboratory and imaging tests (Pelvic USG, Fasting Insulin, HOMA-IR, Total/Free Testosterone, TSH, HbA1c, DHEA-S).
-  - One-click copy or print for physical consultation visits.
-
-### 7. 🗓️ Private Cycle & Symptom Tracker
+### 7. 🗓️ Private Cycle & Symptom Tracker (`/tracker`)
 - Log cycles, symptom severity, and mood patterns over time.
-- **100% Client-Side Privacy:** Stored exclusively in local `localStorage`; zero cloud transmission, no account tracking, and one-click data purge.
+- **100% Client-Side Privacy:** Stored exclusively in browser local storage; zero cloud transmission.
 
 ### 8. 💡 Evidence-Based Myth Busters
-- Disarms harmful stigmas:
-  - *Myth:* PCOS means you can never get pregnant. → *Fact:* PCOS is one of the most treatable ovulatory conditions.
-  - *Myth:* PCOS only affects people who are overweight. → *Fact:* Up to 30% have "Lean PCOS" with normal BMI.
-  - *Myth:* Birth control pills cure PCOS. → *Fact:* Pills manage symptoms; they do not alter underlying biology.
-  - *Myth:* Follicles on ultrasound always mean PCOS. → *Fact:* Up to 25% of healthy women have multifollicular ovaries without PCOS.
+- Disarms widespread stigmas regarding fertility, lean PCOS, birth control pills, and ultrasound follicles.
 
 ---
 
 ## 🛠️ Technology Architecture
 
-- **Frontend:** React 19 + Vite 8
-- **Styling:** Custom Vanilla CSS Design System with light/dark wellness themes, glassmorphism, responsive grids, and micro-interactions.
+- **Frontend:** React 19 + Vite 8 + Tailwind CSS 3
 - **Icons:** Lucide React
 - **Voice Recognition:** Web Speech API (`webkitSpeechRecognition` / `SpeechRecognition`)
-- **Testing:** Node.js native test runner (`node --test`) covering 15 unit and integration test suites.
+- **Testing:** Node.js native test runner (`node --test`)
 
 ```
 src/
 ├── components/
-│   ├── BodyExplorer.jsx        # Interactive SVG anatomical hotspot mapper
-│   ├── CycleTracker.jsx        # Private client-side cycle and symptom diary
-│   ├── EducationLibrary.jsx    # Evidence-grounded women's health library
-│   ├── MythBusters.jsx         # Myth vs. fact cards
-│   ├── PrivacyControls.jsx     # Local storage deletion and privacy audit
-│   ├── RotterdamMatrix.jsx     # 3-Pillar Rotterdam consensus educational component
-│   ├── SpecialistNavigator.jsx # Clinical provider navigation guide
-│   └── TalkOrType.jsx          # Voice/text symptom input, extraction & doctor prep
-├── data/
-│   ├── languages.js            # Dictionaries & prompts (EN, HI, Hinglish, TE, TA, KN, ML, MR, BN)
-│   └── pcosKnowledge.js        # Differential guidance, questions, recommended labs
-├── models/
-│   └── healthEntry.js          # Standardized health data schemas and persistence
+│   ├── BodyExplorer.jsx          # Interactive SVG anatomical hotspot mapper
+│   ├── EarlyWarningCard.jsx      # Warning card with evidence, why seeing this, dismiss
+│   ├── PatternExplanation.jsx    # Evidence breakdown & educational pattern explanations
+│   ├── PatternDetectionView.jsx  # Interactive early warning & pattern detection hub
+│   ├── RotterdamMatrix.jsx       # 3-Pillar Rotterdam consensus educational component
+│   ├── SpecialistNavigator.jsx   # Clinical provider navigation guide
+│   ├── MythBusters.jsx           # Myth vs. fact cards
+│   ├── common/                   # Reusable UI component library (Button, Card, Badge, etc.)
+│   └── layout/                   # Shell layout (Header, Sidebar, MobileNav, GlobalError)
 ├── services/
-│   └── symptomExtractor.js     # Multilingual rule-based extractor & Rotterdam pillar mapper
-├── engine.js                   # Core rules engine and clinical triage
-├── engine.test.js              # 15 automated test cases
-├── App.jsx                     # Root application container & navigation
-├── App.css                     # Comprehensive design system tokens and responsive styles
-└── main.jsx                    # Vite app entrypoint
+│   ├── earlyWarning.js           # Early warning rules engine & pattern detection
+│   ├── patternDetectionService.js# Pattern analysis service
+│   └── symptomExtractor.js       # Multilingual rule-based extractor & Rotterdam pillar mapper
+├── views/                        # Route views (Home, Talk, Tracker, Summary, Learn)
+├── data/                         # Languages dictionaries and presets
+├── engine.js                     # Core rules engine and clinical triage
+└── App.jsx                       # Responsive app router
 ```
 
 ---
@@ -139,7 +135,7 @@ src/
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js (v18.0.0 or higher recommended)
+- Node.js (v18.0.0 or higher)
 - npm (v9.0.0 or higher)
 
 ### Installation
@@ -156,13 +152,13 @@ npm install
 ```bash
 npm run dev
 ```
-Open your browser at `http://localhost:5173` to explore SakhiCare locally.
+Open your browser at `http://localhost:5173` (or the indicated port) to explore SakhiCare locally.
 
 ### Running Automated Tests
 ```bash
 npm test
 ```
-Runs the 15 automated test cases verifying symptom extraction across languages (English, Hindi, Hinglish, Tamil, Telugu), red flag triage, and Rotterdam mappings.
+Runs test suites verifying symptom extraction, red flag triage, and early warning pattern detection.
 
 ### Building for Production
 ```bash
