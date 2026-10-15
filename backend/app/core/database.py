@@ -1,4 +1,4 @@
-"""Async MongoDB Manager for PCOS Saathi / SakhiCare.
+"""Async MongoDB Manager for PCOS Saathi / Luna Her.
 
 Powered by Motor (async driver for MongoDB) and PyMongo.
 Provides connection pooling, health checks, automatic index creation,

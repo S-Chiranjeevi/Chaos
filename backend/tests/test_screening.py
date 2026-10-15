@@ -5,7 +5,10 @@ import io
 from fastapi.testclient import TestClient
 from PIL import Image
 
-from backend.app.main import app
+try:
+    from app.main import app
+except ImportError:
+    from backend.app.main import app
 
 client = TestClient(app)
 

@@ -49,7 +49,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 
 app = FastAPI(
-    title="PCOS Saathi & SakhiCare API",
+    title="PCOS Saathi & Luna Her API",
     description="Full-stack companion API for PCOS symptom analysis, cycle regularity tracking, clinician summaries, and MongoDB data sync.",
     version="3.1.0",
     lifespan=lifespan,
