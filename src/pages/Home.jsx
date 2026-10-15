@@ -37,7 +37,12 @@ const HOME_COPY = {
 }
 
 const actionMetadata = [
-  { id: 'talk', icon: MessageCircle, primary: true }, { id: 'tracker', icon: CalendarDays }, { id: 'insights', icon: HeartPulse }, { id: 'screening', icon: Microscope }, { id: 'doctor', icon: Stethoscope }, { id: 'learn', icon: BookOpen },
+  { id: 'talk', icon: MessageCircle, primary: true },
+  { id: 'tracker', icon: CalendarDays },
+  { id: 'insights', icon: HeartPulse },
+  { id: 'screening', icon: Microscope },
+  { id: 'doctor', icon: Stethoscope },
+  { id: 'learn', icon: BookOpen },
 ]
 
 export function Home({ onNavigate, currentLanguage = 'en' }) {
@@ -48,10 +53,17 @@ export function Home({ onNavigate, currentLanguage = 'en' }) {
         <p className="eyebrow">{copy.eyebrow}</p>
         <h1>{copy.title}</h1>
         <p>{copy.intro}</p>
-        <button className="button button-primary welcome-action" type="button" onClick={() => onNavigate('talk')}>{copy.actions[0][0]} <ArrowRight size={18} aria-hidden="true" /></button>
+        <button className="button button-primary welcome-action" type="button" onClick={() => onNavigate('talk')}>
+          {copy.actions[0][0]} <ArrowRight size={18} aria-hidden="true" />
+        </button>
       </section>
       <section aria-labelledby="home-actions-title">
-        <div className="section-heading"><div><p className="eyebrow">{copy.choose}</p><h2 id="home-actions-title">{copy.question}</h2></div></div>
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">{copy.choose}</p>
+            <h2 id="home-actions-title">{copy.question}</h2>
+          </div>
+        </div>
         <div className="action-grid">
           {actionMetadata.map(({ id, icon: Icon, primary }, index) => (
             <button key={id} type="button" className={`action-card ${primary ? 'action-card-primary' : ''}`} onClick={() => onNavigate(id)}>
@@ -66,3 +78,5 @@ export function Home({ onNavigate, currentLanguage = 'en' }) {
     </div>
   )
 }
+
+export default Home

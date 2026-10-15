@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { Bot, ChevronDown, MessageCircle, Send, ShieldAlert, X } from 'lucide-react'
 import { UrgentCareBanner } from './UrgentCareBanner.jsx'
 import { CHAT_STARTER, createChatReply } from '../services/chatbotService.js'
+import { t } from '../data/translations.js'
 
 function Message({ message, onSuggestion, onNavigate }) {
   const isAssistant = message.sender === 'assistant'
@@ -29,7 +30,7 @@ function Message({ message, onSuggestion, onNavigate }) {
   )
 }
 
-export function ChatbotWidget({ onNavigate }) {
+export function ChatbotWidget({ onNavigate, currentLanguage = 'en' }) {
   const [isOpen, setIsOpen] = useState(false)
   const [draft, setDraft] = useState('')
   const [messages, setMessages] = useState([CHAT_STARTER])
@@ -62,6 +63,14 @@ export function ChatbotWidget({ onNavigate }) {
     setDraft('')
   }
 
+  const launcherLabel = isOpen
+    ? (t('chatbot.launcherOpen', currentLanguage) || 'Close chat')
+    : (t('chatbot.launcherClosed', currentLanguage) || 'Ask LumaHer')
+  const botTitle = t('chatbot.title', currentLanguage) || 'Ask LumaHer'
+  const botSubtitle = t('chatbot.subtitle', currentLanguage) || 'Private, local guidance'
+  const safetyNote = t('chatbot.safetyNote', currentLanguage) || 'Urgent symptoms are checked before guidance.'
+  const placeholderText = t('chatbot.placeholder', currentLanguage) || 'Ask about tracking or preparing for a visit'
+
   return (
     <aside className="chatbot-shell" aria-label="LumaHer help chat">
       {isOpen && (
@@ -69,17 +78,17 @@ export function ChatbotWidget({ onNavigate }) {
           <header className="chatbot-header">
             <div className="chatbot-heading">
               <span className="chatbot-header-icon"><MessageCircle size={20} aria-hidden="true" /></span>
-              <div><h2 id="chatbot-title">Ask LumaHer</h2><p>Private, local guidance</p></div>
+              <div><h2 id="chatbot-title">{botTitle}</h2><p>{botSubtitle}</p></div>
             </div>
             <button type="button" className="chatbot-close" onClick={() => setIsOpen(false)} aria-label="Close chat"><X size={20} /></button>
           </header>
-          <p className="chatbot-safety-note"><ShieldAlert size={15} aria-hidden="true" /> Urgent symptoms are checked before guidance.</p>
+          <p className="chatbot-safety-note"><ShieldAlert size={15} aria-hidden="true" /> {safetyNote}</p>
           <div className="chatbot-transcript" ref={transcriptRef} aria-live="polite" aria-relevant="additions">
             {messages.map((message) => <Message key={message.id} message={message} onSuggestion={sendMessage} onNavigate={navigateFromSuggestion} />)}
           </div>
           <form className="chatbot-composer" onSubmit={(event) => { event.preventDefault(); sendMessage() }}>
             <label className="sr-only" htmlFor="chatbot-message">Type a message</label>
-            <textarea id="chatbot-message" value={draft} onChange={(event) => setDraft(event.target.value)} placeholder="Ask about tracking or preparing for a visit" rows="2" />
+            <textarea id="chatbot-message" value={draft} onChange={(event) => setDraft(event.target.value)} placeholder={placeholderText} rows="2" />
             <button type="submit" disabled={!draft.trim()} aria-label="Send message"><Send size={18} /></button>
           </form>
         </section>
@@ -92,7 +101,7 @@ export function ChatbotWidget({ onNavigate }) {
         aria-controls="chatbot-title"
       >
         <MessageCircle size={22} aria-hidden="true" />
-        <span>{isOpen ? 'Close chat' : 'Ask LumaHer'}</span>
+        <span>{launcherLabel}</span>
         {isOpen && <ChevronDown size={17} aria-hidden="true" />}
       </button>
     </aside>

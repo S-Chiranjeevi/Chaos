@@ -10,7 +10,8 @@ export const SUPPORTED_LANGUAGES = [
   { code: 'ml', name: 'Malayalam', native: 'മലയാളം', region: 'ഇന്ത്യ / കേരളം', speechReady: true },
   { code: 'te', name: 'Telugu', native: 'తెలుగు', region: 'భారతదేశం / ఆంధ్రప్రదేశ్', speechReady: true },
   { code: 'mr', name: 'Marathi', native: 'मराठी', region: 'भारत / महाराष्ट्र', speechReady: true },
-  { code: 'bn', name: 'Bengali', native: 'বাংলা', region: 'ভারত / পশ্চিমবঙ্গ', speechReady: true }
+  { code: 'bn', name: 'Bengali', native: 'বাংলা', region: 'ভারত / পশ্চিমবঙ্গ', speechReady: true },
+  { code: 'ml', name: 'Malayalam', native: 'മലയാളം', region: 'കേരളം', speechReady: true }
 ];
 
 /**

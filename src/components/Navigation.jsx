@@ -4,15 +4,6 @@ import { MAIN_SECTIONS } from './navigationItems.js'
 import { SUPPORTED_LANGUAGES } from './common/LanguageSelector.jsx'
 import { t } from '../data/translations.js'
 
-const NAVIGATION_LABELS = {
-  home: 'nav.home',
-  talk: 'nav.talk',
-  tracker: 'nav.tracker',
-  insights: 'nav.patterns',
-  doctor: 'nav.summary',
-  learn: 'nav.learn',
-}
-
 export function Navigation({ activePage, onNavigate, currentLanguage = 'en', onOpenLanguageSelector }) {
   const currentLangObj = SUPPORTED_LANGUAGES.find((l) => l.code === currentLanguage) || SUPPORTED_LANGUAGES[0]
 
@@ -22,11 +13,14 @@ export function Navigation({ activePage, onNavigate, currentLanguage = 'en', onO
         <span className="lunaher-logo-window lunaher-sidebar-logo"><img src="/lunaher-logo.png" alt="LunaHer" /></span>
       </a>
       <nav className="section-links">
-        {MAIN_SECTIONS.map(({ id, label, icon: Icon }) => (
-          <button key={id} type="button" className={`section-link ${activePage === id ? 'is-active' : ''}`} aria-current={activePage === id ? 'page' : undefined} onClick={() => onNavigate(id)}>
-            <Icon size={19} aria-hidden="true" /><span>{NAVIGATION_LABELS[id] ? t(NAVIGATION_LABELS[id], currentLanguage) : label}</span>
-          </button>
-        ))}
+        {MAIN_SECTIONS.map(({ id, label, icon: Icon }) => {
+          const translatedLabel = t(`nav.${id}`, currentLanguage) || label
+          return (
+            <button key={id} type="button" className={`section-link ${activePage === id ? 'is-active' : ''}`} aria-current={activePage === id ? 'page' : undefined} onClick={() => onNavigate(id)}>
+              <Icon size={19} aria-hidden="true" /><span>{translatedLabel}</span>
+            </button>
+          )
+        })}
       </nav>
       <div className="navigation-footer">
         {onOpenLanguageSelector && (
@@ -40,10 +34,10 @@ export function Navigation({ activePage, onNavigate, currentLanguage = 'en', onO
               <Globe size={16} aria-hidden="true" />
               <span>{currentLangObj.native} <small className="sidebar-language-name">({currentLangObj.name})</small></span>
             </div>
-            <span className="sidebar-language-action">{currentLanguage === 'hi' ? 'बदलें' : 'Change'}</span>
+            <span className="sidebar-language-action">{t('buttons.change', currentLanguage) || 'Change'}</span>
           </button>
         )}
-        <div className="navigation-note"><Shield size={17} aria-hidden="true" /><span>{currentLanguage === 'hi' ? 'आपके स्वास्थ्य नोट्स इसी डिवाइस पर रहते हैं।' : 'Your health notes stay on this device.'}</span></div>
+        <div className="navigation-note"><Shield size={17} aria-hidden="true" /><span>{t('nav.privacyNote', currentLanguage) || 'Your health notes stay on this device.'}</span></div>
       </div>
     </aside>
   )

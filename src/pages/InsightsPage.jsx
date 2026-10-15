@@ -7,11 +7,13 @@ import { readLocalData, STORAGE_KEYS } from '../services/localStorage.js'
 import { detectRedFlags } from '../services/safetyRules.js'
 import { validateOutput } from '../services/outputValidator.js'
 
+import { t } from '../data/translations.js'
+
 function InsightState({ title, children, action, onAction, tone = 'neutral' }) {
   return <div className={`insight-state insight-state-${tone}`} role={tone === 'error' ? 'alert' : 'status'}><strong>{title}</strong><p>{children}</p>{action && <button className="button button-secondary" type="button" onClick={onAction}>{action}</button>}<small className="mt-2 block font-semibold">This is information, not a diagnosis.</small></div>
 }
 
-export function InsightsPage({ onNavigate, healthEntry, refreshKey }) {
+export function InsightsPage({ onNavigate, healthEntry, refreshKey, currentLanguage = 'en' }) {
   const [state, setState] = useState({ loading: true, entry: null, error: null })
 
   useEffect(() => {
@@ -41,7 +43,7 @@ export function InsightsPage({ onNavigate, healthEntry, refreshKey }) {
     })
   }
   const assessmentValidation = entry?.assessment ? validateOutput(entry.assessment) : { valid: true }
-  return <div className="page-stack"><UrgentCareBanner warnings={safetyWarnings} /><header className="page-heading"><p className="eyebrow">Your saved notes</p><h1 data-page-heading tabIndex="-1">Early warnings and insights</h1><p>Review what you have written down. These notes cannot tell you what is causing a change.</p></header>
+  return <div className="page-stack"><UrgentCareBanner warnings={safetyWarnings} /><header className="page-heading"><p className="eyebrow">{t('insightsPage.eyebrow', currentLanguage) || 'Your saved notes'}</p><h1 data-page-heading tabIndex="-1">{t('insightsPage.title', currentLanguage) || 'Early warnings and insights'}</h1><p>{t('insightsPage.description', currentLanguage) || 'Review what you have written down. These notes cannot tell you what is causing a change.'}</p></header>
     {state.loading ? <InsightState title="Loading your notes">Please wait while we look for notes saved on this device.</InsightState> : state.error ? <InsightState title="We could not open your saved notes" tone="error">{state.error}</InsightState> : !entry ? <div className="empty-panel"><span className="empty-icon"><HeartPulse size={26} aria-hidden="true" /></span><h2>No saved notes yet</h2><p>When you save a note, you can review it here. There is nothing you need to track.</p><button className="button button-primary" type="button" onClick={() => onNavigate('talk')}>Describe something I notice <ArrowRight size={17} aria-hidden="true" /></button></div> : <>
       <div className="insight-note"><div className="insight-note-heading"><ClipboardList size={21} aria-hidden="true" /><div><strong>Your latest note</strong><small>{entry.timestamp ? new Date(entry.timestamp).toLocaleString() : 'Saved on this device'}</small></div></div><p>{entry.rawTranscript || entry.notes || 'A saved note is ready to review.'}</p></div>
       {!assessmentValidation.valid ? <InsightState title="Automated guidance was hidden" tone="error">This result did not pass safety checks. Please speak with a qualified healthcare professional about your concerns. This is information, not a diagnosis.</InsightState> : safetyWarnings.length ? <InsightState title="Please seek urgent help" tone="urgent">The safety check found a symptom that may need urgent attention. Contact local emergency help or a trusted health worker now.</InsightState> : <InsightState title="No urgent warning in this saved note" tone="calm">This only describes the note you saved. It does not rule out a health concern. If you feel very unwell or unsafe, seek local urgent help.</InsightState>}
@@ -53,7 +55,7 @@ export function InsightsPage({ onNavigate, healthEntry, refreshKey }) {
       <PersonalizedInsights
         currentPeriodLogs={[]}
         currentSymptomLogs={entry?.symptoms || []}
-        userLanguage={entry?.language === 'hi' ? 'Hindi' : 'English'}
+        userLanguage={currentLanguage === 'hi' ? 'Hindi' : currentLanguage === 'kn' ? 'Kannada' : currentLanguage === 'ta' ? 'Tamil' : currentLanguage === 'te' ? 'Telugu' : currentLanguage === 'mr' ? 'Marathi' : currentLanguage === 'bn' ? 'Bengali' : currentLanguage === 'ml' ? 'Malayalam' : 'English'}
       />
     </section>
   </div>

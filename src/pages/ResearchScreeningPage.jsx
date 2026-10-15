@@ -17,7 +17,7 @@ import { ClinicalScreeningForm } from '../components/screening/ClinicalScreening
 import { UltrasoundImageAnalyzer } from '../components/screening/UltrasoundImageAnalyzer.jsx';
 import { ScreeningResultsDashboard } from '../components/screening/ScreeningResultsDashboard.jsx';
 
-export function ResearchScreeningPage() {
+export function ResearchScreeningPage({ onNavigate, currentLanguage = 'en' }) {
   const [activeTab, setActiveTab] = useState('clinical'); // 'clinical' | 'ultrasound' | 'transparency'
   
   // Ultrasound transfer state

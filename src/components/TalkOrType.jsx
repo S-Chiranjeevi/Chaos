@@ -59,7 +59,7 @@ function assessWithSafety(input, candidate, localResult) {
   }
 }
 
-export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
+export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en', onLanguageChange }) {
   // Primary state
   const [selectedLang, setSelectedLang] = useState(initialLanguage)
   const [inputText, setInputText] = useState('')
@@ -91,17 +91,20 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
   const voiceTranscriptRef = useRef('')
   const shouldAnalyzeVoiceRef = useRef(false)
 
+  useEffect(() => {
+    if (initialLanguage && initialLanguage !== selectedLang) {
+      setSelectedLang(initialLanguage)
+    }
+  }, [initialLanguage])
+
   const currentLangObj = LANGUAGES.find((l) => l.code === selectedLang) || LANGUAGES[0]
   const strings = UI_STRINGS[selectedLang] || UI_STRINGS.en
   const examples = EXAMPLE_PROMPTS[selectedLang] || EXAMPLE_PROMPTS.en
 
-  useEffect(() => {
-    setSelectedLang(initialLanguage)
-  }, [initialLanguage])
-
   // Handle language change
   function handleLanguageChange(code) {
     setSelectedLang(code)
+    onLanguageChange?.(code)
     // If mic is active, restart or stop
     if (micActive) {
       shouldAnalyzeVoiceRef.current = false

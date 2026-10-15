@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Globe } from 'lucide-react';
 import GlobalError from './components/layout/GlobalError.jsx';
 import { LanguageSelector, SUPPORTED_LANGUAGES } from './components/common/LanguageSelector.jsx';
+import { t } from './data/translations.js';
 import { BottomNavigation } from './components/BottomNavigation.jsx';
 import { Navigation } from './components/Navigation.jsx';
 import { DoctorSummaryPage } from './pages/DoctorSummaryPage.jsx';
@@ -137,6 +138,10 @@ export function App() {
           <TalkOrTypePage
             key={currentLanguage}
             currentLanguage={currentLanguage}
+            onSelectLanguage={(lang) => {
+              setCurrentLanguage(lang);
+              StorageService.savePreferences({ language: lang });
+            }}
             onHealthEntryCreated={(entry) => {
               setLastSharedEntry(entry);
               setRefreshKey((v) => v + 1);
@@ -144,17 +149,18 @@ export function App() {
           />
         );
       case 'tracker':
-        return <HealthTrackerPage latestEntry={lastSharedEntry} />;
+        return <HealthTrackerPage latestEntry={lastSharedEntry} currentLanguage={currentLanguage} />;
       case 'insights':
         return (
           <InsightsPage
             onNavigate={navigate}
             healthEntry={lastSharedEntry}
             refreshKey={refreshKey}
+            currentLanguage={currentLanguage}
           />
         );
       case 'screening':
-        return <ResearchScreeningPage onNavigate={navigate} />;
+        return <ResearchScreeningPage onNavigate={navigate} currentLanguage={currentLanguage} />;
       case 'doctor':
         return (
           <DoctorSummaryPage
@@ -165,7 +171,7 @@ export function App() {
           />
         );
       case 'learn':
-        return <LearnPage />;
+        return <LearnPage currentLanguage={currentLanguage} />;
       default:
         return <Home onNavigate={navigate} currentLanguage={currentLanguage} />;
     }
@@ -198,7 +204,7 @@ export function App() {
           <main id="main-content" className="page-content" tabIndex="-1">
             {renderPage()}
             <footer className="page-footer">
-              <span>LunaHer · A gentle place to begin</span>
+              <span>LunaHer · {t('homePage.heroEyebrow', currentLanguage) || 'A gentle place to begin'}</span>
               <button
                 type="button"
                 onClick={() => setLanguageDialogOpen(true)}
@@ -218,7 +224,7 @@ export function App() {
       {/* Mobile Navigation */}
       <BottomNavigation activePage={activePage} onNavigate={navigate} currentLanguage={currentLanguage} />
 
-      <ChatbotWidget onNavigate={navigate} />
+      <ChatbotWidget onNavigate={navigate} currentLanguage={currentLanguage} />
       <BackgroundMusic />
 
       {/* Language Selector Modal */}
