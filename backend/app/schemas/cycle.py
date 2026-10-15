@@ -53,3 +53,98 @@ class CycleResponse(BaseModel):
     insights: List[str] = Field(default_factory=list, description="Educational insights based on clinical guidelines")
     urgency: str = Field(default="routine", description="Urgency rating based on cycle patterns")
     disclaimer: str = Field(default="This is information, not a diagnosis.", description="Medical disclaimer")
+
+
+# ============================================================================
+# APIVerve Menstrual Cycle Forecast Schemas
+# Documentation: https://docs.apiverve.com/ref/menstrualcycle
+# ============================================================================
+
+class APIVerveForecastRequest(BaseModel):
+    """Validated input parameters for APIVerve Menstrual Cycle Calculator API."""
+    last_period: str = Field(
+        ...,
+        description="First day of last menstrual period in YYYY-MM-DD format",
+        examples=["2026-03-01"]
+    )
+    cycle_length: int = Field(
+        default=28,
+        ge=21,
+        le=35,
+        description="Average length of menstrual cycle in days (allowed: 21-35)"
+    )
+    period_length: int = Field(
+        default=5,
+        ge=2,
+        le=10,
+        description="Average length of period in days (allowed: 2-10)"
+    )
+    cycles: int = Field(
+        default=3,
+        ge=1,
+        le=12,
+        description="Number of future cycles to calculate (allowed: 1-12)"
+    )
+
+    @field_validator("last_period")
+    @classmethod
+    def validate_last_period(cls, value: str) -> str:
+        cleaned = str(value).strip()
+        if not DATE_REGEX.match(cleaned):
+            raise ValueError(f"Invalid date format '{cleaned}'. Must be YYYY-MM-DD.")
+        try:
+            parsed = datetime.strptime(cleaned, "%Y-%m-%d")
+        except ValueError:
+            raise ValueError(f"'{cleaned}' is not a valid calendar date.")
+
+        # Reasonable bounds check: between 1900 and 2100
+        if parsed.year < 1900 or parsed.year > 2100:
+            raise ValueError(f"Date year {parsed.year} is outside acceptable range.")
+        return cleaned
+
+
+class APIVervePeriod(BaseModel):
+    start_date: str = Field(..., description="Estimated period start date (YYYY-MM-DD)")
+    end_date: str = Field(..., description="Estimated period end date (YYYY-MM-DD)")
+    duration_days: int = Field(..., description="Period duration in days")
+
+
+class APIVerveOvulation(BaseModel):
+    date: str = Field(..., description="Estimated ovulation date (YYYY-MM-DD)")
+    day_of_cycle: int = Field(..., description="Cycle day number on which ovulation is estimated")
+
+
+class APIVerveFertileWindow(BaseModel):
+    start_date: str = Field(..., description="Fertile window start date (YYYY-MM-DD)")
+    end_date: str = Field(..., description="Fertile window end date (YYYY-MM-DD)")
+    duration_days: int = Field(..., description="Fertile window length in days")
+
+
+class APIVerveCycleItem(BaseModel):
+    cycle_number: int = Field(..., description="Index of calculated cycle (1-based)")
+    period: APIVervePeriod
+    ovulation: APIVerveOvulation
+    fertile_window: APIVerveFertileWindow
+
+
+class APIVerveForecastData(BaseModel):
+    last_period_date: str = Field(..., description="Input last period start date")
+    cycle_length: int = Field(..., description="Cycle length used for calculations")
+    period_length: int = Field(..., description="Period duration used for calculations")
+    cycles_calculated: int = Field(..., description="Count of calculated cycles returned")
+    cycles: List[APIVerveCycleItem] = Field(default_factory=list, description="Forecast cycle details")
+    disclaimer: Optional[str] = Field(
+        default=None,
+        description="Medical disclaimer provided by APIVerve upstream engine"
+    )
+
+
+class APIVerveForecastResponse(BaseModel):
+    status: str = Field(default="ok", description="Status code ('ok')")
+    source: str = Field(default="apiverve_live_api", description="Source identifier")
+    data: APIVerveForecastData = Field(..., description="Structured menstrual cycle forecast data")
+    disclaimer: str = Field(
+        default="This information is an estimate based on average mathematical cycle calculations and is not a medical diagnosis.",
+        description="PCOS Saathi medical safety disclaimer"
+    )
+

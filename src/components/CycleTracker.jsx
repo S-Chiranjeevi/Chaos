@@ -21,6 +21,7 @@ import { CycleCalendarView } from './tracker/CycleCalendarView.jsx';
 import { UpcomingPeriodCard } from './tracker/UpcomingPeriodCard.jsx';
 import { CycleInsightsCard } from './tracker/CycleInsightsCard.jsx';
 import { CycleEducationalSafety } from './tracker/CycleEducationalSafety.jsx';
+import { APIVerveForecastCard } from './tracker/APIVerveForecastCard.jsx';
 
 function readInitialEntries() {
   try {
@@ -43,7 +44,8 @@ function readInitialEntries() {
 
 export function CycleTracker({ latestEntry }) {
   const [entries, setEntries] = useState(() => readInitialEntries());
-  const [activeTab, setActiveTab] = useState('insights'); // 'insights' | 'calendar' | 'safety'
+  const [forecastHistory, setForecastHistory] = useState(() => StorageService.getApiVerveForecasts());
+  const [activeTab, setActiveTab] = useState('forecast'); // 'forecast' | 'insights' | 'calendar' | 'safety'
   const [editingEntry, setEditingEntry] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [statusMessage, setStatusMessage] = useState(null);
@@ -52,12 +54,14 @@ export function CycleTracker({ latestEntry }) {
     setEntries(readInitialEntries());
   };
 
-
   // Listen to cross-app storage changes
   useEffect(() => {
     const handleStorageChange = (e) => {
       if (e.detail?.key === STORAGE_KEYS.CYCLE_ENTRIES || e.detail?.key === 'all_purged') {
         reloadEntries();
+      }
+      if (e.detail?.key === STORAGE_KEYS.APIVERVE_FORECASTS || e.detail?.key === 'all_purged') {
+        setForecastHistory(StorageService.getApiVerveForecasts());
       }
     };
     window.addEventListener('pcos_saathi:data_change', handleStorageChange);
@@ -143,7 +147,23 @@ export function CycleTracker({ latestEntry }) {
 
       {/* Feature Navigation Tabs */}
       <div className="flex items-center justify-between gap-2 flex-wrap border-b border-stone-200/80 pb-2">
-        <div className="flex items-center gap-1.5 p-1 bg-stone-200/50 rounded-2xl">
+        <div className="flex items-center gap-1.5 p-1 bg-stone-200/50 rounded-2xl flex-wrap">
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab('forecast');
+              setIsFormOpen(false);
+            }}
+            className={`px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all ${
+              activeTab === 'forecast'
+                ? 'bg-white text-stone-900 shadow-xs'
+                : 'text-stone-600 hover:text-stone-900'
+            }`}
+          >
+            <Sparkles className="w-4 h-4 text-rose-600" />
+            <span>Cycle Insights & Forecast</span>
+          </button>
+
           <button
             type="button"
             onClick={() => {
@@ -157,7 +177,7 @@ export function CycleTracker({ latestEntry }) {
             }`}
           >
             <Activity className="w-4 h-4 text-rose-600" />
-            <span>Cycle Insights & Forecast</span>
+            <span>Pattern Analysis</span>
           </button>
 
           <button
@@ -222,7 +242,12 @@ export function CycleTracker({ latestEntry }) {
         />
       )}
 
-      {/* TAB 1: Insights & Forecast */}
+      {/* TAB 1: Live APIVerve Menstrual Cycle Forecast */}
+      {activeTab === 'forecast' && (
+        <APIVerveForecastCard />
+      )}
+
+      {/* TAB 2: Insights & Pattern History */}
       {activeTab === 'insights' && (
         <div className="space-y-6">
           {/* Upcoming Period Forecast Card */}
@@ -236,13 +261,14 @@ export function CycleTracker({ latestEntry }) {
         </div>
       )}
 
-      {/* TAB 2: Calendar & Logged History */}
+      {/* TAB 3: Calendar & Logged History */}
       {activeTab === 'calendar' && (
         <div className="space-y-6">
           {/* Interactive Menstrual Calendar */}
           <CycleCalendarView
             entries={entries}
             expectedWindow={predictionResult?.expectedNextPeriod}
+            apiverveCycles={forecastHistory[0]?.responseData?.cycles || []}
           />
 
           {/* Chronological Entry List with Edit / Delete */}
@@ -254,7 +280,7 @@ export function CycleTracker({ latestEntry }) {
         </div>
       )}
 
-      {/* TAB 3: Clinical Guide & Safety */}
+      {/* TAB 4: Clinical Guide & Safety */}
       {activeTab === 'safety' && (
         <CycleEducationalSafety />
       )}

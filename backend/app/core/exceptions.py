@@ -38,13 +38,26 @@ def setup_exception_handlers(app: Any) -> None:
     @app.exception_handler(StarletteHTTPException)
     async def http_exception_handler(request: Request, exc: StarletteHTTPException) -> JSONResponse:
         """Format standard HTTP errors (404, 400, 405, etc.)."""
+        if isinstance(exc.detail, dict):
+            error_code = exc.detail.get("error", f"HTTP_{exc.status_code}")
+            message = exc.detail.get("message", "An error occurred.")
+            return JSONResponse(
+                status_code=exc.status_code,
+                content={
+                    "error": error_code,
+                    "message": message,
+                    "detail": exc.detail,
+                },
+            )
         return JSONResponse(
             status_code=exc.status_code,
             content={
                 "error": f"HTTP_{exc.status_code}",
                 "message": str(exc.detail),
+                "detail": str(exc.detail),
             },
         )
+
 
     @app.exception_handler(Exception)
     async def generic_exception_handler(request: Request, exc: Exception) -> JSONResponse:
