@@ -39,6 +39,22 @@ class Settings(BaseSettings):
         default=8.0,
         description="HTTP client timeout for outgoing AI requests"
     )
+    MONGODB_URI: str = Field(
+        default="mongodb://localhost:27017",
+        description="MongoDB connection string (local or MongoDB Atlas mongodb+srv://...)"
+    )
+    MONGODB_DB_NAME: str = Field(
+        default="sakhicare_db",
+        description="MongoDB database name"
+    )
+    MONGODB_TIMEOUT_MS: int = Field(
+        default=3000,
+        description="MongoDB connection server selection timeout in milliseconds"
+    )
+    MONGODB_AUTO_CONNECT: bool = Field(
+        default=True,
+        description="Whether to attempt automatic connection to MongoDB on startup"
+    )
 
     model_config = SettingsConfigDict(
         env_file=".env",
