@@ -2,6 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { detectRedFlags, getSafetyDisclaimer } from '../src/services/safetyRules.js'
 import { prepareOutputForDisplay, validateOutput } from '../src/services/outputValidator.js'
+import { requestSymptomAnalysis } from '../src/services/apiClient.js'
 
 const warningIds = (input) => detectRedFlags(input).map((warning) => warning.id)
 
@@ -223,4 +224,19 @@ test('prepares a validated output and runs urgent rules on the input first', () 
   const result = prepareOutputForDisplay({ input: 'I am soaking a pad every hour.', output: 'Please contact a health professional.' })
   assert.equal(result.valid, true)
   assert.equal(result.urgentWarnings[0].id, 'heavy_bleeding')
+})
+
+test('urgent symptoms are stopped locally before contacting the backend', async () => {
+  const originalFetch = globalThis.fetch
+  let contactedBackend = false
+  globalThis.fetch = () => { contactedBackend = true; throw new Error('fetch should not run') }
+  try {
+    await assert.rejects(
+      requestSymptomAnalysis({ text: 'I am soaking a pad every hour.' }),
+      /Urgent symptoms were detected before contacting the online service/,
+    )
+    assert.equal(contactedBackend, false)
+  } finally {
+    globalThis.fetch = originalFetch
+  }
 })

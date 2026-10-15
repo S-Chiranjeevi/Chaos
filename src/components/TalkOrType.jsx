@@ -15,12 +15,47 @@ import {
 import { LANGUAGES, EXAMPLE_PROMPTS, UI_STRINGS } from '../data/languages.js'
 import { speechService } from '../services/speechService.js'
 import { extractSymptoms } from '../services/symptomExtractor.js'
-import { requestSymptomAnalysis } from '../services/apiClient.js'
+import { AnalysisUnavailableError, requestSymptomAnalysis } from '../services/apiClient.js'
+import { detectRedFlags, getSafetyDisclaimer } from '../services/safetyRules.js'
+import { validateOutput } from '../services/outputValidator.js'
 import { createHealthEntry, publishHealthEntry } from '../models/healthEntry.js'
+import { UrgentCareBanner } from './UrgentCareBanner.jsx'
 import { SymptomCards } from './SymptomCards.jsx'
 import { AssessmentView } from './AssessmentView.jsx'
 import { HealthEntryExport } from './HealthEntryExport.jsx'
 import { StatePreviewBar } from './StatePreviewBar.jsx'
+
+function assessWithSafety(input, candidate, localResult) {
+  const safetyWarnings = detectRedFlags(input)
+  const validation = validateOutput(candidate)
+  const localValidation = validateOutput(localResult)
+  let parsed = validation.valid ? validation.output : localValidation.valid ? localValidation.output : null
+
+  if (!parsed) {
+    parsed = {
+      symptoms: [],
+      possibleRelationships: [],
+      isUrgent: safetyWarnings.length > 0,
+      urgency: safetyWarnings.length > 0 ? 'urgent' : 'routine',
+      redFlags: [],
+      disclaimer: getSafetyDisclaimer(),
+      questionsForDoctor: [],
+      lifestyleTips: [],
+      recommendedSpecialist: 'a qualified healthcare professional',
+      outputBlocked: true,
+    }
+  }
+
+  const redFlags = Array.isArray(parsed.redFlags) ? parsed.redFlags : Array.isArray(parsed.red_flags) ? parsed.red_flags : []
+  return {
+    ...parsed,
+    safetyWarnings,
+    isUrgent: safetyWarnings.length > 0 || parsed.isUrgent || ['urgent', 'emergency'].includes(parsed.urgency),
+    urgency: safetyWarnings.length > 0 || parsed.urgency === 'emergency' ? 'urgent' : parsed.urgency,
+    redFlags: [...new Set([...redFlags, ...safetyWarnings.map((warning) => warning.title)])],
+    disclaimer: getSafetyDisclaimer(),
+  }
+}
 
 export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
   // Primary state
@@ -175,27 +210,43 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
     setCurrentState('processing')
     setAnalysisFallbackMessage('')
 
-    const localResult = extractSymptoms(inputText, { preferredLanguage: selectedLang })
-    let parsed = localResult
-    try {
-      parsed = await requestSymptomAnalysis({ text: inputText.trim(), language: selectedLang })
-      parsed = {
-        ...localResult,
-        ...parsed,
-        symptoms: Array.isArray(parsed.symptoms) ? parsed.symptoms : localResult.symptoms,
-        detectedLanguage: parsed.detectedLanguage || localResult.detectedLanguage,
-        possibleRelationships: Array.isArray(parsed.possibleRelationships) ? parsed.possibleRelationships : localResult.possibleRelationships,
-        recommendedSpecialist: parsed.recommendedSpecialist || localResult.recommendedSpecialist,
-        // Local rules retain the safety floor even if an optional service responds.
-        disclaimer: localResult.disclaimer,
-        urgency: localResult.urgency === 'urgent' ? 'urgent' : parsed.urgency,
-        redFlags: localResult.redFlags.length ? localResult.redFlags : parsed.redFlags,
-        lifestyleTips: Array.isArray(parsed.lifestyleTips) && parsed.lifestyleTips.length ? parsed.lifestyleTips : localResult.lifestyleTips,
-        questionsForDoctor: Array.isArray(parsed.questionsForDoctor) && parsed.questionsForDoctor.length ? parsed.questionsForDoctor : localResult.questionsForDoctor,
+    const input = inputText.trim()
+    const safetyWarnings = detectRedFlags(input)
+    const localResult = extractSymptoms(input, { preferredLanguage: selectedLang })
+    let candidate = localResult
+
+    // Urgent findings use local rules immediately and never wait on an online model.
+    if (!safetyWarnings.length) {
+      try {
+        const response = await requestSymptomAnalysis({ text: input, language: selectedLang })
+        const validation = validateOutput(response)
+        if (!validation.valid) throw new AnalysisUnavailableError('The online response did not pass safety checks.')
+        const backendResult = validation.output
+        candidate = {
+          ...localResult,
+          ...backendResult,
+          // Keep locally structured symptom cards, while accepting safe backend education.
+          symptoms: localResult.symptoms,
+          detectedLanguage: backendResult.detectedLanguage || backendResult.detected_language || localResult.detectedLanguage,
+          possibleRelationships: Array.isArray(backendResult.possibleRelationships)
+            ? backendResult.possibleRelationships
+            : backendResult.possible_relation ? [backendResult.possible_relation] : localResult.possibleRelationships,
+          recommendedSpecialist: backendResult.recommendedSpecialist || backendResult.recommended_specialist || localResult.recommendedSpecialist,
+          urgency: localResult.urgency === 'urgent' ? 'urgent' : backendResult.urgency,
+          redFlags: localResult.redFlags.length ? localResult.redFlags : backendResult.redFlags || backendResult.red_flags || [],
+          lifestyleTips: backendResult.lifestyleTips || backendResult.self_care_tips || localResult.lifestyleTips,
+          questionsForDoctor: backendResult.questionsForDoctor || backendResult.questions_for_doctor || localResult.questionsForDoctor,
+          disclaimer: getSafetyDisclaimer(),
+        }
+      } catch (error) {
+        const safetyBlocked = error instanceof AnalysisUnavailableError && /safety checks/i.test(error.message)
+        setAnalysisFallbackMessage(safetyBlocked
+          ? 'The online response was hidden by safety checks, so SakhiCare used on-device guidance instead.'
+          : 'We could not use the online analysis service, so SakhiCare used private on-device symptom guidance instead.')
       }
-    } catch {
-      setAnalysisFallbackMessage('We could not reach the online analysis service, so SakhiCare used private on-device symptom guidance instead.')
     }
+
+    const parsed = assessWithSafety(input, candidate, localResult)
 
     setExtractedResult(parsed)
     setSymptomsList(parsed.symptoms)
@@ -212,6 +263,7 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
         topics: parsed.topics,
         questionsForDoctor: parsed.questionsForDoctor,
         redFlags: parsed.redFlags,
+        safetyWarnings: parsed.safetyWarnings,
       },
     })
 
@@ -282,8 +334,10 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
     } else if (targetState === 'processing') {
       setRecordingStatusMessage('')
     } else if (targetState === 'results') {
-      if (!inputText) setInputText('My periods come every 2–3 months, and I have acne and severe pain.')
-      const parsed = extractSymptoms('My periods come every 2–3 months, and I have acne and severe pain.')
+      const sample = 'My periods come every 2–3 months, and I have acne and severe pain.'
+      if (!inputText) setInputText(sample)
+      const localResult = extractSymptoms(sample, { preferredLanguage: selectedLang })
+      const parsed = assessWithSafety(sample, localResult, localResult)
       setExtractedResult(parsed)
       setSymptomsList(parsed.symptoms)
       const mockEntry = createHealthEntry({
@@ -584,6 +638,7 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
       {/* RESULTS DISPLAY */}
       {currentState === 'results' && extractedResult && (
         <section ref={resultsRef} className="results-container" id="results-view" aria-live="polite">
+          <UrgentCareBanner warnings={extractedResult.safetyWarnings || []} />
           {/* SECTION HEADER */}
           <div className="results-hero-strip">
             <div className="strip-title-group">

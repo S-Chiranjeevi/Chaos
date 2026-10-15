@@ -36,6 +36,7 @@ class AnalyzeRequest(BaseModel):
 
 class AnalyzeResponse(BaseModel):
     """Empathetic, non-diagnostic response for symptom analysis."""
+    safety_warnings: List[dict[str, Any]] = Field(default_factory=list, description="Urgent safety warnings to render before other information")
     detected_language: str = Field(..., description="Language detected or used for reply")
     symptoms: List[str] = Field(default_factory=list, description="Extracted symptom labels")
     possible_relation: str = Field(default="", description="Educational relation to hormonal/cycle patterns")

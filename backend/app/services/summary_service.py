@@ -3,10 +3,10 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Optional, Union
 from ..schemas.summary import SummaryRequest, SummaryResponse
+from ..safety.output_validator import DISCLAIMER, validate_output
+from ..safety.red_flags import detect_red_flags
 from .cycle_service import cycle_service
 from .gemini_service import gemini_service
-
-DISCLAIMER = "This is information, not a diagnosis."
 
 AVAILABLE_CLINICAL_INSIGHTS = [
     "International Rotterdam criteria require ruling out thyroid dysfunction and hyperprolactinemia before confirming PCOS.",
@@ -23,13 +23,14 @@ class SummaryService:
     @classmethod
     async def generate_summary(cls, request: SummaryRequest) -> SummaryResponse:
         """Synthesize summary using Gemini if available, otherwise local fallback."""
+        safety_warnings = detect_red_flags(request.model_dump())
         normalized_symptoms = cls._normalize_symptoms(request.symptoms)
         cycle_metrics = cls._extract_cycle_metrics(request.cycle_data)
         normalized_insights = cls._normalize_insights(request.insights)
         duration_text = request.duration.strip() if request.duration else "recent months"
 
         # Try Gemini AI synthesis if configured and reachable
-        if gemini_service.is_available:
+        if not safety_warnings and gemini_service.is_available:
             ai_summary = await cls._try_gemini_summary(
                 symptoms=normalized_symptoms,
                 duration=duration_text,
@@ -38,16 +39,23 @@ class SummaryService:
                 language=request.language or "en",
             )
             if ai_summary:
-                return ai_summary
+                safe_ai_summary = validate_output(ai_summary.model_dump())
+                if safe_ai_summary is not None:
+                    return SummaryResponse(**safe_ai_summary)
 
         # Deterministic local fallback
-        return cls._local_summary(
+        local_summary = cls._local_summary(
             symptoms=normalized_symptoms,
             duration=duration_text,
             cycle_metrics=cycle_metrics,
             insights=normalized_insights,
             language=request.language or "en",
+            safety_warnings=safety_warnings,
         )
+        safe_local_summary = validate_output(local_summary.model_dump())
+        if safe_local_summary is not None:
+            return SummaryResponse(**safe_local_summary)
+        return cls._blocked_summary(safety_warnings)
 
     @classmethod
     def _normalize_symptoms(cls, raw_symptoms: List[Union[str, Dict[str, Any]]]) -> List[Dict[str, Any]]:
@@ -121,7 +129,9 @@ class SummaryService:
         cycle_metrics: Dict[str, Any],
         insights: List[str],
         language: str,
+        safety_warnings: Optional[List[Dict[str, Any]]] = None,
     ) -> SummaryResponse:
+        safety_warnings = safety_warnings or []
         symptom_names = [s["symptom"] for s in symptoms]
         symptoms_str = ", ".join(symptom_names) if symptom_names else "menstrual and hormonal wellness patterns"
 
@@ -132,6 +142,9 @@ class SummaryService:
             f"Over the past {duration}, I recorded {symptoms_str} and observed a {cycle_phrase}. "
             "I would like to review these observations to evaluate whether clinical hormonal testing or imaging is recommended."
         )
+        if safety_warnings:
+            urgent_text = "\n".join(f"{warning['title']}. {warning['message']}" for warning in safety_warnings)
+            narrative = f"URGENT SAFETY INFORMATION\n{urgent_text}\n\n{narrative}"
 
         repeated_patterns: List[str] = []
         if avg_days and (avg_days > 35 or avg_days < 21):
@@ -149,19 +162,28 @@ class SummaryService:
         ]
 
         # Clinical notes for pre-consultation sheet
+        red_flag_notes = "\n".join(f"- {warning['title']}: {warning['message']}" for warning in safety_warnings)
+        if not red_flag_notes:
+            red_flag_notes = "- Red Flags: None acutely detected"
         clinical_notes = (
             f"PRE-CONSULTATION SUMMARY\n"
             f"- Reported Timeframe: {duration}\n"
             f"- Primary Symptoms Logged: {symptoms_str}\n"
             f"- Cycle Parameters: {cycle_phrase}\n"
-            f"- Red Flags: None acutely detected\n"
+            f"{red_flag_notes}\n"
             f"- Purpose: Patient seeks clinical guidance and evaluation for suspected hormonal irregularity."
         )
 
+        urgent_print_section = ""
+        if safety_warnings:
+            urgent_print_section = "URGENT SAFETY INFORMATION:\n" + "\n".join(
+                f"- {warning['title']}: {warning['message']}" for warning in safety_warnings
+            ) + "\n\n"
         printable_text = (
             f"=====================================================\n"
             f" PCOS SAATHI — CLINICIAN PRE-CONSULTATION SUMMARY\n"
             f"=====================================================\n\n"
+            f"{urgent_print_section}"
             f"PATIENT NARRATIVE:\n{narrative}\n\n"
             f"RECORDED SYMPTOMS:\n"
             + "\n".join([f" • {s['symptom']} (Severity: {s['severity']}, Duration: {s['duration']}, Frequency: {s['frequency']})" for s in symptoms])
@@ -174,16 +196,35 @@ class SummaryService:
         )
 
         return SummaryResponse(
+            safety_warnings=safety_warnings,
             narrative=narrative,
             main_symptoms=symptoms,
             cycle_summary=cycle_metrics,
             repeated_patterns=repeated_patterns,
-            red_flags=[],
-            recommended_specialist="gynecologist",
+            red_flags=[warning["title"] for warning in safety_warnings],
+            recommended_specialist="urgent medical care" if safety_warnings else "gynecologist",
             questions_for_doctor=questions_for_doctor,
             personalized_insights=AVAILABLE_CLINICAL_INSIGHTS[:3],
             clinical_notes=clinical_notes,
             printable_text=printable_text,
+            disclaimer=DISCLAIMER,
+        )
+
+    @classmethod
+    def _blocked_summary(cls, safety_warnings: List[Dict[str, Any]]) -> SummaryResponse:
+        urgent_text = "\n".join(f"{warning['title']}. {warning['message']}" for warning in safety_warnings)
+        if urgent_text:
+            narrative = f"URGENT SAFETY INFORMATION\n{urgent_text}\n\n"
+        else:
+            narrative = "Automated summary was hidden because it did not pass safety checks. Please speak with a qualified healthcare professional.\n\n"
+        narrative += DISCLAIMER
+        return SummaryResponse(
+            safety_warnings=safety_warnings,
+            narrative=narrative,
+            red_flags=[warning["title"] for warning in safety_warnings],
+            recommended_specialist="urgent medical care" if safety_warnings else "a qualified healthcare professional",
+            clinical_notes="Automated summary was withheld by safety checks.",
+            printable_text=f"{narrative}\n\nDISCLAIMER:\n{DISCLAIMER}",
             disclaimer=DISCLAIMER,
         )
 
