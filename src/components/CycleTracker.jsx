@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Activity, CalendarDays, Download, ShieldCheck, Trash2 } from 'lucide-react'
+import { Activity, CalendarDays, Download, Trash2 } from 'lucide-react'
 import PatternTimeline from './PatternTimeline.jsx'
 import { analyzeCycles } from '../services/cycleAnalysis.js'
 import { deleteAllLocalData, exportAllLocalData, loadCycleEntries, loadDoctorSummary, loadHealthEntries, saveCycleEntry, saveDoctorSummary, saveInsight } from '../services/storageService.js'
@@ -134,7 +134,6 @@ function CycleTracker() {
         <p className="eyebrow">Your private health journal</p>
         <h2 id="cycle-tracker-title">Health tracker</h2>
         <p>Keep period and symptom notes together, and review your own records over time.</p>
-        <div className="cycle-privacy"><ShieldCheck size={16} aria-hidden="true" /> Saved in this browser only. No account or outside database.</div>
       </div>
 
       <div className="cycle-tracker-layout">
