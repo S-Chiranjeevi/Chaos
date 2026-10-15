@@ -1,37 +1,68 @@
 import React from 'react'
 import { ArrowRight, BookOpen, CalendarDays, HeartPulse, MessageCircle, Microscope, Stethoscope } from 'lucide-react'
 
-const actions = [
-  { id: 'talk', label: 'Describe my symptoms', detail: 'Write or say what you notice, using your own words.', icon: MessageCircle, primary: true },
-  { id: 'tracker', label: 'Track my cycle', detail: 'Add a period date if you would like to keep a record.', icon: CalendarDays },
-  { id: 'insights', label: 'View my insights', detail: 'Review notes you have saved on this device.', icon: HeartPulse },
-  { id: 'screening', label: 'LunaHer Pattern Screening', detail: 'Review clinical and lab values with the LunaHer pattern screening model.', icon: Microscope },
-  { id: 'doctor', label: 'Prepare for a doctor visit', detail: 'Make a simple summary and questions to bring.', icon: Stethoscope },
-  { id: 'learn', label: 'Learn about PCOS', detail: 'Read clear, gentle information and myth checks.', icon: BookOpen },
+const HOME_COPY = {
+  en: {
+    eyebrow: 'A gentle place to begin', title: 'Your health, in your words.', intro: 'You do not need medical words or all the answers. Choose one thing that would help you today.', choose: 'Choose what feels useful', question: 'How can we help today?', footnote: 'Take your time. You can skip any step and come back later.',
+    actions: [['Describe my symptoms', 'Write or say what you notice, using your own words.'], ['Track my cycle', 'Add a period date if you would like to keep a record.'], ['View my insights', 'Review notes you have saved on this device.'], ['LunaHer Pattern Screening', 'Review clinical and lab values with the LunaHer pattern screening model.'], ['Prepare for a doctor visit', 'Make a simple summary and questions to bring.'], ['Learn about PCOS', 'Read clear, gentle information and myth checks.']],
+  },
+  hi: {
+    eyebrow: 'शुरू करने के लिए एक सहज जगह', title: 'आपका स्वास्थ्य, आपके शब्दों में।', intro: 'आपको चिकित्सीय शब्द या सभी जवाब जानने की ज़रूरत नहीं है। आज जो मददगार लगे, उसे चुनें।', choose: 'वह चुनें जो उपयोगी लगे', question: 'आज हम कैसे मदद कर सकते हैं?', footnote: 'अपना समय लें। आप कोई भी कदम छोड़कर बाद में वापस आ सकते हैं।',
+    actions: [['मेरे लक्षण बताएं', 'अपनी भाषा में लिखें या बोलें कि आप क्या महसूस कर रहे हैं।'], ['मेरा चक्र ट्रैक करें', 'रिकॉर्ड रखने के लिए पीरियड की तारीख जोड़ें।'], ['मेरी जानकारियाँ देखें', 'इस डिवाइस पर सहेजे गए नोट्स देखें।'], ['LunaHer पैटर्न स्क्रीनिंग', 'LunaHer स्क्रीनिंग मॉडल के साथ क्लिनिकल और लैब मान देखें।'], ['डॉक्टर की मुलाकात की तैयारी', 'ले जाने के लिए सरल सारांश और प्रश्न बनाएं।'], ['PCOS के बारे में जानें', 'स्पष्ट, सहज जानकारी और मिथकों की जाँच पढ़ें।']],
+  },
+  kn: {
+    eyebrow: 'ಪ್ರಾರಂಭಿಸಲು ಒಂದು ಸುಲಭ ಸ್ಥಳ', title: 'ನಿಮ್ಮ ಆರೋಗ್ಯ, ನಿಮ್ಮ ಮಾತುಗಳಲ್ಲಿ.', intro: 'ವೈದ್ಯಕೀಯ ಪದಗಳು ಅಥವಾ ಎಲ್ಲ ಉತ್ತರಗಳು ನಿಮಗೆ ಬೇಕಾಗಿಲ್ಲ. ಇಂದು ಸಹಾಯವಾಗುವ ಒಂದನ್ನು ಆಯ್ಕೆಮಾಡಿ.', choose: 'ಉಪಯುಕ್ತವೆನಿಸುವುದನ್ನು ಆಯ್ಕೆಮಾಡಿ', question: 'ಇಂದು ನಾವು ಹೇಗೆ ಸಹಾಯ ಮಾಡಬಹುದು?', footnote: 'ನಿಮ್ಮ ಸಮಯ ತೆಗೆದುಕೊಳ್ಳಿ. ಯಾವುದೇ ಹಂತವನ್ನು ಬಿಟ್ಟು ನಂತರ ಮರಳಿ ಬರಬಹುದು.',
+    actions: [['ನನ್ನ ಲಕ್ಷಣಗಳನ್ನು ವಿವರಿಸಿ', 'ನಿಮ್ಮ ಸ್ವಂತ ಮಾತುಗಳಲ್ಲಿ ನೀವು ಗಮನಿಸಿದುದನ್ನು ಬರೆಯಿರಿ ಅಥವಾ ಹೇಳಿ.'], ['ನನ್ನ ಋತುಚಕ್ರವನ್ನು ಟ್ರ್ಯಾಕ್ ಮಾಡಿ', 'ದಾಖಲೆಗಾಗಿ ಮುಟ್ಟಿನ ದಿನಾಂಕ ಸೇರಿಸಿ.'], ['ನನ್ನ ಮಾಹಿತಿಗಳನ್ನು ನೋಡಿ', 'ಈ ಸಾಧನದಲ್ಲಿ ಉಳಿಸಿದ ಟಿಪ್ಪಣಿಗಳನ್ನು ಪರಿಶೀಲಿಸಿ.'], ['LunaHer ಮಾದರಿ ಸ್ಕ್ರೀನಿಂಗ್', 'LunaHer ಸ್ಕ್ರೀನಿಂಗ್ ಮಾದರಿಯೊಂದಿಗೆ ಕ್ಲಿನಿಕಲ್ ಮತ್ತು ಲ್ಯಾಬ್ ಮೌಲ್ಯಗಳನ್ನು ನೋಡಿ.'], ['ವೈದ್ಯರ ಭೇಟಿಗೆ ಸಿದ್ಧತೆ', 'ಕೊಂಡೊಯ್ಯಲು ಸರಳ ಸಾರಾಂಶ ಮತ್ತು ಪ್ರಶ್ನೆಗಳನ್ನು ತಯಾರಿಸಿ.'], ['PCOS ಬಗ್ಗೆ ತಿಳಿಯಿರಿ', 'ಸ್ಪಷ್ಟ ಮಾಹಿತಿ ಮತ್ತು ತಪ್ಪು ಕಲ್ಪನೆಗಳ ಪರಿಶೀಲನೆ ಓದಿ.']],
+  },
+  ta: {
+    eyebrow: 'தொடங்க ஒரு மென்மையான இடம்', title: 'உங்கள் ஆரோக்கியம், உங்கள் வார்த்தைகளில்.', intro: 'மருத்துவச் சொற்களோ எல்லா பதில்களோ உங்களுக்குத் தேவையில்லை. இன்று உதவும் ஒன்றைத் தேர்ந்தெடுக்கவும்.', choose: 'பயனுள்ளதாக இருப்பதைத் தேர்ந்தெடுக்கவும்', question: 'இன்று நாங்கள் எப்படி உதவலாம்?', footnote: 'உங்கள் நேரத்தை எடுத்துக்கொள்ளுங்கள். எந்தப் படியையும் தவிர்த்து பிறகு திரும்பலாம்.',
+    actions: [['என் அறிகுறிகளை விவரிக்கவும்', 'நீங்கள் கவனித்ததை உங்கள் சொந்த வார்த்தைகளில் எழுதுங்கள் அல்லது சொல்லுங்கள்.'], ['என் சுழற்சியைக் கண்காணிக்கவும்', 'பதிவாக வைத்துக்கொள்ள மாதவிடாய் தேதியைச் சேர்க்கவும்.'], ['என் தகவல்களைப் பார்க்கவும்', 'இந்தச் சாதனத்தில் சேமித்த குறிப்புகளைப் பார்க்கவும்.'], ['LunaHer முறைத் திரையிடல்', 'LunaHer திரையிடல் மாதிரியுடன் மருத்துவ மற்றும் ஆய்வக மதிப்புகளைப் பார்க்கவும்.'], ['மருத்துவர் சந்திப்புக்குத் தயாராகுங்கள்', 'எடுத்துச் செல்ல எளிய சுருக்கம் மற்றும் கேள்விகளை உருவாக்கவும்.'], ['PCOS பற்றி அறிக', 'தெளிவான தகவல்களையும் கட்டுக்கதைகளின் சரிபார்ப்பையும் படியுங்கள்.']],
+  },
+  ml: {
+    eyebrow: 'തുടങ്ങാൻ സുഖകരമായ ഒരു സ്ഥലം', title: 'നിങ്ങളുടെ ആരോഗ്യം, നിങ്ങളുടെ വാക്കുകളിൽ.', intro: 'വൈദ്യശാസ്ത്ര പദങ്ങളോ എല്ലാ ഉത്തരങ്ങളോ അറിയേണ്ടതില്ല. ഇന്ന് സഹായകമാകുന്ന ഒന്ന് തിരഞ്ഞെടുക്കുക.', choose: 'ഉപകാരപ്പെടുന്നതു തിരഞ്ഞെടുക്കുക', question: 'ഇന്ന് ഞങ്ങൾ എങ്ങനെ സഹായിക്കും?', footnote: 'സമയം എടുക്കൂ. ഏത് ഘട്ടവും ഒഴിവാക്കി പിന്നീട് തിരികെ വരാം.',
+    actions: [['എന്റെ ലക്ഷണങ്ങൾ വിവരിക്കുക', 'നിങ്ങൾ ശ്രദ്ധിച്ചതെന്തെന്ന് നിങ്ങളുടെ വാക്കുകളിൽ എഴുതുകയോ പറയുകയോ ചെയ്യുക.'], ['എന്റെ ചക്രം ട്രാക്ക് ചെയ്യുക', 'രേഖ സൂക്ഷിക്കാൻ പിരീഡ് തീയതി ചേർക്കുക.'], ['എന്റെ വിവരങ്ങൾ കാണുക', 'ഈ ഉപകരണത്തിൽ സംരക്ഷിച്ച കുറിപ്പുകൾ കാണുക.'], ['LunaHer പാറ്റേൺ സ്ക്രീനിംഗ്', 'LunaHer സ്ക്രീനിംഗ് മാതൃകയിൽ ക്ലിനിക്കൽ, ലാബ് മൂല്യങ്ങൾ കാണുക.'], ['ഡോക്ടർ സന്ദർശനത്തിന് തയ്യാറെടുക്കുക', 'കൊണ്ടുപോകാൻ ലളിതമായ സംഗ്രഹവും ചോദ്യങ്ങളും തയ്യാറാക്കുക.'], ['PCOS നെക്കുറിച്ച് അറിയുക', 'വ്യക്തമായ വിവരങ്ങളും തെറ്റിദ്ധാരണ പരിശോധനയും വായിക്കുക.']],
+  },
+  te: {
+    eyebrow: 'ప్రారంభించడానికి సులభమైన స్థలం', title: 'మీ ఆరోగ్యం, మీ మాటల్లో.', intro: 'వైద్య పదాలు లేదా అన్ని సమాధానాలు మీకు అవసరం లేదు. ఈ రోజు సహాయపడేదాన్ని ఎంచుకోండి.', choose: 'ఉపయోగకరంగా అనిపించేదాన్ని ఎంచుకోండి', question: 'ఈ రోజు మేము ఎలా సహాయపడగలం?', footnote: 'మీ సమయం తీసుకోండి. ఏ దశనైనా దాటి తర్వాత తిరిగి రావచ్చు.',
+    actions: [['నా లక్షణాలను వివరించండి', 'మీ మాటల్లో మీరు గమనించినదాన్ని రాయండి లేదా చెప్పండి.'], ['నా చక్రాన్ని ట్రాక్ చేయండి', 'రికార్డు కోసం పిరియడ్ తేదీని జోడించండి.'], ['నా వివరాలను చూడండి', 'ఈ పరికరంలో సేవ్ చేసిన నోట్లను చూడండి.'], ['LunaHer ప్యాటర్న్ స్క్రీనింగ్', 'LunaHer స్క్రీనింగ్ మోడల్‌తో క్లినికల్ మరియు ల్యాబ్ విలువలను చూడండి.'], ['డాక్టర్ సందర్శనకు సిద్ధం అవ్వండి', 'తీసుకెళ్లడానికి సరళమైన సారాంశం, ప్రశ్నలు తయారు చేయండి.'], ['PCOS గురించి తెలుసుకోండి', 'స్పష్టమైన సమాచారం మరియు అపోహల తనిఖీలు చదవండి.']],
+  },
+  mr: {
+    eyebrow: 'सुरुवात करण्यासाठी एक आरामदायी जागा', title: 'तुमचे आरोग्य, तुमच्या शब्दांत.', intro: 'वैद्यकीय शब्द किंवा सर्व उत्तरे माहीत असणे आवश्यक नाही. आज उपयोगी पडेल ते निवडा.', choose: 'उपयोगी वाटेल ते निवडा', question: 'आज आम्ही कशी मदत करू शकतो?', footnote: 'वेळ घ्या. कोणताही टप्पा सोडून नंतर परत येऊ शकता.',
+    actions: [['माझी लक्षणे सांगा', 'तुम्हाला काय जाणवले ते तुमच्या शब्दांत लिहा किंवा बोला.'], ['माझे चक्र ट्रॅक करा', 'नोंद ठेवण्यासाठी पाळीची तारीख जोडा.'], ['माझ्या नोंदी पहा', 'या उपकरणावर साठवलेल्या नोंदी पहा.'], ['LunaHer पॅटर्न स्क्रीनिंग', 'LunaHer स्क्रीनिंग मॉडेलसह क्लिनिकल व लॅब मूल्ये पाहा.'], ['डॉक्टर भेटीची तयारी', 'सोबत नेण्यासाठी सोपा सारांश आणि प्रश्न तयार करा.'], ['PCOS बद्दल जाणून घ्या', 'स्पष्ट माहिती आणि गैरसमज तपासा.']],
+  },
+  bn: {
+    eyebrow: 'শুরু করার জন্য একটি সহজ জায়গা', title: 'আপনার স্বাস্থ্য, আপনার ভাষায়।', intro: 'চিকিৎসার শব্দ বা সব উত্তর জানার দরকার নেই। আজ যে বিষয়টি সাহায্য করবে সেটি বেছে নিন।', choose: 'যা কাজে লাগবে তা বেছে নিন', question: 'আজ আমরা কীভাবে সাহায্য করতে পারি?', footnote: 'সময় নিন। যেকোনো ধাপ এড়িয়ে পরে ফিরে আসতে পারেন।',
+    actions: [['আমার লক্ষণ বর্ণনা করুন', 'আপনার নিজের ভাষায় আপনি যা লক্ষ্য করেছেন লিখুন বা বলুন।'], ['আমার চক্র ট্র্যাক করুন', 'রেকর্ড রাখার জন্য পিরিয়ডের তারিখ যোগ করুন।'], ['আমার তথ্য দেখুন', 'এই ডিভাইসে সংরক্ষিত নোট দেখুন।'], ['LunaHer প্যাটার্ন স্ক্রিনিং', 'LunaHer স্ক্রিনিং মডেলে ক্লিনিক্যাল এবং ল্যাব মান দেখুন।'], ['ডাক্তারের সাক্ষাতের প্রস্তুতি', 'সঙ্গে নেওয়ার জন্য সহজ সারাংশ ও প্রশ্ন তৈরি করুন।'], ['PCOS সম্পর্কে জানুন', 'পরিষ্কার তথ্য ও ভুল ধারণার যাচাই পড়ুন।']],
+  },
+}
+
+const actionMetadata = [
+  { id: 'talk', icon: MessageCircle, primary: true }, { id: 'tracker', icon: CalendarDays }, { id: 'insights', icon: HeartPulse }, { id: 'screening', icon: Microscope }, { id: 'doctor', icon: Stethoscope }, { id: 'learn', icon: BookOpen },
 ]
 
-export function Home({ onNavigate }) {
+export function Home({ onNavigate, currentLanguage = 'en' }) {
+  const copy = HOME_COPY[currentLanguage] || HOME_COPY.en
   return (
     <div className="page-stack">
       <section className="welcome-panel">
-        <p className="eyebrow">A gentle place to begin</p>
-        <h1>Your health, in your words.</h1>
-        <p>You do not need medical words or all the answers. Choose one thing that would help you today.</p>
-        <button className="button button-primary welcome-action" type="button" onClick={() => onNavigate('talk')}>Describe my symptoms <ArrowRight size={18} aria-hidden="true" /></button>
+        <p className="eyebrow">{copy.eyebrow}</p>
+        <h1>{copy.title}</h1>
+        <p>{copy.intro}</p>
+        <button className="button button-primary welcome-action" type="button" onClick={() => onNavigate('talk')}>{copy.actions[0][0]} <ArrowRight size={18} aria-hidden="true" /></button>
       </section>
       <section aria-labelledby="home-actions-title">
-        <div className="section-heading"><div><p className="eyebrow">Choose what feels useful</p><h2 id="home-actions-title">How can we help today?</h2></div></div>
+        <div className="section-heading"><div><p className="eyebrow">{copy.choose}</p><h2 id="home-actions-title">{copy.question}</h2></div></div>
         <div className="action-grid">
-          {actions.map(({ id, label, detail, icon: Icon, primary }) => (
+          {actionMetadata.map(({ id, icon: Icon, primary }, index) => (
             <button key={id} type="button" className={`action-card ${primary ? 'action-card-primary' : ''}`} onClick={() => onNavigate(id)}>
               <span className="action-icon"><Icon size={21} aria-hidden="true" /></span>
-              <span className="action-copy"><strong>{label}</strong><small>{detail}</small></span>
+              <span className="action-copy"><strong>{copy.actions[index][0]}</strong><small>{copy.actions[index][1]}</small></span>
               <ArrowRight size={18} className="action-arrow" aria-hidden="true" />
             </button>
           ))}
         </div>
       </section>
-      <p className="home-footnote">Take your time. You can skip any step and come back later.</p>
+      <p className="home-footnote">{copy.footnote}</p>
     </div>
   )
 }

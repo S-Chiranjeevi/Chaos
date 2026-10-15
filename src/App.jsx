@@ -167,7 +167,7 @@ export function App() {
       case 'learn':
         return <LearnPage />;
       default:
-        return <Home onNavigate={navigate} />;
+        return <Home onNavigate={navigate} currentLanguage={currentLanguage} />;
     }
   }
 
