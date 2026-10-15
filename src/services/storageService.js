@@ -244,6 +244,47 @@ export const StorageService = {
   },
 
   // =========================================================================
+  // APIVERVE FORECAST HISTORY (`pcos_saathi_apiverve_forecasts`)
+  // =========================================================================
+  getApiVerveForecasts() {
+    const raw = getStorage().getItem(STORAGE_KEYS.APIVERVE_FORECASTS);
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  },
+
+  saveApiVerveForecast(forecastData) {
+    const existing = this.getApiVerveForecasts();
+    const entry = {
+      id: `apv-forecast-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      createdAt: new Date().toISOString(),
+      ...forecastData,
+    };
+    const updated = [entry, ...existing.filter((f) => f.id !== entry.id)].slice(0, 50);
+    getStorage().setItem(STORAGE_KEYS.APIVERVE_FORECASTS, JSON.stringify(updated));
+    notifyDataChange(STORAGE_KEYS.APIVERVE_FORECASTS, updated);
+    return entry;
+  },
+
+  deleteApiVerveForecast(id) {
+    const existing = this.getApiVerveForecasts();
+    const updated = existing.filter((f) => f.id !== id);
+    getStorage().setItem(STORAGE_KEYS.APIVERVE_FORECASTS, JSON.stringify(updated));
+    notifyDataChange(STORAGE_KEYS.APIVERVE_FORECASTS, updated);
+    return updated;
+  },
+
+  clearApiVerveForecasts() {
+    getStorage().removeItem(STORAGE_KEYS.APIVERVE_FORECASTS);
+    notifyDataChange(STORAGE_KEYS.APIVERVE_FORECASTS, []);
+    return [];
+  },
+
+  // =========================================================================
   // PRIVACY PURGE & DATA EXPORT
   // =========================================================================
   exportAllData() {
@@ -256,6 +297,7 @@ export const StorageService = {
       insights: this.getInsights(),
       doctorSummary: this.getDoctorSummary(),
       preferences: this.getPreferences(),
+      apiverveForecasts: this.getApiVerveForecasts(),
     };
   },
 

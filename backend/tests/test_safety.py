@@ -1,9 +1,15 @@
 import unittest
 from types import SimpleNamespace
 
-from backend.app.safety.output_validator import DISCLAIMER, validate_output
-from backend.app.safety.red_flags import detect_red_flags
-from backend.app.services.insight_service import personalized_insights, validate_ai_insight
+try:
+    from backend.app.safety.output_validator import DISCLAIMER, validate_output
+    from backend.app.safety.red_flags import detect_red_flags
+    from backend.app.services.insight_service import personalized_insights, validate_ai_insight
+except ImportError:
+    from app.safety.output_validator import DISCLAIMER, validate_output
+    from app.safety.red_flags import detect_red_flags
+    from app.services.insight_service import personalized_insights, validate_ai_insight
+
 
 
 class RedFlagTests(unittest.TestCase):
