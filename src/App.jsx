@@ -124,16 +124,6 @@ export function App() {
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
-
-
-  function handleTriggerDemoError() {
-    setGlobalError({
-      title: 'Local Vault Sync Notice',
-      message: 'IndexedDB transaction cached locally. All health data remains strictly on your device.',
-      code: 'OFFLINE_STORAGE_VERIFIED',
-    });
-  }
-
   function renderPage() {
     switch (activePage) {
       case 'talk':
@@ -196,7 +186,6 @@ export function App() {
         currentLanguage={currentLanguage}
         onOpenLanguageSelector={() => setLanguageDialogOpen(true)}
         onNavigateHome={() => navigate('home')}
-        onTriggerDemoError={handleTriggerDemoError}
       />
 
       <div className="app-body">

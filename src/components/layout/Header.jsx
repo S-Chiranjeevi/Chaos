@@ -13,8 +13,7 @@ import { SUPPORTED_LANGUAGES } from '../common/LanguageSelector.jsx';
 export function Header({
   currentLanguage = 'en',
   onOpenLanguageSelector,
-  onNavigateHome,
-  onTriggerDemoError
+  onNavigateHome
 }) {
   const currentLangObj = SUPPORTED_LANGUAGES.find(l => l.code === currentLanguage) || SUPPORTED_LANGUAGES[0];
 
