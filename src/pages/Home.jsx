@@ -1,6 +1,5 @@
 import React from 'react'
 import { ArrowRight, BookOpen, CalendarDays, HeartPulse, LockKeyhole, MessageCircle, Stethoscope } from 'lucide-react'
-import { DisclaimerBanner } from '../components/DisclaimerBanner.jsx'
 
 const actions = [
   { id: 'talk', label: 'Describe my symptoms', detail: 'Write or say what you notice, using your own words.', icon: MessageCircle, primary: true },
@@ -20,7 +19,6 @@ export function Home({ onNavigate }) {
         <p>You do not need medical words or all the answers. Choose one thing that would help you today.</p>
         <button className="button button-primary welcome-action" type="button" onClick={() => onNavigate('talk')}>Describe my symptoms <ArrowRight size={18} aria-hidden="true" /></button>
       </section>
-      <DisclaimerBanner />
       <section aria-labelledby="home-actions-title">
         <div className="section-heading"><div><p className="eyebrow">Choose what feels useful</p><h2 id="home-actions-title">How can we help today?</h2></div></div>
         <div className="action-grid">

@@ -10,6 +10,7 @@ from ..schemas.cycle import (
 )
 from ..services.cycle_service import cycle_service
 from ..services.apiverve_service import apiverve_service, APIVerveError
+from ..safety.output_validator import DISCLAIMER, validate_output
 
 router = APIRouter(tags=["Cycle"])
 
@@ -20,7 +21,17 @@ async def analyze_cycle(request: CycleRequest) -> CycleResponse:
 
     Stateless computation. No dates or health entries are stored.
     """
-    return cycle_service.analyze_cycle(request.period_start_dates)
+    response = cycle_service.analyze_cycle(request.period_start_dates)
+    safe_response = validate_output(response.model_dump())
+    if safe_response is None:
+        return CycleResponse(
+            insights=[
+                "Cycle information was hidden because it did not pass safety checks. "
+                "Please speak with a qualified healthcare professional."
+            ],
+            disclaimer=DISCLAIMER,
+        )
+    return CycleResponse(**safe_response)
 
 
 @router.post("/api/cycle/apiverve-forecast", response_model=APIVerveForecastResponse)
@@ -47,4 +58,3 @@ async def calculate_apiverve_forecast(request: APIVerveForecastRequest) -> APIVe
             status_code=exc.status_code,
             detail={"error": exc.code, "message": exc.message},
         )
-

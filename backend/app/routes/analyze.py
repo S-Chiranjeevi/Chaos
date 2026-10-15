@@ -6,6 +6,8 @@ from ..core.logging import logger
 from ..schemas.analyze import AnalyzeRequest, AnalyzeResponse
 from ..services.gemini_service import gemini_service
 from ..services.local_analyzer import local_analyze
+from ..safety.output_validator import DISCLAIMER, validate_output
+from ..safety.red_flags import detect_red_flags
 
 router = APIRouter(tags=["Analyze"])
 
@@ -36,8 +38,11 @@ async def analyze_symptoms(request: AnalyzeRequest) -> AnalyzeResponse:
 
     Zero data is permanently saved or stored.
     """
-    # 1. If Gemini AI is configured, try calling it with strict timeout
-    if gemini_service.is_available:
+    # Scan the submitted note before an AI call or response can be returned.
+    warnings = detect_red_flags(request.text)
+
+    # Urgent input uses the local path immediately and never waits on AI.
+    if not warnings and gemini_service.is_available:
         user_prompt = (
             f"Analyze user input (Age: {request.age or 'Not provided'}, Preferred language: {request.language}):\n"
             f"\"{request.text}\""
@@ -45,17 +50,56 @@ async def analyze_symptoms(request: AnalyzeRequest) -> AnalyzeResponse:
         ai_data = await gemini_service.generate_json(ANALYZE_SYSTEM_PROMPT, user_prompt)
         if ai_data:
             try:
-                # Sanitize and validate through schema
-                ai_data["disclaimer"] = "This is information, not a diagnosis."
-                if not ai_data.get("detected_language"):
-                    ai_data["detected_language"] = request.language or "en"
-                return AnalyzeResponse(**ai_data)
+                safe_ai_data = validate_output(ai_data)
+                if safe_ai_data is None:
+                    raise ValueError("AI output did not pass safety checks")
+                safe_ai_data["disclaimer"] = DISCLAIMER
+                safe_ai_data["safety_warnings"] = warnings
+                if not safe_ai_data.get("detected_language"):
+                    safe_ai_data["detected_language"] = request.language or "en"
+                ai_response = AnalyzeResponse(**safe_ai_data)
+                safe_response = _validate_response(ai_response, warnings)
+                if safe_response is not None:
+                    return safe_response
+                logger.warning("AI response failed output safety checks; reverting to local analyzer.")
             except Exception as exc:
                 logger.warning("AI response validation failed (%s); reverting to local analyzer.", exc.__class__.__name__)
 
     # 2. Local deterministic clinical rule fallback (guaranteed offline & private)
-    return local_analyze(
+    local_response = local_analyze(
         text=request.text,
         language=request.language or "en",
         age=request.age
+    )
+    safe_local_response = _validate_response(local_response, warnings)
+    return safe_local_response or _blocked_response(warnings, request.language or "en")
+
+
+def _validate_response(response: AnalyzeResponse, warnings: list[dict]) -> AnalyzeResponse | None:
+    data = response.model_dump()
+    data["disclaimer"] = DISCLAIMER
+    data["safety_warnings"] = warnings
+    if warnings:
+        data["urgency"] = "urgent"
+        data["red_flags"] = list(dict.fromkeys([*data.get("red_flags", []), *[warning["title"] for warning in warnings]]))
+    safe = validate_output(data)
+    return AnalyzeResponse(**safe) if safe is not None else None
+
+
+def _blocked_response(warnings: list[dict], language: str) -> AnalyzeResponse:
+    return AnalyzeResponse(
+        safety_warnings=warnings,
+        detected_language=language,
+        symptoms=[],
+        possible_relation="",
+        urgency="urgent" if warnings else "routine",
+        red_flags=[warning["title"] for warning in warnings],
+        recommended_specialist="urgent medical care" if warnings else "a qualified healthcare professional",
+        questions_for_doctor=[],
+        self_care_tips=[],
+        disclaimer=DISCLAIMER,
+        reply_text=(
+            "Please seek urgent medical care. " if warnings else
+            "Automated health information could not safely be shown. Please speak with a qualified healthcare professional. "
+        ) + DISCLAIMER,
     )

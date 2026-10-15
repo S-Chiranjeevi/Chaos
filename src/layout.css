@@ -1,12 +1,12 @@
 .sakhi-layout {
-  --layout-ink: #173d38;
-  --layout-muted: #506963;
-  --layout-green: #176b59;
-  --layout-green-dark: #125344;
-  --layout-paper: #f6f8f2;
-  --layout-line: #d8e4dc;
+  --layout-ink: #41294f;
+  --layout-muted: #665b70;
+  --layout-green: #86499c;
+  --layout-green-dark: #5f3475;
+  --layout-paper: #fffaf6;
+  --layout-line: #e8d9ea;
   --layout-surface: #fff;
-  --layout-mint: #e4f2eb;
+  --layout-mint: #f3e9f6;
   --layout-warning: #762f26;
   --layout-warning-bg: #fff0ed;
   display: block;
@@ -19,14 +19,25 @@
 .sakhi-layout *, .sakhi-layout *::before, .sakhi-layout *::after { box-sizing: border-box; }
 .sakhi-layout button, .sakhi-layout input, .sakhi-layout textarea, .sakhi-layout select { font: inherit; }
 .sakhi-layout button { cursor: pointer; }
-.sakhi-layout :focus-visible { outline: 3px solid #c0841a; outline-offset: 3px; }
+.sakhi-layout :focus-visible { outline: 3px solid #bd78c7; outline-offset: 3px; }
 .skip-link { position: fixed; z-index: 1000; top: 10px; left: 10px; padding: 10px 14px; background: #fff; color: #173d38; border: 2px solid #176b59; border-radius: 10px; transform: translateY(-150%); }
 .skip-link:focus { transform: translateY(0); }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 .desktop-navigation { position: sticky; top: 80px; flex: 0 0 260px; width: 260px; height: calc(100vh - 80px); padding: 25px 16px 18px; display: flex; flex-direction: column; background: #fff; border-right: 1px solid var(--layout-line); }
-.app-brand { display: flex; align-items: center; gap: 10px; padding: 0 9px 27px; color: var(--layout-ink); text-decoration: none; font-weight: 800; font-size: 19px; letter-spacing: -.4px; }
+.app-brand { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 0 9px 20px; color: var(--layout-ink); text-decoration: none; font-weight: 800; font-size: 19px; letter-spacing: -.4px; }
 .app-brand small { display: block; color: var(--layout-muted); font-size: 11px; font-weight: 500; letter-spacing: 0; }
 .brand-flower { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 14px; color: #fff; background: var(--layout-green); font-size: 23px; }
+.lunaher-header { background: rgba(255, 250, 253, .97) !important; border-color: #eaddec !important; }
+.lunaher-brand-button:focus-visible { outline: 3px solid #bd78c7 !important; outline-offset: 2px; }
+.lunaher-logo-window { position: relative; display: block; flex: none; overflow: hidden; background: #fdf6eb; border-radius: 12px; }
+.lunaher-logo-window img { position: absolute; top: -25%; left: -25%; width: 150%; height: 150%; max-width: none; object-fit: contain; }
+.lunaher-header-logo { width: 102px; height: 84px; }
+.lunaher-sidebar-logo { width: 168px; height: 138px; border-radius: 16px; }
+.lunaher-privacy-indicator { color: #553765 !important; background: #f7eff9 !important; border-color: #e5d4eb !important; }
+.lunaher-privacy-indicator .bg-emerald-500 { background-color: #c56ab2 !important; }
+.lunaher-privacy-indicator .text-emerald-700 { color: #75438b !important; }
+.lunaher-language-button { color: #563669 !important; background: #f8f0fa !important; border-color: #e3d1e9 !important; }
+.lunaher-language-button:hover { background: #f0e2f4 !important; border-color: #ca9bd3 !important; }
 .section-links { display: grid; gap: 5px; }
 .section-link { width: 100%; min-height: 46px; padding: 9px 11px; display: flex; align-items: center; gap: 11px; border: 0; border-radius: 12px; background: transparent; color: var(--layout-muted); text-align: left; font-size: 13px; font-weight: 650; line-height: 1.3; }
 .section-link:hover, .section-link.is-active { background: var(--layout-mint); color: var(--layout-green-dark); }
@@ -123,6 +134,10 @@
   .app-column { width: 100%; }
   .app-body { display: block; min-height: calc(100vh - 64px); }
   .mobile-topbar { position: sticky; top: 0; z-index: 50; min-height: 56px; padding: 8px 15px; display: flex; align-items: center; justify-content: space-between; background: #ffffffed; border-bottom: 1px solid var(--layout-line); backdrop-filter: blur(12px); }
+  .lunaher-header-logo { width: 76px; height: 62px; }
+  .lunaher-privacy-indicator { padding: 6px 7px !important; }
+  .lunaher-privacy-indicator span:first-of-type { font-size: 9px !important; }
+  .lunaher-header .max-w-7xl { height: 64px; }
   .mobile-brand { display: inline-flex; align-items: center; gap: 7px; color: var(--layout-green-dark); font-weight: 800; text-decoration: none; }
   .mobile-back { display: inline-flex; align-items: center; gap: 5px; padding: 8px 9px; color: var(--layout-green-dark); border: 0; border-radius: 10px; background: transparent; font-size: 13px; font-weight: 700; }
   .page-content { width: 100%; min-height: calc(100vh - 56px); padding: 22px 16px 15px; }

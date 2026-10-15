@@ -35,6 +35,7 @@ class SummaryRequest(BaseModel):
 
 class SummaryResponse(BaseModel):
     """Synthesized 1-page clinician pre-consultation dossier."""
+    safety_warnings: List[Dict[str, Any]] = Field(default_factory=list, description="Urgent safety warnings to render before other information")
     narrative: str = Field(default="", description="Patient-facing narrative of reported symptoms")
     main_symptoms: List[Dict[str, Any]] = Field(default_factory=list, description="Structured symptom frequency and severity table")
     cycle_summary: Dict[str, Any] = Field(default_factory=dict, description="Condensed menstrual regularity metrics")

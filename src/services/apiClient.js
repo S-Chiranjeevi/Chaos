@@ -1,16 +1,16 @@
+import { validateOutput } from './outputValidator.js'
+import { detectRedFlags } from './safetyRules.js'
+
 /** Optional symptom-analysis transport.
  * No endpoint is assumed. When it is absent, slow, or returns an invalid payload,
  * callers use the local rules engine so care guidance remains available offline.
  */
 export class AnalysisUnavailableError extends Error {}
 
-function isUsableAnalysis(value) {
-  if (!value || !Array.isArray(value.symptoms) || !['routine', 'soon', 'urgent'].includes(value.urgency)) return false
-  const text = JSON.stringify(value).toLowerCase()
-  return !/you have pcos|this confirms pcos|\btake\s+(?:this|\d)|\b\d+\s*mg\b|prescription|dosage/.test(text)
-}
-
 export async function requestSymptomAnalysis({ text, language, signal } = {}) {
+  if (detectRedFlags(text).length) {
+    throw new AnalysisUnavailableError('Urgent symptoms were detected before contacting the online service.')
+  }
   const endpoint = import.meta.env?.VITE_SYMPTOM_API_URL
   if (!endpoint) throw new AnalysisUnavailableError('No symptom-analysis service is configured.')
   let response
@@ -27,6 +27,11 @@ export async function requestSymptomAnalysis({ text, language, signal } = {}) {
   if (!response.ok) throw new AnalysisUnavailableError('The symptom-analysis service is temporarily unavailable.')
   let payload
   try { payload = await response.json() } catch { throw new AnalysisUnavailableError('The symptom-analysis service returned an invalid response.') }
-  if (!isUsableAnalysis(payload)) throw new AnalysisUnavailableError('The symptom-analysis service returned an incomplete response.')
-  return payload
+  const validation = validateOutput(payload)
+  if (!validation.valid) throw new AnalysisUnavailableError('The online response did not pass safety checks.')
+  const safePayload = validation.output
+  if (!safePayload || !Array.isArray(safePayload.symptoms) || !['routine', 'soon', 'urgent', 'emergency'].includes(safePayload.urgency)) {
+    throw new AnalysisUnavailableError('The symptom-analysis service returned an incomplete response.')
+  }
+  return safePayload
 }

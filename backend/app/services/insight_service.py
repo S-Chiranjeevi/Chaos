@@ -4,11 +4,12 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any, Callable
 
-from .ai_client import AIClient, ConsentRequiredError
+from .ai_client import AIClient
+from ..safety.output_validator import DISCLAIMER, validate_output
+from ..safety.red_flags import detect_red_flags
 
 ALLOWED_URGENCY = {"routine", "soon", "urgent"}
 REQUIRED_FIELDS = {"id", "title", "message", "evidence", "urgency", "suggestedAction", "relatedEntryIds"}
-UNSAFE_LANGUAGE = ("diagnos", "you have pcos", "take ", " mg", "medication", "prescription", "dosage")
 
 
 def minimum_necessary_context(period_logs: list[dict[str, Any]], symptom_logs: list[dict[str, Any]]) -> dict[str, Any]:
@@ -33,19 +34,38 @@ def validate_ai_insight(value: Any) -> dict[str, Any] | None:
     cleaned = {field: value[field] for field in REQUIRED_FIELDS}
     if not all(isinstance(cleaned[field], str) for field in ("id", "title", "message", "suggestedAction")):
         return None
-    combined = " ".join([cleaned["title"], cleaned["message"], cleaned["suggestedAction"], *cleaned["evidence"]]).lower()
-    if any(term in combined for term in UNSAFE_LANGUAGE):
-        return None
     if not isinstance(cleaned["relatedEntryIds"], list) or not all(isinstance(item, str) for item in cleaned["relatedEntryIds"]):
+        return None
+    cleaned = validate_output(cleaned)
+    if cleaned is None:
         return None
     cleaned.update({
         "source": "ai_assisted",
         "dismissed": False,
         "createdAt": datetime.now(timezone.utc).isoformat(),
         "whyItAppeared": "AI-assisted insight based only on the cycle and symptom summary you approved.",
-        "education": "This is information, not a diagnosis.",
+        "education": DISCLAIMER,
     })
     return cleaned
+
+
+def _red_flag_insights(period_logs: list[dict[str, Any]], symptom_logs: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Create visible insight cards from deterministic checks before any AI call."""
+    warnings = detect_red_flags({"period_logs": period_logs, "symptom_logs": symptom_logs})
+    return [{
+        "id": warning["id"],
+        "title": warning["title"],
+        "message": warning["message"],
+        "evidence": warning["matchedTerms"],
+        "urgency": "urgent",
+        "suggestedAction": warning["message"],
+        "relatedEntryIds": [],
+        "source": "rule_based",
+        "dismissed": False,
+        "whyItAppeared": "A deterministic urgent-symptom safety rule matched the note.",
+        "education": DISCLAIMER,
+        "disclaimer": DISCLAIMER,
+    } for warning in warnings]
 
 
 def personalized_insights(period_logs: list[dict[str, Any]], symptom_logs: list[dict[str, Any]], *, consent: bool,
@@ -55,13 +75,19 @@ def personalized_insights(period_logs: list[dict[str, Any]], symptom_logs: list[
     Any unavailable service, timeout, parse error, or unsafe AI response falls back
     to local rules without interrupting the user flow. Raw prompts are never saved.
     """
-    local_insights = local_rule_builder()
+    # Inspect local symptom data first, independent of AI availability or consent.
+    urgent_insights = _red_flag_insights(period_logs, symptom_logs)
+    local_insights = [
+        safe for item in local_rule_builder()
+        if (safe := validate_output(item)) is not None
+    ]
     if not consent or not ai_client:
-        return local_insights
+        return urgent_insights + local_insights
     try:
         candidates = ai_client.generate_structured_insights(minimum_necessary_context(period_logs, symptom_logs), consent=True)
         valid = [insight for item in candidates if (insight := validate_ai_insight(item))]
         # Urgent local safety findings remain first and are never displaced by AI output.
-        return local_insights + [item for item in valid if item["id"] not in {local["id"] for local in local_insights}]
-    except (ConsentRequiredError, TimeoutError, ValueError, OSError, KeyError):
-        return local_insights
+        return urgent_insights + local_insights + [item for item in valid if item["id"] not in {local["id"] for local in local_insights + urgent_insights}]
+    except Exception:
+        # An AI transport or parsing failure must never hide deterministic warnings.
+        return urgent_insights + local_insights

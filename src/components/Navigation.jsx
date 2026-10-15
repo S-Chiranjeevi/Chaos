@@ -6,8 +6,7 @@ export function Navigation({ activePage, onNavigate }) {
   return (
     <aside className="desktop-navigation" aria-label="Main navigation">
       <a className="app-brand" href="#home" onClick={(event) => { event.preventDefault(); onNavigate('home') }}>
-        <span className="brand-flower" aria-hidden="true">✿</span>
-        <span>SakhiCare<small>Your health, in your words</small></span>
+        <span className="lunaher-logo-window lunaher-sidebar-logo"><img src="/lunaher-logo.png" alt="LunaHer" /></span>
       </a>
       <nav className="section-links">
         {MAIN_SECTIONS.map(({ id, label, icon: Icon }) => (
