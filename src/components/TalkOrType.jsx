@@ -25,9 +25,9 @@ import { AssessmentView } from './AssessmentView.jsx'
 import { HealthEntryExport } from './HealthEntryExport.jsx'
 import { StatePreviewBar } from './StatePreviewBar.jsx'
 
-export function TalkOrType({ onHealthEntryCreated }) {
+export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
   // Primary state
-  const [selectedLang, setSelectedLang] = useState('en')
+  const [selectedLang, setSelectedLang] = useState(initialLanguage)
   const [inputText, setInputText] = useState('')
   const [currentState, setCurrentState] = useState('empty') // 'empty' | 'typing' | 'recording' | 'transcribing' | 'processing' | 'results' | 'permission-denied' | 'unsupported-browser' | 'network-error'
   
@@ -41,6 +41,7 @@ export function TalkOrType({ onHealthEntryCreated }) {
   const [extractedResult, setExtractedResult] = useState(null)
   const [symptomsList, setSymptomsList] = useState([])
   const [healthEntry, setHealthEntry] = useState(null)
+  const [storageSaveError, setStorageSaveError] = useState('')
 
   const textareaRef = useRef(null)
   const resultsRef = useRef(null)
@@ -198,7 +199,8 @@ export function TalkOrType({ onHealthEntryCreated }) {
       })
 
       setHealthEntry(newEntry)
-      publishHealthEntry(newEntry)
+      const saveResult = publishHealthEntry(newEntry)
+      setStorageSaveError(saveResult?.ok ? '' : saveResult?.error || 'Your note could not be saved on this device.')
 
       if (onHealthEntryCreated) {
         onHealthEntryCreated(newEntry)
@@ -242,7 +244,8 @@ export function TalkOrType({ onHealthEntryCreated }) {
       },
     }
     setHealthEntry(updatedEntry)
-    publishHealthEntry(updatedEntry)
+    const saveResult = publishHealthEntry(updatedEntry)
+    setStorageSaveError(saveResult?.ok ? '' : saveResult?.error || 'Your note could not be saved on this device.')
     if (onHealthEntryCreated) onHealthEntryCreated(updatedEntry)
   }
 
@@ -537,6 +540,7 @@ export function TalkOrType({ onHealthEntryCreated }) {
       {/* RESULTS DISPLAY */}
       {currentState === 'results' && extractedResult && (
         <section ref={resultsRef} className="results-container" id="results-view" aria-live="polite">
+          {storageSaveError && <div className="storage-save-error" role="alert"><div><strong>Your note is still on this screen, but it did not save.</strong><p>{storageSaveError}</p></div><button type="button" onClick={() => { const result = publishHealthEntry(healthEntry); setStorageSaveError(result?.ok ? '' : result?.error || 'Your note could not be saved on this device.') }}>Try saving my note again</button></div>}
           {/* SECTION HEADER */}
           <div className="results-hero-strip">
             <div className="strip-title-group">

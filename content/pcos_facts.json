@@ -1,0 +1,70 @@
+[
+  {
+    "id": "what_is_pcos",
+    "topic": "What PCOS Means",
+    "title": "Understanding Polycystic Ovary Syndrome (PCOS)",
+    "summary": "PCOS is a common endocrine and metabolic condition characterized by hormonal imbalances that can affect ovulation, cycle regularity, and androgen levels.",
+    "keyPoints": [
+      "PCOS is an endocrine (hormonal) condition, not an infectious disease or cancer.",
+      "Doctors assess it using established international criteria (such as the Rotterdam criteria), which require at least two of: irregular ovulation/periods, higher androgen signs (like excess facial hair or acne), or multiple small ovarian follicles on ultrasound.",
+      "Having follicles on the ovaries does not automatically mean PCOS; similarly, one can have PCOS without visible ovarian cysts.",
+      "It is a manageable condition that clinicians and individuals navigate with tailored lifestyle, nutritional, and clinical care."
+    ],
+    "source": "Monash University / International Evidence-based Guideline for the Assessment and Management of Polycystic Ovary Syndrome (2023)"
+  },
+  {
+    "id": "common_symptoms",
+    "topic": "Common Symptoms",
+    "title": "Frequent Signs Observed Across Cycles",
+    "summary": "PCOS presents differently in every body. Symptoms often relate to reproductive hormones, metabolic sensitivity, and skin health.",
+    "keyPoints": [
+      "Irregular, delayed, or infrequent menstrual periods (cycles longer than 35 days or fewer than 8 cycles per year).",
+      "Persistent or adult-onset acne, particularly along the jawline and chin.",
+      "Increased hair growth on the face, chest, abdomen, or upper thighs (hirsutism).",
+      "Scalp hair thinning or excessive hair shedding (androgenic alopecia).",
+      "Difficulty losing weight or unexplained weight gain related to insulin resistance.",
+      "Pelvic discomfort, bloating, or fatigue across menstrual phases."
+    ],
+    "source": "American College of Obstetricians and Gynecologists (ACOG) Practice Bulletin No. 194"
+  },
+  {
+    "id": "other_causes",
+    "topic": "Other Possible Causes",
+    "title": "Why Similar Symptoms Can Have Several Origins",
+    "summary": "The endocrine system is interconnected. Symptoms overlapping with PCOS are frequently caused by other distinct and treatable conditions.",
+    "keyPoints": [
+      "Thyroid disorders (Hypothyroidism or Hyperthyroidism) can alter menstrual frequency, skin hydration, hair loss, and body weight.",
+      "Hyperprolactinemia (elevated prolactin hormone) can pause or delay regular ovulation.",
+      "Hypothalamic amenorrhea caused by high psychological stress, overtraining, or rapid caloric restriction can halt periods.",
+      "Endometriosis or adenomyosis can cause severe pelvic pain and heavy or painful bleeding.",
+      "Nutritional deficiencies (such as severe Vitamin D or Iron deficiency) can cause fatigue, cycle delays, and hair thinning."
+    ],
+    "source": "The Endocrine Society Clinical Practice Guideline on PCOS and Ovulatory Disorders"
+  },
+  {
+    "id": "when_to_seek_care",
+    "topic": "When to Seek Care",
+    "title": "Knowing When to Schedule a Routine Visit vs Seek Urgent Attention",
+    "summary": "Understanding when to book a doctor consultation helps you advocate for your health safely.",
+    "keyPoints": [
+      "Schedule a routine consultation if your periods come less frequently than every 35 days, or if you miss periods for 3 consecutive months.",
+      "Consult a doctor if you experience progressive facial hair, worsening cystic acne, or unexplained weight shifts.",
+      "Seek urgent or emergency care immediately if you experience severe sudden pelvic pain, very heavy bleeding (soaking through more than one pad per hour for two consecutive hours), or fainting/dizziness with bleeding."
+    ],
+    "source": "National Health Service (NHS) Clinical Guidance on Menstrual Health and Emergency Gynecological Evaluation"
+  },
+  {
+    "id": "doctor_visit_prep",
+    "topic": "Preparing for a Doctor Visit",
+    "title": "How to Prepare for Your Gynecologist Appointment",
+    "summary": "Bringing a structured symptom timeline and specific questions empowers you to have a productive, collaborative discussion.",
+    "keyPoints": [
+      "Track cycle dates: Note your last 3–6 period start dates and duration.",
+      "Record symptom frequency and severity: Note when acne, facial hair, or cramps appear.",
+      "Bring medication history: Note any supplements, birth control, or thyroid medications you have taken.",
+      "Prepare key questions: Ask which blood tests (FSH, LH, Total/Free Testosterone, TSH, Prolactin, Fasting Insulin) or pelvic imaging are recommended.",
+      "Remember: You have the right to ask for clarification, a respectful environment, and a differential evaluation."
+    ],
+    "source": "World Health Organization (WHO) Guidelines on Patient Empowerment and Reproductive Health Navigation"
+  }
+]

@@ -1,12 +1,15 @@
-# SakhiCare (सखी केयर) ✿
+# SakhiCare (सखी केयर / PCOS Saathi) ✿
 ### Multilingual PCOS & Women's Health Symptom Care Navigator
 
 > **Hackathon Theme:** Build a tool that turns everyday descriptions of symptoms—including regional-language inputs—into understandable information and guidance toward appropriate care, particularly for PCOS. It should not present itself as diagnosing.
+>
+> **Architecture & Contracts:** [docs/architecture.md](docs/architecture.md) · [docs/api_contract.md](docs/api_contract.md) · [docs/integration_checklist.md](docs/integration_checklist.md)  
+> **Core Invariant:** Zero remote database (No MongoDB, PostgreSQL, Firebase). 100% offline-first local persistence via `localStorage`/`IndexedDB`.
 
 [![Vite](https://img.shields.io/badge/Vite-8.x-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
 [![React](https://img.shields.io/badge/React-19.x-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![TailwindCSS](https://img.shields.io/badge/Tailwind-3.x-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![Tests](https://img.shields.io/badge/Tests-Passing-success)](https://nodejs.org/api/test.html)
+[![Tests](https://img.shields.io/badge/Tests-36%20Passing-success)](https://nodejs.org/api/test.html)
 [![Privacy](https://img.shields.io/badge/Privacy-100%25%20Client--Side-green)](https://github.com/S-Chiranjeevi/Chaos)
 [![Medical Disclaimer](https://img.shields.io/badge/Medical%20Framing-Non--Diagnostic-important)](https://github.com/S-Chiranjeevi/Chaos)
 
@@ -46,8 +49,8 @@ Major systemic barriers include:
   - English, Hindi (हिंदी), Hinglish, Telugu (తెలుగు), Tamil (தமிழ்), Kannada (ಕನ್ನಡ), Malayalam (മലയാളം), Marathi (मराठी), Bengali (বাংলা).
 - **One-Click Vernacular Chips:** Realistic presets for common expressions (e.g., missed cycles, facial hair, dark neck, painful cramps).
 
-### 2. ⚠️ Early Warning & Pattern Detection (`/patterns`)
-- **Rules-Based, Deterministic Engine:** Operates 100% locally on device without black-box AI hallucinations.
+### 2. ⚠️ Early Warning & Repeated Pattern Detection (`/patterns`)
+- **Rules-Based, Deterministic Engine:** Operates 100% locally on device without black-box AI hallucinations (`src/services/earlyWarning.js`).
 - **Analyzes Repeated Symptoms & Worsening Trends:**
   - Repeated irregular cycles & long gaps (>35 days)
   - Repeated pelvic discomfort
@@ -57,7 +60,7 @@ Major systemic barriers include:
   - Increasing bleeding volume
   - Multiple concurrent symptoms (metabolic, ovulatory, androgenic)
   - Insufficient tracking data explanations
-- **Structured Warning Cards:**
+- **Structured Warning Cards (`EarlyWarningCard.jsx` & `PatternExplanation.jsx`):**
   - Distinct urgency levels (Urgent: Red, Soon: Amber, Informational: Blue/Green)
   - Full transparent evidence breakdown
   - Plain-language explanation ("Why am I seeing this?")
@@ -106,7 +109,7 @@ Major systemic barriers include:
 - **Frontend:** React 19 + Vite 8 + Tailwind CSS 3
 - **Icons:** Lucide React
 - **Voice Recognition:** Web Speech API (`webkitSpeechRecognition` / `SpeechRecognition`)
-- **Testing:** Node.js native test runner (`node --test`)
+- **Testing:** Node.js native test runner (`node --test`) covering 36 automated test cases.
 
 ```
 src/
@@ -124,7 +127,7 @@ src/
 │   ├── earlyWarning.js           # Early warning rules engine & pattern detection
 │   ├── patternDetectionService.js# Pattern analysis service
 │   └── symptomExtractor.js       # Multilingual rule-based extractor & Rotterdam pillar mapper
-├── views/                        # Route views (Home, Talk, Tracker, Summary, Learn)
+├── views/                        # Route views (Home, Talk, Tracker, Summary, Learn, Privacy)
 ├── data/                         # Languages dictionaries and presets
 ├── engine.js                     # Core rules engine and clinical triage
 └── App.jsx                       # Responsive app router
@@ -152,13 +155,13 @@ npm install
 ```bash
 npm run dev
 ```
-Open your browser at `http://localhost:5173` (or the indicated port) to explore SakhiCare locally.
+Open your browser at `http://localhost:5173` (or `http://localhost:3000`) to explore SakhiCare locally.
 
 ### Running Automated Tests
 ```bash
 npm test
 ```
-Runs test suites verifying symptom extraction, red flag triage, and early warning pattern detection.
+Runs 36 automated test cases verifying symptom extraction, red flag triage, and early warning pattern detection across languages.
 
 ### Building for Production
 ```bash

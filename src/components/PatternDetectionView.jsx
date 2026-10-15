@@ -24,6 +24,8 @@ import {
   getDoctorSummaryWarningIds,
 } from '../services/earlyWarning.js'
 import { EarlyWarningCard } from './EarlyWarningCard.jsx'
+import { InsightsPanel } from './InsightsPanel.jsx'
+
 
 // Pre-packaged test scenarios for hackathon judges and users to test immediately
 export const TEST_PRESETS = [
@@ -354,6 +356,11 @@ export function PatternDetectionView({ initialPeriodLogs = [], initialSymptomLog
         )}
       </div>
 
+<<<<<<< HEAD
+=======
+      {/* Personalized, explainable insight layer uses the same local tracker data. */}
+      <InsightsPanel periodLogs={periodLogs} symptomLogs={symptomLogs} />
+>>>>>>> origin/main
 
       {/* DOCTOR SUMMARY BASKET */}
       {doctorSummaryItems.length > 0 && (

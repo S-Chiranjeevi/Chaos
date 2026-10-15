@@ -1,0 +1,44 @@
+[
+  {
+    "id": "myth_fertility",
+    "myth": "Having PCOS means you can never get pregnant or have children.",
+    "fact": "PCOS is one of the most treatable causes of ovulatory subfertility. Many people with PCOS conceive naturally or with simple lifestyle changes, ovulatory tracking, or targeted clinical care such as ovulation induction.",
+    "explanation": "PCOS can make ovulation irregular, making timing more challenging, but it does not mean eggs are missing. In fact, individuals with PCOS often have an abundant ovarian reserve.",
+    "source": "American Society for Reproductive Medicine (ASRM) Practice Committee Guidelines"
+  },
+  {
+    "id": "myth_cysts_required",
+    "myth": "You must have ovarian cysts to have PCOS.",
+    "fact": "You do not need ovarian cysts to be diagnosed with PCOS. The Rotterdam criteria require two out of three criteria: irregular periods, elevated androgens, or polycystic ovaries on ultrasound.",
+    "explanation": "Furthermore, the small 'cysts' seen on ultrasound in PCOS are actually normal, immature egg follicles that have paused development, rather than harmful true cysts.",
+    "source": "Rotterdam ESHRE/ASRM-Sponsored PCOS Consensus Workshop Group"
+  },
+  {
+    "id": "myth_weight_only",
+    "myth": "PCOS only affects people who are overweight or obese.",
+    "fact": "PCOS occurs across all body sizes and weights. Up to 20–30% of individuals diagnosed with PCOS have a normal or lower BMI (often referred to as 'lean PCOS').",
+    "explanation": "While insulin resistance and weight changes can accompany PCOS, the core hormonal and genetic drivers affect metabolic pathways independently of body size.",
+    "source": "The Endocrine Society Clinical Review on Lean PCOS and Metabolic Manifestations"
+  },
+  {
+    "id": "myth_birth_control",
+    "myth": "The birth control pill is the only treatment for PCOS.",
+    "fact": "Birth control pills can help regulate menstrual bleeding and manage symptoms for some, but they are not the only care option and do not 'cure' the underlying hormonal balance.",
+    "explanation": "Comprehensive PCOS management involves personalized nutritional balance, stress and cortisol reduction, resistance and aerobic movement, sleep optimization, and non-contraceptive clinical therapies when desired.",
+    "source": "Monash International Evidence-based Guideline for PCOS Care (2023)"
+  },
+  {
+    "id": "myth_age_limits",
+    "myth": "PCOS is only relevant when you are trying to conceive.",
+    "fact": "PCOS is a lifelong metabolic and hormonal profile, not just a pregnancy consideration. Managing insulin sensitivity and cycle regularity supports cardiovascular, mental, and bone health well beyond family planning.",
+    "explanation": "Proactive self-care and medical oversight help safeguard long-term cardiometabolic wellness at every life stage.",
+    "source": "World Health Organization (WHO) Reproductive and Endocrine Health Policy Brief"
+  },
+  {
+    "id": "myth_personal_fault",
+    "myth": "You caused your PCOS through poor diet or lack of willpower.",
+    "fact": "PCOS has a strong genetic, epigenetic, and neuroendocrine foundation. You did not cause your PCOS.",
+    "explanation": "Family history, receptor sensitivity, and prenatal hormonal exposures play central roles. Self-compassion and informed support are far more effective than self-blame.",
+    "source": "National Institutes of Health (NIH) Office of Disease Prevention Evidence-based Methodology Workshop on PCOS"
+  }
+]
