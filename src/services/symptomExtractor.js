@@ -20,11 +20,16 @@ export const SYMPTOM_DEFINITIONS = [
     patterns: [
       /\b(irregular|infrequent|missed|late|skipped|unpredictable|delay(?:ed)?)\s+(periods?|menstrual cycles?|cycles?|menses)\b/i,
       /\b(periods?|cycles?)\s+(?:come\s+|arrive\s+|are\s+)?(?:every\s+)?(?:2[\s–-]3|two[\s–-]three|\d+)\s+months?\b/i,
+      /\b(periods?|cycles?)\b.{0,45}\b(irregular|infrequent|late|unpredictable|der se|nahi|ruk)\b/i,
       /\b(no\s+period|period.{0,20}(?:three|3|two|2|several)\s+months?)\b/i,
-      /अनियमित|महीनों से पीरियड|पीरियड नहीं|माहवारी में देरी|मासिक धर्म/i,
-      /ಅನಿಯಮಿತ|ಮುಟ್ಟು.*ತಡ|ಋತುಚಕ್ರ.*ಆಲಸ್ಯ|ತಿಂಗಳು.*ಬರಲಿಲ್ಲ/i,
-      /ஒழுங்கற்ற|மாதவிடாய்.*தாமதம்|மாதவிடாய்.*வரவில்லை/i,
-      /ക്രമരഹിതമായ|ആർത്തവം.*വൈക|മാസമുറ.*തടസ്സം/i,
+      /\b(periods?\s+late|mahina\s+late|cycle\s+late|time\s+pe\s+nahi|time\s+par\s+nahi)\b/i,
+      /अनियमित|महीनों से पीरियड|पीरियड नहीं|माहवारी में देरी|मासिक धर्म|पीरियड्स.*(?:2[\s–-]3|महीने|देरी)/i,
+      /అపరిమిత|క్రమం తప్పి|నెలసరి.*ఆలస్యం|పీరియడ్స్.*రావడం లేదు|సమయానికి రావడం లేదు/i,
+      /ಅನಿಯಮಿತ|ಮುಟ್ಟು.*ತಡ|ಋತುಚಕ್ರ.*ಆಲಸ್ಯ|ತಿಂಗಳು.*ಬರಲಿಲ್ಲ|ಮುಟ್ಟು.*(?:2[\s–-]3|ತಿಂಗಳು)/i,
+      /ஒழுங்கற்ற|மாதவிடாய்.*தாமதம்|மாதவிடாய்.*வரவில்லை|மாதவிடாய்.*(?:2[\s–-]3|மாதம்)/i,
+      /ക്രമരഹിതമായ|ആർത്തവം.*വൈക|മാസമുറ.*തടസ്സം|ആർത്തവം.*(?:2[\s–-]3|മാസം)/i,
+      /मासिक पाळी.*उशीर|अनियमित पाळी/i,
+      /অনিয়মিত পিরিয়ড|মাসিক অনিয়ম/i,
     ],
     defaultDuration: '2–3 months',
     defaultFrequency: 'Every 2–3 months',
@@ -35,11 +40,14 @@ export const SYMPTOM_DEFINITIONS = [
     label: 'Acne and skin breakouts',
     category: 'Dermatological & Androgenic',
     patterns: [
-      /\b(acne|pimples?|breakouts?|zits|cystic acne)\b/i,
+      /\b(acne|pimples?|breakouts?|zits|cystic acne|jawline acne)\b/i,
       /मुंहासे|कील-मुंहासे|दाने|चेहरे के दाने/i,
+      /మొటిమలు/i,
       /ಮೊಡವೆಗಳು|ಮುಖದಲ್ಲಿ ಮೊಡವೆ/i,
       /பருக்கள்|முகப்பரு/i,
       /മുഖക്കുരു|കുരുക്കൾ/i,
+      /पिंपल्स|पुरळ/i,
+      /ব্রণ/i,
     ],
     defaultDuration: 'Recent months',
     defaultFrequency: 'Persistent',
@@ -52,10 +60,14 @@ export const SYMPTOM_DEFINITIONS = [
     patterns: [
       /\b(increased|extra|excess|more|unwanted)\s+(?:facial|body|face|chin|jawline)\s+hair\b/i,
       /\b(facial\s+hair|hair\s+growth\s+(?:on|around)\s+(?:my\s+)?(?:face|chin|jawline|chest))\b/i,
-      /चेहरे पर बाल|अनचाहे बाल|दाढ़ी पर बाल/i,
-      /ಮುಖದ ಮೇಲೆ ಕೂದಲು|ಅನಗತ್ಯ ಕೂದಲು/i,
+      /\b(chin\s+par\s+baal|chehre\s+pe\s+baal|unwanted\s+baal)\b/i,
+      /चेहरे पर बाल|अनचाहे बाल|दाढ़ी पर बाल|ठुड्डी पर बाल/i,
+      /ముఖంపై వెంట్రుకలు|గడ్డంపై వెంట్రుకలు|అవాంఛిత రోమాలు/i,
+      /ಮುಖದ ಮೇಲೆ ಕೂದಲು|ಅನಗತ್ಯ ಕೂದಲು|ಗಲ್ಲದ ಕೂದಲು/i,
       /முகத்தில் முடி|தேவையற்ற முடி வளர்ச்சி/i,
       /മുഖത്തെ രോമം|താടിയിൽ രോമം/i,
+      /हनुवटीवर केस|चेहऱ्यावर केस|नको असलेले केस/i,
+      /মুখের লোম|থুতনিতে লোম|অবাঞ্ছিত লোম/i,
     ],
     defaultDuration: 'Gradual onset',
     defaultFrequency: 'Continuous',
@@ -112,6 +124,24 @@ export const SYMPTOM_DEFINITIONS = [
     defaultSeverity: 'Moderate',
   },
   {
+    id: 'acanthosis_nigricans',
+    label: 'Dark velvety patches on neck or skin folds (Acanthosis Nigricans)',
+    category: 'Metabolic & Endocrine',
+    patterns: [
+      /\b(dark\s+neck|dark\s+skin\s+around\s+neck|velvety\s+patches?|acanthosis(?:\s+nigricans)?|dark\s+armpits)\b/i,
+      /\b(gale\s+pe\s+kaalapan|gardan\s+kali|gardan\s+par\s+kala)\b/i,
+      /गर्दन पर कालापन|काली गर्दन/i,
+      /మెడ నల్లబడటం|మెడపై నల్లటి మచ్చలు/i,
+      /ಕುತ್ತಿಗೆ ಕಪ್ಪಾಗುವುದು/i,
+      /கழுத்தில் கருமை/i,
+      /मानेवर काळे डाग/i,
+      /ঘাড়ের কালো দাগ/i,
+    ],
+    defaultDuration: 'Persistent over months',
+    defaultFrequency: 'Constant; resistant to washing/scrubbing',
+    defaultSeverity: 'Moderate',
+  },
+  {
     id: 'hair_thinning',
     label: 'Scalp hair thinning or hair loss',
     category: 'Dermatological & Androgenic',
@@ -157,7 +187,29 @@ export const SYMPTOM_DEFINITIONS = [
     defaultSeverity: 'Severe',
     isRedFlag: true,
   },
+  {
+    id: 'pregnancy_warning',
+    label: 'Possible pregnancy-related warning signs',
+    category: 'Pregnancy-related warning signs',
+    patterns: [
+      /\b(pregnan(?:t|cy)|might be pregnant|possible pregnancy)\b.{0,70}\b(bleeding|spotting|pain|cramps?|dizz(?:y|iness)|faint(?:ed|ing)?)\b/i,
+      /\b(bleeding|spotting|pain|cramps?|dizz(?:y|iness)|faint(?:ed|ing)?)\b.{0,70}\b(pregnan(?:t|cy)|might be pregnant|possible pregnancy)\b/i,
+      /गर्भवती|गर्भावस्था.{0,30}(दर्द|खून|चक्कर)/i,
+    ],
+    defaultDuration: 'Not specified',
+    defaultFrequency: 'Not specified',
+    defaultSeverity: 'Severe',
+    isRedFlag: true,
+  },
 ]
+
+export function detectLanguage(text = '', preferredLanguage = 'en') {
+  if (/\p{Script=Devanagari}/u.test(text)) return 'hi'
+  if (/\p{Script=Kannada}/u.test(text)) return 'kn'
+  if (/\p{Script=Tamil}/u.test(text)) return 'ta'
+  if (/\p{Script=Malayalam}/u.test(text)) return 'ml'
+  return preferredLanguage || 'en'
+}
 
 /**
  * Extracts duration phrase from user note (e.g. "2-3 months", "past 6 months", "1 year")
@@ -211,18 +263,23 @@ function extractSeverityFromText(text, fallback = 'Moderate') {
 /**
  * Main parser: takes a text note and returns structured symptom cards and non-diagnostic guidance
  */
-export function extractSymptoms(rawText = '') {
+export function extractSymptoms(rawText = '', { preferredLanguage = 'en' } = {}) {
   const text = (rawText || '').trim()
+  const detectedLanguage = detectLanguage(text, preferredLanguage)
   if (!text) {
     return {
       symptoms: [],
       hasPcosIndicators: false,
       isUrgent: false,
       redFlags: [],
-      disclaimer: 'These symptoms can sometimes occur with PCOS, but they can also have other causes.',
+      disclaimer: 'These symptoms can sometimes occur with PCOS, but they can also have other causes. This is information, not a diagnosis.',
+      urgency: 'routine',
       topics: [],
       questionsForDoctor: [],
       lifestyleTips: [],
+      detectedLanguage,
+      possibleRelationships: [],
+      recommendedSpecialist: 'Consider booking an appointment with a gynecologist.',
     }
   }
 
@@ -279,7 +336,7 @@ export function extractSymptoms(rawText = '') {
 
   // Carefully framed questions for the doctor
   const questionsForDoctor = [
-    'What diagnostic tests (such as pelvic ultrasound or hormone panel) are appropriate for my symptoms?',
+    'What evaluations, such as a pelvic ultrasound or hormone panel, might be appropriate for my symptoms?',
     'Could these symptoms be linked to PCOS, thyroid function, or another underlying hormonal balance?',
     'What symptom diary or tracking parameters should I keep over the next few cycles?',
   ]
@@ -291,10 +348,15 @@ export function extractSymptoms(rawText = '') {
     questionsForDoctor.unshift('What signs should prompt me to go to an urgent care or emergency room immediately?')
   }
 
+  const possibleRelationships = []
+  if (hasHormonalSigns) possibleRelationships.push('This could be related to hormone changes, including PCOS, but there can be many possible causes.')
+  if (ids.has('pelvic_discomfort') || ids.has('severe_pain')) possibleRelationships.push('Pelvic discomfort can have many possible causes and may be worth discussing with a clinician.')
+  if (ids.has('heavy_bleeding')) possibleRelationships.push('A change in bleeding can have many possible causes and may be worth discussing with a clinician.')
+  if (!possibleRelationships.length) possibleRelationships.push('This pattern may be worth discussing with a healthcare professional because there can be many possible causes.')
+
   // Educational topics
   const topics = [
-    'How gynecologists evaluate menstrual cycle health (Rotterdam criteria overview)',
-    'Other potential causes: Thyroid conditions (Hypothyroidism), Hyperprolactinemia, Stress/Cortisol, and Endometriosis',
+    ...possibleRelationships,
     'Self-advocacy tips: Preparing for your consultation and tracking symptoms',
   ]
 
@@ -305,15 +367,49 @@ export function extractSymptoms(rawText = '') {
     'Stay well hydrated and note any triggers related to caffeine or high-stress days.',
   ]
 
+  const hasOvulatory = ids.has('irregular_periods')
+  const hasAndrogenic = ids.has('acne') || ids.has('increased_hair') || ids.has('hair_thinning')
+  const hasMetabolic = ids.has('weight_changes') || ids.has('acanthosis_nigricans')
+
+  const recommendedTests = []
+  if (hasOvulatory) {
+    recommendedTests.push({ test: 'Pelvic / Transvaginal Ultrasound', reason: 'To evaluate ovarian antral follicle count and morphology' })
+    recommendedTests.push({ test: 'Serum TSH & Prolactin', reason: 'To rule out thyroid disorder or hyperprolactinemia' })
+  }
+  if (hasAndrogenic) {
+    recommendedTests.push({ test: 'Total & Free Testosterone', reason: 'Measures bioavailable circulating androgens' })
+    recommendedTests.push({ test: 'DHEA-Sulfate (DHEA-S)', reason: 'Assesses adrenal androgen contribution' })
+  }
+  if (hasMetabolic) {
+    recommendedTests.push({ test: 'Fasting Glucose & Fasting Insulin (HOMA-IR)', reason: 'Identifies hidden insulin resistance early' })
+    recommendedTests.push({ test: 'HbA1c & Fasting Lipid Profile', reason: 'Screens for pre-diabetes and cardiometabolic balance' })
+  }
+  if (!recommendedTests.length) {
+    recommendedTests.push({ test: 'Well-Woman Routine Panel (CBC, TSH, HbA1c)', reason: 'General baseline hormonal and metabolic assessment' })
+  }
+
   return {
     symptoms: matchedSymptoms,
-    hasPcosIndicators: hasHormonalSigns,
+    hasPcosIndicators: hasHormonalSigns || hasOvulatory || hasAndrogenic || hasMetabolic,
     isUrgent,
     redFlags,
-    disclaimer: 'These symptoms can sometimes occur with PCOS, but they can also have other causes.',
+    disclaimer: 'These symptoms can sometimes occur with PCOS, but they can also have other causes. This is information, not a diagnosis.',
     urgency: isUrgent ? 'urgent' : hasHormonalSigns ? 'soon' : 'routine',
     topics,
     questionsForDoctor,
     lifestyleTips,
+    recommendedTests,
+    rotterdamPillars: {
+      ovulatory: hasOvulatory,
+      androgenic: hasAndrogenic,
+      metabolic: hasMetabolic,
+    },
+    detectedLanguage,
+    possibleRelationships,
+    recommendedSpecialist: isUrgent
+      ? 'Please seek urgent medical care now or contact local emergency services.'
+      : hasHormonalSigns
+        ? 'Consider booking an appointment with a gynecologist. An endocrinologist may also be helpful.'
+        : 'Consider booking an appointment with a gynecologist.',
   }
 }

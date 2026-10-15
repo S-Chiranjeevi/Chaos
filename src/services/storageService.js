@@ -1,151 +1,274 @@
-const KEYS = {
-  healthEntries: 'sakhicare_health_entries_v1',
-  cycleEntries: 'sakhicare_cycle_entries_v1',
-  insights: 'sakhicare_insights_v1',
-  doctorSummary: 'sakhicare_doctor_summary_v1',
-  legacyTracker: 'sakhicare_health_tracker_v1',
+/**
+ * PCOS Saathi - Unified Local Storage Service
+ * 
+ * Strict Client-Side Persistence Layer.
+ * Guarantees zero cloud telemetry, complete offline functionality,
+ * and predictable cross-component event notifications.
+ */
+
+import {
+  STORAGE_KEYS,
+  createHealthEntry,
+  createCycleEntry,
+  createInsight,
+  createDoctorSummary,
+} from '../models/pcosSaathiSchemas.js';
+
+// Safe wrapper around window.localStorage
+function getStorage() {
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return {
+      getItem: () => null,
+      setItem: () => {},
+      removeItem: () => {},
+      clear: () => {},
+      length: 0,
+      key: () => null,
+    };
+  }
+  return window.localStorage;
 }
 
-const uid = (prefix) => `${prefix}-${globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`}`
-
-function readJson(key, fallback) {
+// Broadcast event to notify components across the app
+export function notifyDataChange(key, data) {
+  if (typeof window === 'undefined') return;
   try {
-    const raw = globalThis.localStorage?.getItem(key)
-    if (raw === null || raw === undefined) return fallback
-    return JSON.parse(raw)
-  } catch {
-    return fallback
+    const event = new CustomEvent('pcos_saathi:data_change', {
+      detail: { key, data, timestamp: new Date().toISOString() },
+      bubbles: true,
+    });
+    window.dispatchEvent(event);
+  } catch (err) {
+    console.warn('Failed to dispatch pcos_saathi:data_change event', err);
   }
 }
 
-function writeJson(key, value) {
-  try {
-    if (!globalThis.localStorage) throw new Error('Local storage is unavailable in this browser.')
-    globalThis.localStorage.setItem(key, JSON.stringify(value))
-    return value
-  } catch (error) {
-    throw new Error(`Could not save data on this device. ${error.message || 'Check browser storage settings and try again.'}`)
-  }
-}
+export const StorageService = {
+  // =========================================================================
+  // 1. HEALTH ENTRIES (`pcos_saathi_health_entries`)
+  // =========================================================================
+  getHealthEntries() {
+    const raw = getStorage().getItem(STORAGE_KEYS.HEALTH_ENTRIES);
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  },
 
-function list(key) {
-  const value = readJson(key, [])
-  return Array.isArray(value) ? value : []
-}
+  saveHealthEntry(entryData) {
+    const entry = createHealthEntry(entryData);
+    const existing = this.getHealthEntries();
+    const updated = [entry, ...existing.filter((e) => e.id !== entry.id)];
+    getStorage().setItem(STORAGE_KEYS.HEALTH_ENTRIES, JSON.stringify(updated));
+    notifyDataChange(STORAGE_KEYS.HEALTH_ENTRIES, updated);
+    return entry;
+  },
 
-function upsert(key, entry, prefix) {
-  if (!entry || typeof entry !== 'object' || Array.isArray(entry)) throw new TypeError('An entry is required.')
-  const record = { ...entry, id: entry.id || uid(prefix) }
-  const current = list(key)
-  const index = current.findIndex((item) => item?.id === record.id)
-  if (index < 0) current.push(record)
-  else current[index] = record
-  writeJson(key, current)
-  return record
-}
+  deleteHealthEntry(id) {
+    const existing = this.getHealthEntries();
+    const updated = existing.filter((e) => e.id !== id);
+    getStorage().setItem(STORAGE_KEYS.HEALTH_ENTRIES, JSON.stringify(updated));
+    notifyDataChange(STORAGE_KEYS.HEALTH_ENTRIES, updated);
+    return updated;
+  },
 
-function isValidDate(value) {
-  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false
-  const [year, month, day] = value.split('-').map(Number)
-  const date = new Date(Date.UTC(year, month - 1, day))
-  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day
-}
+  // =========================================================================
+  // 2. CYCLE ENTRIES (`pcos_saathi_cycle_entries`)
+  // =========================================================================
+  getCycleEntries() {
+    const raw = getStorage().getItem(STORAGE_KEYS.CYCLE_ENTRIES);
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  },
 
-function localDateString(date = new Date()) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
-}
+  saveCycleEntry(cycleData) {
+    const entry = createCycleEntry(cycleData);
+    const existing = this.getCycleEntries();
+    // Sort descending by startDate
+    const updated = [entry, ...existing.filter((c) => c.id !== entry.id)].sort(
+      (a, b) => b.startDate.localeCompare(a.startDate)
+    );
+    getStorage().setItem(STORAGE_KEYS.CYCLE_ENTRIES, JSON.stringify(updated));
+    notifyDataChange(STORAGE_KEYS.CYCLE_ENTRIES, updated);
+    return entry;
+  },
 
-export function saveHealthEntry(entry) {
-  return upsert(KEYS.healthEntries, entry, 'health')
-}
+  deleteCycleEntry(id) {
+    const existing = this.getCycleEntries();
+    const updated = existing.filter((c) => c.id !== id);
+    getStorage().setItem(STORAGE_KEYS.CYCLE_ENTRIES, JSON.stringify(updated));
+    notifyDataChange(STORAGE_KEYS.CYCLE_ENTRIES, updated);
+    return updated;
+  },
 
-export function loadHealthEntries() {
-  return list(KEYS.healthEntries)
-}
+  // =========================================================================
+  // 3. INSIGHTS (`pcos_saathi_insights`)
+  // =========================================================================
+  getInsights() {
+    const raw = getStorage().getItem(STORAGE_KEYS.INSIGHTS);
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  },
 
-export function deleteHealthEntry(id) {
-  const current = list(KEYS.healthEntries)
-  const remaining = current.filter((entry) => entry?.id !== id)
-  writeJson(KEYS.healthEntries, remaining)
-  return current.length !== remaining.length
-}
+  saveInsights(insightsList) {
+    const validated = (Array.isArray(insightsList) ? insightsList : [insightsList]).map(
+      (ins) => createInsight(ins)
+    );
+    getStorage().setItem(STORAGE_KEYS.INSIGHTS, JSON.stringify(validated));
+    notifyDataChange(STORAGE_KEYS.INSIGHTS, validated);
+    return validated;
+  },
 
-export function saveCycleEntry(entry) {
-  if (!entry || !isValidDate(entry.startDate)) throw new TypeError('Enter a valid period start date.')
-  const today = localDateString()
-  if (entry.startDate > today) throw new RangeError('A period start date can’t be in the future.')
-  if (entry.endDate && !isValidDate(entry.endDate)) throw new TypeError('Enter a valid period end date.')
-  if (entry.endDate && entry.endDate > today) throw new RangeError('A period end date can’t be in the future.')
-  if (entry.endDate && entry.endDate < entry.startDate) throw new RangeError('The end date must be the same as or after the start date.')
+  // =========================================================================
+  // 4. DOCTOR SUMMARY (`pcos_saathi_doctor_summary`)
+  // =========================================================================
+  getDoctorSummary() {
+    const raw = getStorage().getItem(STORAGE_KEYS.DOCTOR_SUMMARY);
+    if (!raw) return null;
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  },
 
-  const current = loadCycleEntries()
-  if (current.some((item) => item.startDate === entry.startDate && item.id !== entry.id)) {
-    const error = new Error('A period already starts on that date. Edit its existing entry instead.')
-    error.code = 'DUPLICATE_CYCLE_DATE'
-    throw error
-  }
-  return upsert(KEYS.cycleEntries, entry, 'cycle')
-}
+  saveDoctorSummary(summaryData) {
+    const summary = createDoctorSummary(summaryData);
+    getStorage().setItem(STORAGE_KEYS.DOCTOR_SUMMARY, JSON.stringify(summary));
+    notifyDataChange(STORAGE_KEYS.DOCTOR_SUMMARY, summary);
+    return summary;
+  },
 
-export function loadCycleEntries() {
-  const saved = readJson(KEYS.cycleEntries, null)
-  if (Array.isArray(saved)) return saved
+  // =========================================================================
+  // 5. PREFERENCES (`pcos_saathi_preferences`)
+  // =========================================================================
+  getPreferences() {
+    const raw = getStorage().getItem(STORAGE_KEYS.PREFERENCES);
+    const defaults = {
+      language: 'en',
+      theme: 'light',
+      fontSize: 'medium',
+      hapticFeedback: false,
+      enableReminders: false,
+    };
+    if (!raw) return defaults;
+    try {
+      return { ...defaults, ...JSON.parse(raw) };
+    } catch {
+      return defaults;
+    }
+  },
 
-  // Preserve records saved by the first tracker version on this device.
-  const legacy = readJson(KEYS.legacyTracker, [])
-  if (!Array.isArray(legacy) || legacy.length === 0) return []
-  const migrated = legacy.filter((entry) => entry && isValidDate(entry.startDate)).map((entry) => ({
-    id: entry.id || uid('cycle'),
-    startDate: entry.startDate,
-    endDate: entry.endDate || '',
-    flowLevel: entry.flowLevel || '',
-    painLevel: entry.painLevel || entry.severity || '',
-    symptoms: Array.isArray(entry.symptoms) ? entry.symptoms : [],
-    mood: entry.mood || '',
-    energyLevel: entry.energyLevel || '',
-    notes: entry.notes || entry.note || '',
-  }))
-  if (migrated.length) writeJson(KEYS.cycleEntries, migrated)
-  return migrated
-}
+  savePreferences(prefs) {
+    const current = this.getPreferences();
+    const updated = { ...current, ...prefs };
+    getStorage().setItem(STORAGE_KEYS.PREFERENCES, JSON.stringify(updated));
+    notifyDataChange(STORAGE_KEYS.PREFERENCES, updated);
+    return updated;
+  },
 
-export function saveInsight(insight) {
-  return upsert(KEYS.insights, insight, 'insight')
-}
+  // =========================================================================
+  // 6. AI CONSENT & PRIVACY (`pcos_saathi_ai_consent`)
+  // =========================================================================
+  getAiConsent() {
+    const raw = getStorage().getItem(STORAGE_KEYS.AI_CONSENT);
+    const defaults = {
+      consented: false,
+      timestamp: null,
+      telemetryAllowed: false, // ALWAYS false by architectural invariant
+      localWhisperOptIn: true,
+      remoteFastApiOptIn: false, // Off by default (explicit opt-in only)
+    };
+    if (!raw) return defaults;
+    try {
+      return { ...defaults, ...JSON.parse(raw), telemetryAllowed: false };
+    } catch {
+      return defaults;
+    }
+  },
 
-export function loadInsights() {
-  return list(KEYS.insights)
-}
+  saveAiConsent(consent) {
+    const updated = {
+      ...this.getAiConsent(),
+      ...consent,
+      telemetryAllowed: false, // Invariant: Telemetry cannot be forced on
+      timestamp: new Date().toISOString(),
+    };
+    getStorage().setItem(STORAGE_KEYS.AI_CONSENT, JSON.stringify(updated));
+    notifyDataChange(STORAGE_KEYS.AI_CONSENT, updated);
+    return updated;
+  },
 
-export function saveDoctorSummary(summary) {
-  if (summary === null || summary === undefined) {
-    try { globalThis.localStorage?.removeItem(KEYS.doctorSummary) } catch { /* storage may be unavailable */ }
-    return null
-  }
-  return writeJson(KEYS.doctorSummary, summary)
-}
+  // =========================================================================
+  // BACKWARD COMPATIBILITY MIGRATION (from sakhicare_* keys)
+  // =========================================================================
+  migrateLegacyKeys() {
+    const storage = getStorage();
+    try {
+      // 1. Health Entry migration
+      const legacyHealth = storage.getItem('sakhicare_latest_entry');
+      if (legacyHealth && !storage.getItem(STORAGE_KEYS.HEALTH_ENTRIES)) {
+        const parsed = JSON.parse(legacyHealth);
+        this.saveHealthEntry(parsed);
+      }
 
-export function loadDoctorSummary() {
-  return readJson(KEYS.doctorSummary, null)
-}
+      // 2. Cycle Tracker migration
+      const legacyCycle = storage.getItem('sakhicare_cycle_tracker');
+      if (legacyCycle && !storage.getItem(STORAGE_KEYS.CYCLE_ENTRIES)) {
+        const parsed = JSON.parse(legacyCycle);
+        if (Array.isArray(parsed)) {
+          parsed.forEach((c) => {
+            this.saveCycleEntry({
+              startDate: c.date,
+              notes: c.note,
+            });
+          });
+        }
+      }
+    } catch (err) {
+      console.warn('Legacy key migration skipped:', err);
+    }
+  },
 
-export function exportAllLocalData() {
-  return {
-    app: 'Luna Her',
-    exportedAt: new Date().toISOString(),
-    storage: 'This export was assembled from data stored locally in this browser.',
-    healthEntries: loadHealthEntries(),
-    cycleEntries: loadCycleEntries(),
-    insights: loadInsights(),
-    doctorSummary: loadDoctorSummary(),
-  }
-}
+  // =========================================================================
+  // PRIVACY PURGE & DATA EXPORT
+  // =========================================================================
+  exportAllData() {
+    return {
+      version: '3.0.0',
+      exportedAt: new Date().toISOString(),
+      disclaimer: 'Personal health data exported solely by user from local device.',
+      healthEntries: this.getHealthEntries(),
+      cycleEntries: this.getCycleEntries(),
+      insights: this.getInsights(),
+      doctorSummary: this.getDoctorSummary(),
+      preferences: this.getPreferences(),
+    };
+  },
 
-export function deleteAllLocalData() {
-  try {
-    for (const key of Object.values(KEYS)) globalThis.localStorage?.removeItem(key)
-    return true
-  } catch (error) {
-    throw new Error(`Could not delete all local data. ${error.message || 'Check browser storage settings and try again.'}`)
-  }
-}
+  clearAllPcosData() {
+    const storage = getStorage();
+    Object.values(STORAGE_KEYS).forEach((key) => {
+      storage.removeItem(key);
+    });
+    // Also remove legacy keys
+    storage.removeItem('sakhicare_latest_entry');
+    storage.removeItem('sakhicare_cycle_tracker');
+
+    notifyDataChange('all_purged', null);
+    return true;
+  },
+};
