@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { TalkOrType } from './components/TalkOrType.jsx'
-import { CycleTracker } from './components/CycleTracker.jsx'
+import { PatternDetectionView } from './components/PatternDetectionView.jsx'
 import { PrivacyControls } from './components/PrivacyControls.jsx'
 import { EducationLibrary } from './components/EducationLibrary.jsx'
 import { Heart, Shield, Sparkles, Stethoscope, Sun, Moon, Info } from 'lucide-react'
@@ -112,14 +112,17 @@ function App() {
           </div>
         </section>
 
-        <section className="integration-section" id="tracker">
+        <section className="integration-section" id="pattern-detection">
           <div className="section-container">
-            <div className="section-header">
-              <span className="subhead-pill">Private cycle tracker</span>
-              <h2>Notice patterns over time</h2>
-              <p>Log a cycle or symptom in a few words. Entries stay only on this device.</p>
-            </div>
-            <CycleTracker latestEntry={lastSharedEntry} />
+            <PatternDetectionView
+              initialSymptomLogs={lastSharedEntry?.symptoms?.map((s) => ({
+                symptom: s.symptom,
+                severity: s.severity?.toLowerCase() || 'moderate',
+                duration: s.duration,
+                date: new Date().toISOString().slice(0, 10),
+                note: 'From Talk or Type entry',
+              })) || []}
+            />
           </div>
         </section>
 
