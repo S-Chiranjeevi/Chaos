@@ -101,7 +101,7 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    document.title = `${PAGE_TITLES[activePage]} · PCOS Saathi`;
+    document.title = `${PAGE_TITLES[activePage]} · LunaHer`;
     if (activePage !== 'home') {
       requestAnimationFrame(() => document.querySelector('[data-page-heading]')?.focus());
     }
@@ -203,7 +203,7 @@ export function App() {
           <main id="main-content" className="page-content" tabIndex="-1">
             {renderPage()}
             <footer className="page-footer">
-              <span>PCOS Saathi · A gentle, private place to begin</span>
+              <span>LunaHer · A gentle, private place to begin</span>
               <button type="button" onClick={() => navigate('privacy')}>
                 Privacy choices
               </button>

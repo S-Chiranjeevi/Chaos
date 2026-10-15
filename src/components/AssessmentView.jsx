@@ -36,7 +36,7 @@ export function AssessmentView({ assessment, _symptoms = [] }) {
             “These symptoms can sometimes occur with PCOS, but they can also have other causes.”
           </p>
           <p className="banner-subtext">
-            This is information, not a diagnosis. SakhiCare helps you organize your experiences and prepare for a safe, supportive conversation with a qualified healthcare professional.
+            This is information, not a diagnosis. LunaHer helps you organize your experiences and prepare for a safe, supportive conversation with a qualified healthcare professional.
           </p>
         </div>
       </div>

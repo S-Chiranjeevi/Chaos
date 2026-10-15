@@ -50,7 +50,7 @@ QUESTIONS TO BRING TO DOCTOR:
 ${healthEntry.assessment.questionsForDoctor?.map((q, i) => `${i + 1}. ${q}`).join('\n')}
 
 DISCLAIMER:
-This summary was organized using SakhiCare. It is educational information for self-advocacy. This is information, not a diagnosis.`
+This summary was organized using LunaHer. It is educational information for self-advocacy. This is information, not a diagnosis.`
 
     const blob = new Blob([summaryText], { type: 'text/plain;charset=utf-8' })
     const url = URL.createObjectURL(blob)

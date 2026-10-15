@@ -230,8 +230,8 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
       } catch (error) {
         const safetyBlocked = error instanceof AnalysisUnavailableError && /safety checks/i.test(error.message)
         setAnalysisFallbackMessage(safetyBlocked
-          ? 'The online response was hidden by safety checks, so SakhiCare used on-device guidance instead.'
-          : 'We could not use the online analysis service, so SakhiCare used private on-device symptom guidance instead.')
+          ? 'The online response was hidden by safety checks, so LunaHer used on-device guidance instead.'
+          : 'We could not use the online analysis service, so LunaHer used private on-device symptom guidance instead.')
       }
     }
 

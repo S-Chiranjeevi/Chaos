@@ -191,7 +191,7 @@ export function PrivacyView({ onNavigate }) {
                 variant="danger"
                 size="sm"
                 onClick={handlePurgeAll}
-                ariaLabel="Delete all stored PCOS Saathi records permanently"
+                ariaLabel="Delete all stored LunaHer records permanently"
                 helperText="Irreversible action"
                 icon={
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -205,7 +205,7 @@ export function PrivacyView({ onNavigate }) {
 
             {purgeConfirmed && (
               <div role="status" className="p-3 bg-red-100 text-red-900 border border-red-300 rounded-xl text-xs font-semibold">
-                ✓ All PCOS Saathi local records have been successfully eradicated from this browser.
+                ✓ All LunaHer local records have been successfully deleted from this browser.
               </div>
             )}
           </div>

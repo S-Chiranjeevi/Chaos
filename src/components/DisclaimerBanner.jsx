@@ -7,7 +7,7 @@ export function DisclaimerBanner() {
       <Info size={20} aria-hidden="true" />
       <div>
         <strong>Helpful to know</strong>
-        <p>SakhiCare shares general information. It cannot tell you what condition you have or replace a health worker.</p>
+        <p>LunaHer shares general information. It cannot tell you what condition you have or replace a health worker.</p>
       </div>
     </aside>
   )
