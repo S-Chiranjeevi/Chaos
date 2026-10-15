@@ -1,4 +1,4 @@
-"""Opt-in AI transport for SakhiCare insights.
+"""Opt-in AI transport for Luna Her insights.
 
 The client is deliberately small: consent is mandatory, only a sanitized structured
 summary is transmitted, requests time out, and neither prompts nor responses are

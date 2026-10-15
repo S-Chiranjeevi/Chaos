@@ -24,6 +24,10 @@ class AnalyzeRequest(BaseModel):
         le=120,
         description="User age in years (optional)"
     )
+    follow_up_answers: Optional[dict[str, Any]] = Field(
+        default=None,
+        description="User answers to previous follow-up clarification questions"
+    )
 
     @field_validator("text")
     @classmethod
@@ -47,3 +51,5 @@ class AnalyzeResponse(BaseModel):
     self_care_tips: List[str] = Field(default_factory=list, description="Non-medical lifestyle and nutritional guidance")
     disclaimer: str = Field(default="This is information, not a diagnosis.", description="Medical disclaimer")
     reply_text: str = Field(default="", description="Empathetic, conversational overview for the user")
+    follow_up_questions: List[dict[str, Any]] = Field(default_factory=list, description="AI-generated follow-up questions to clarify context")
+    synthesized_suggestions: Optional[dict[str, Any]] = Field(default=None, description="Suggestions synthesized from symptoms and follow-up answers")

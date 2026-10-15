@@ -24,7 +24,7 @@ import { analyzeHealthPatterns, DISCLAIMER } from '../services/patternDetectionS
 
 function savedPersonalizedInsights() {
   try {
-    const saved = JSON.parse(localStorage.getItem('sakhicare_doctor_insights') || '[]')
+    const saved = JSON.parse(localStorage.getItem('lunaher_doctor_insights') || localStorage.getItem('sakhicare_doctor_insights') || '[]')
     return Array.isArray(saved) ? saved.map((insight) => `${insight.title}: ${insight.message}`).filter(Boolean) : []
   } catch {
     return []
@@ -85,15 +85,26 @@ export function DoctorSummary({
     if (initialData) return initialData
     const savedEntry = getLatestHealthEntry()
     if (savedEntry && savedEntry.symptoms && savedEntry.symptoms.length > 0) {
+      const tailored = savedEntry.tailoredSuggestions
+      const customQuestions = tailored?.questionsForDoctor?.length
+        ? tailored.questionsForDoctor
+        : DEFAULT_DOCTOR_SUMMARY.questionsForDoctor
+
+      const clarifiedNarrative = tailored?.summaryNarrative
+        ? `I am sharing a summary of symptoms and follow-up details recorded in LunaHer: "${tailored.summaryNarrative}". I would like to discuss possible causes and whether further evaluation is appropriate.`
+        : `I am sharing a summary of symptoms recorded in LunaHer: "${savedEntry.rawTranscript}". I would like to discuss possible causes and whether further evaluation is appropriate.`
+
       return {
         ...DEFAULT_DOCTOR_SUMMARY,
-        narrative: `I am sharing a summary of symptoms recorded in LunaHer: "${savedEntry.rawTranscript}". I would like to discuss possible causes and whether further evaluation is appropriate.`,
+        narrative: clarifiedNarrative,
         mainSymptoms: savedEntry.symptoms.map((s) => ({
           symptom: s.symptom,
           duration: s.duration || 'Not specified',
           frequency: s.frequency || 'Not specified',
           severity: s.severity || 'Moderate',
         })),
+        questionsForDoctor: customQuestions,
+        suggestedSpecialist: tailored?.recommendedSpecialist || DEFAULT_DOCTOR_SUMMARY.suggestedSpecialist,
         disclaimer: DISCLAIMER,
         personalizedInsights: [...new Set([...DEFAULT_DOCTOR_SUMMARY.personalizedInsights, ...selectedInsights])],
       }
@@ -147,7 +158,7 @@ export function DoctorSummary({
 
   // Format the complete summary as clean, legible text for sharing / printing
   const plainTextSummary = useMemo(() => {
-    return `SAKHICARE — CLINICIAN DISCUSSION SUMMARY
+    return `LUNA HER — CLINICIAN DISCUSSION SUMMARY
 Generated: ${new Date().toLocaleDateString()}
 Storage: 100% On-Device / Local
 Disclaimer: ${summaryData.disclaimer || DISCLAIMER}
@@ -203,7 +214,7 @@ NOTE: LunaHer is an educational self-advocacy tool and does not provide clinical
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `sakhicare-doctor-summary-${new Date().toISOString().slice(0, 10)}.txt`
+    a.download = `luna-her-doctor-summary-${new Date().toISOString().slice(0, 10)}.txt`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
@@ -212,12 +223,12 @@ NOTE: LunaHer is an educational self-advocacy tool and does not provide clinical
 
   function handleExportJson() {
     const exportObject = {
-      schema: 'SakhiCareDoctorSummary_v1',
+      schema: 'LunaHerDoctorSummary_v1',
       generatedAt: new Date().toISOString(),
       language: currentLanguage,
       ...summaryData,
       metadata: {
-        tool: 'SakhiCare Multilingual Doctor Summary',
+        tool: 'Luna Her Multilingual Doctor Summary',
         diagnosticClaim: false,
         source: 'Self-reported timeline & pattern detection',
       }
@@ -226,7 +237,7 @@ NOTE: LunaHer is an educational self-advocacy tool and does not provide clinical
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `sakhicare-doctor-summary-${new Date().toISOString().slice(0, 10)}.json`
+    a.download = `luna-her-doctor-summary-${new Date().toISOString().slice(0, 10)}.json`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)

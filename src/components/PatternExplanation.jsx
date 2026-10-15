@@ -103,7 +103,7 @@ export function PatternExplanation({ warning, defaultExpanded = false }) {
 
           <div className="flex items-center gap-1.5 text-[11px] text-stone-500 dark:text-stone-400 italic pt-1">
             <CheckCircle2 size={12} className="text-emerald-600 flex-shrink-0" />
-            <span>SakhiCare shares patterns for self-advocacy. This is information, not a diagnosis.</span>
+            <span>Luna Her shares patterns for self-advocacy. This is information, not a diagnosis.</span>
           </div>
         </div>
       )}

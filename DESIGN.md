@@ -1,8 +1,8 @@
-# SakhiCare — product and UX handoff
+# Luna Her — product and UX handoff
 
 ## Product promise
 
-SakhiCare helps women put what they notice into their own words, keep optional health notes, and prepare for a conversation with a health worker. It offers general information, not diagnosis or treatment. People can skip tracking and decide what to share.
+Luna Her helps women put what they notice into their own words, keep optional health notes, and prepare for a conversation with a health worker. It offers general information, not diagnosis or treatment. People can skip tracking and decide what to share.
 
 ## Screen map
 
@@ -48,7 +48,7 @@ Persistent navigation: **Home**, **Talk or type**, **Health tracker**, **Doctor 
 | Symptom chip | Selectable, plain words: **Pain**, **Bleeding**, **Feeling tired**, **Feeling sick**, **Something else**; selected state also uses `aria-pressed` |
 | Language selector | Label **Language**; options **English**, **हिन्दी**, **বাংলা**, **தமிழ்**. Production must ship complete, reviewed translations for every screen and spoken content |
 | Progress indicator | **Step 1 of 2 — Tell us** and **Step 2 of 2 — Check**; pair text with the visual progress bar |
-| Disclaimer banner | “SakhiCare shares general information. It cannot diagnose a health problem or replace a health worker.” |
+| Disclaimer banner | “Luna Her shares general information. It cannot diagnose a health problem or replace a health worker.” |
 | Urgent warning card | **Get help now if you feel in immediate danger** plus “If you feel very unwell or unsafe, contact local emergency help or a trusted person near you now.” Provide **Show help options** |
 | Empty state | **No notes yet** / “Your notes will show here when you add them. Start with one thing you noticed.” / **Add a note** |
 | Loading state | “Please wait while we prepare your notes. This may take a moment.” Use a labelled, non-interactive skeleton and announce status to assistive technology |

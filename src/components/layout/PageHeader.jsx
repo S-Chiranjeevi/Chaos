@@ -3,7 +3,7 @@ import { Button } from '../common/Button.jsx';
 import { Badge } from '../common/Badge.jsx';
 
 /**
- * PageHeader - Reusable header component for SakhiCare views.
+ * PageHeader - Reusable header component for Luna Her views.
  * Features:
  * - Back button with visible descriptive label and helper text
  * - Main <h1> title and subtitle

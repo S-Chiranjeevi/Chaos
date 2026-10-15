@@ -1,5 +1,5 @@
 /**
- * PCOS Saathi & SakhiCare Shared HealthEntry Bridge
+ * PCOS Saathi & Luna Her Shared HealthEntry Bridge
  * 
  * Standardized data contract for symptom descriptions, extracted clinical features,
  * and non-diagnostic educational guidance for PCOS and women's health.
@@ -12,7 +12,7 @@ import { writeLocalData, readLocalData, clearLocalHealthData } from '../services
 export const SEVERITY_LEVELS = ['Mild', 'Moderate', 'Severe', 'Unspecified'];
 
 export const createHealthEntry = ({
-  id = `sakhi-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+  id = `luna-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
   timestamp = new Date().toISOString(),
   language = 'en',
   inputMode = 'text', // 'text' | 'speech'
@@ -21,6 +21,8 @@ export const createHealthEntry = ({
   assessment = null,
   disclaimerAcknowledged = true,
   notes = '',
+  followUpQnA = [],
+  tailoredSuggestions = null,
 } = {}) => {
   return {
     id,
@@ -46,6 +48,8 @@ export const createHealthEntry = ({
       questionsForDoctor: [],
       redFlags: [],
     },
+    followUpQnA,
+    tailoredSuggestions,
     disclaimerAcknowledged,
     notes,
     metadata: {
@@ -64,6 +68,12 @@ export const publishHealthEntry = (entry) => {
 
   // 1. Dispatch events for legacy and canonical listeners
   try {
+    const lunaEvent = new CustomEvent('lunaher:healthEntryUpdate', {
+      detail: entry,
+      bubbles: true,
+    });
+    window.dispatchEvent(lunaEvent);
+
     const legacyEvent = new CustomEvent('sakhicare:healthEntryUpdate', {
       detail: entry,
       bubbles: true,
@@ -77,7 +87,8 @@ export const publishHealthEntry = (entry) => {
     window.dispatchEvent(canonicalEvent);
   } catch { /* The page can still save locally if events are unavailable. */ }
 
-  // 2. Persist in legacy localStorage key
+  // 2. Persist in legacy localStorage keys
+  writeLocalData('lunaher_latest_entry', entry);
   writeLocalData('sakhicare_latest_entry', entry);
 
   // 3. Persist in canonical array key `pcos_saathi_health_entries`
@@ -103,7 +114,7 @@ export const getLatestHealthEntry = () => {
       const list = JSON.parse(canonicalRaw);
       if (Array.isArray(list) && list.length > 0) return list[0];
     }
-    const stored = readLocalData('sakhicare_latest_entry', null).value;
+    const stored = readLocalData('lunaher_latest_entry', null).value || readLocalData('sakhicare_latest_entry', null).value;
     return stored || null;
   } catch {
     return null;
@@ -115,7 +126,7 @@ export const deleteAllLocalHealthData = () => {
   clearLocalHealthData();
   for (let index = localStorage.length - 1; index >= 0; index -= 1) {
     const key = localStorage.key(index);
-    if (key?.startsWith('sakhicare_') || key?.startsWith('pcos_saathi_')) {
+    if (key?.startsWith('lunaher_') || key?.startsWith('sakhicare_') || key?.startsWith('pcos_saathi_')) {
       localStorage.removeItem(key);
     }
   }

@@ -382,7 +382,7 @@ test('Test 10: Data deletion removes all insights, records, doctor summaries and
     assert.equal(getDoctorSummary().length, 0)
     assert.equal(getInsightRecords().length, 0)
 
-    // Also test SakhiCare global privacy deleteAllLocalHealthData
+    // Also test Luna Her global privacy deleteAllLocalHealthData
     store.set('sakhicare_latest_entry', 'entry')
     store.set('unrelated_key', 'keep')
     deleteAllLocalHealthData()

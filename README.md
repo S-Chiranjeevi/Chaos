@@ -1,4 +1,4 @@
-# SakhiCare (सखी केयर / PCOS Saathi) ✿
+# Luna Her (सखी केयर / PCOS Saathi) ✿
 ### Multilingual PCOS & Women's Health Symptom Care Navigator
 
 > **Hackathon Theme:** Build a tool that turns everyday descriptions of symptoms—including regional-language inputs—into understandable information and guidance toward appropriate care, particularly for PCOS. It should not present itself as diagnosing.
@@ -27,9 +27,9 @@ Major systemic barriers include:
 
 ---
 
-## 💡 The Solution: SakhiCare
+## 💡 The Solution: Luna Her
 
-**SakhiCare** bridges the gap between everyday lived experiences and evidence-based clinical medicine. It empowers women to express how they feel naturally—through **voice or text in 9 regional languages and dialects**—and transforms those narratives into:
+**Luna Her** bridges the gap between everyday lived experiences and evidence-based clinical medicine. It empowers women to express how they feel naturally—through **voice or text in 9 regional languages and dialects**—and transforms those narratives into:
 - Structured health symptom cards (duration, frequency, severity).
 - Early Warning & Pattern Detection rules engine with evidence cards.
 - Educational grounding under the **Rotterdam 2003 International Consensus**.
@@ -37,7 +37,7 @@ Major systemic barriers include:
 - Clear care navigation (which specialist to consult: Gynecologist, Endocrinologist, Dermatologist, Dietitian).
 - An exportable **Doctor Consultation Briefing** with pre-formulated doctor questions.
 
-> ⚠️ **Strict Non-Diagnostic Medical Guardrail:** SakhiCare **never** claims to diagnose conditions or recommend pharmaceutical dosages. Every output reinforces: *"These symptoms can sometimes occur with PCOS, but they can also have other causes. Only in-person blood panels and pelvic imaging evaluated by a certified physician can provide a definitive diagnosis."*
+> ⚠️ **Strict Non-Diagnostic Medical Guardrail:** Luna Her **never** claims to diagnose conditions or recommend pharmaceutical dosages. Every output reinforces: *"These symptoms can sometimes occur with PCOS, but they can also have other causes. Only in-person blood panels and pelvic imaging evaluated by a certified physician can provide a definitive diagnosis."*
 
 ---
 
@@ -155,7 +155,7 @@ npm install
 ```bash
 npm run dev
 ```
-Open your browser at `http://localhost:5173` (or `http://localhost:3000`) to explore SakhiCare locally.
+Open your browser at `http://localhost:5173` (or `http://localhost:3000`) to explore Luna Her locally.
 
 ### Running Automated Tests
 ```bash
@@ -172,11 +172,11 @@ npm run build
 
 ## 📜 Medical Ethics & Safety Statement
 
-SakhiCare adheres strictly to digital health communication standards:
-- **No Diagnostic Claims:** SakhiCare provides educational insights, differential possibilities, and preparation materials. It does not replace clinical consultation.
+Luna Her adheres strictly to digital health communication standards:
+- **No Diagnostic Claims:** Luna Her provides educational insights, differential possibilities, and preparation materials. It does not replace clinical consultation.
 - **Differential Awareness:** Emphasizes that symptoms like irregular periods or fatigue can stem from thyroid conditions, stress, hyperprolactinemia, or nutritional deficiencies.
 - **Red Flag Escalation:** Immediately directs individuals experiencing acute pain or severe bleeding to emergency medical facilities.
-- **Data Sovereignty:** All personal data entered into SakhiCare remains strictly in the user's browser local memory.
+- **Data Sovereignty:** All personal data entered into Luna Her remains strictly in the user's browser local memory.
 
 ---
 

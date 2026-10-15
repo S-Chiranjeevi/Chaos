@@ -6,7 +6,7 @@ import { detectRedFlags } from './safetyRules.js'
  */
 export class AnalysisUnavailableError extends Error {}
 
-export async function requestSymptomAnalysis({ text, language, signal } = {}) {
+export async function requestSymptomAnalysis({ text, language, followUpAnswers, signal } = {}) {
   if (detectRedFlags(text).length) {
     throw new AnalysisUnavailableError('Urgent symptoms were detected before contacting the online service.')
   }
@@ -16,7 +16,7 @@ export async function requestSymptomAnalysis({ text, language, signal } = {}) {
     response = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, language }),
+      body: JSON.stringify({ text, language, follow_up_answers: followUpAnswers }),
       signal,
     })
   } catch {

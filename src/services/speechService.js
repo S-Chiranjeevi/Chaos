@@ -1,5 +1,5 @@
 /**
- * Speech Recognition Service for SakhiCare Talk or Type
+ * Speech Recognition Service for Luna Her Talk or Type
  * Handles Web Speech API integration, multi-language speech-to-text,
  * permission checking, and fallback states.
  */

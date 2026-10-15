@@ -1,5 +1,5 @@
 /**
- * SakhiCare - Personalized AI Insights Engine
+ * Luna Her - Personalized AI Insights Engine
  * 
  * Analyzes symptom logs and menstrual cycle history to generate
  * short, personalized, easy-to-understand educational insights.

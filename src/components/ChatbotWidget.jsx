@@ -63,13 +63,13 @@ export function ChatbotWidget({ onNavigate }) {
   }
 
   return (
-    <aside className="chatbot-shell" aria-label="SakhiCare help chat">
+    <aside className="chatbot-shell" aria-label="Luna Her help chat">
       {isOpen && (
         <section className="chatbot-panel" aria-labelledby="chatbot-title">
           <header className="chatbot-header">
             <div className="chatbot-heading">
               <span className="chatbot-header-icon"><MessageCircle size={20} aria-hidden="true" /></span>
-              <div><h2 id="chatbot-title">Ask SakhiCare</h2><p>Private, local guidance</p></div>
+              <div><h2 id="chatbot-title">Ask Luna Her</h2><p>Private, local guidance</p></div>
             </div>
             <button type="button" className="chatbot-close" onClick={() => setIsOpen(false)} aria-label="Close chat"><X size={20} /></button>
           </header>
@@ -92,7 +92,7 @@ export function ChatbotWidget({ onNavigate }) {
         aria-controls="chatbot-title"
       >
         <MessageCircle size={22} aria-hidden="true" />
-        <span>{isOpen ? 'Close chat' : 'Ask SakhiCare'}</span>
+        <span>{isOpen ? 'Close chat' : 'Ask Luna Her'}</span>
         {isOpen && <ChevronDown size={17} aria-hidden="true" />}
       </button>
     </aside>

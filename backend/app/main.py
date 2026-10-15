@@ -17,10 +17,13 @@ from fastapi.responses import RedirectResponse
 
 from .core.config import settings
 from .core.exceptions import setup_exception_handlers
+from .core.database import mongo_manager
 from .core.logging import PrivacyLoggingMiddleware, logger
 from .routes.analyze import router as analyze_router
 from .routes.cycle import router as cycle_router
+from .routes.db_routes import router as db_router
 from .routes.health import router as health_router
+from .routes.screening import router as screening_router
 from .routes.summary import router as summary_router
 
 
@@ -30,14 +33,25 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     ai_status = "ENABLED (Gemini)" if settings.has_gemini else "OFFLINE FALLBACK MODE"
     logger.info("Starting PCOS Saathi Backend [%s] in %s environment", ai_status, settings.ENVIRONMENT)
     logger.info("CORS allowed origins: %s", ", ".join(settings.cors_origins))
+
+    # Initialize MongoDB connection if enabled
+    if settings.MONGODB_AUTO_CONNECT:
+        try:
+            await mongo_manager.connect()
+        except Exception as exc:
+            logger.warning("Initial MongoDB connection attempt returned: %s", exc)
+
     yield
+
+    # Cleanly disconnect MongoDB
+    await mongo_manager.disconnect()
     logger.info("Shutting down PCOS Saathi Backend")
 
 
 app = FastAPI(
-    title="PCOS Saathi Stateless API",
-    description="Stateless, privacy-first companion API for PCOS symptom analysis, cycle regularity tracking, and clinician summaries.",
-    version="3.0.0",
+    title="PCOS Saathi & Luna Her API",
+    description="Full-stack companion API for PCOS symptom analysis, cycle regularity tracking, clinician summaries, and MongoDB data sync.",
+    version="3.1.0",
     lifespan=lifespan,
     docs_url="/docs",
     redoc_url="/redoc",
@@ -63,6 +77,8 @@ app.include_router(health_router)
 app.include_router(analyze_router)
 app.include_router(cycle_router)
 app.include_router(summary_router)
+app.include_router(db_router)
+app.include_router(screening_router)
 
 
 @app.get("/", include_in_schema=False)

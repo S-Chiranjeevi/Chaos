@@ -1,4 +1,4 @@
-"""Safe orchestration for optional AI-assisted SakhiCare insights."""
+"""Safe orchestration for optional AI-assisted Luna Her insights."""
 from __future__ import annotations
 
 from datetime import datetime, timezone

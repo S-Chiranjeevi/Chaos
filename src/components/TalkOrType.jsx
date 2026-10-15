@@ -19,11 +19,13 @@ import { AnalysisUnavailableError, requestSymptomAnalysis } from '../services/ap
 import { detectRedFlags, getSafetyDisclaimer } from '../services/safetyRules.js'
 import { validateOutput } from '../services/outputValidator.js'
 import { createHealthEntry, publishHealthEntry } from '../models/healthEntry.js'
+import { generateFollowUpQuestions, synthesizeSuggestions } from '../services/followUpService.js'
 import { UrgentCareBanner } from './UrgentCareBanner.jsx'
 import { SymptomCards } from './SymptomCards.jsx'
 import { AssessmentView } from './AssessmentView.jsx'
 import { HealthEntryExport } from './HealthEntryExport.jsx'
-import { StatePreviewBar } from './StatePreviewBar.jsx'
+import { FollowUpQuestions } from './FollowUpQuestions.jsx'
+import { TailoredSuggestions } from './TailoredSuggestions.jsx'
 
 function assessWithSafety(input, candidate, localResult) {
   const safetyWarnings = detectRedFlags(input)
@@ -62,7 +64,7 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
   const [selectedLang, setSelectedLang] = useState(initialLanguage)
   const [inputText, setInputText] = useState('')
   const [geminiConsent, setGeminiConsent] = useState(false)
-  const [currentState, setCurrentState] = useState('empty') // 'empty' | 'typing' | 'recording' | 'transcribing' | 'processing' | 'results' | 'permission-denied' | 'unsupported-browser' | 'network-error'
+  const [currentState, setCurrentState] = useState('empty') // 'empty' | 'typing' | 'recording' | 'transcribing' | 'processing' | 'followup' | 'results' | 'permission-denied' | 'unsupported-browser' | 'network-error'
   
   // Audio & Speech status
   const [recordingStatusMessage, setRecordingStatusMessage] = useState('') // "Listening...", "Tap to stop", "We could not hear you. Try again."
@@ -76,6 +78,13 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
   const [healthEntry, setHealthEntry] = useState(null)
   const [analysisFallbackMessage, setAnalysisFallbackMessage] = useState('')
   const [storageSaveError, setStorageSaveError] = useState('')
+  // Follow-up Q&A and Tailored Suggestions State
+  const [followUpQuestions, setFollowUpQuestions] = useState([])
+  const [followUpAnswers, setFollowUpAnswers] = useState({})
+  const [customNotes, setCustomNotes] = useState({})
+  const [tailoredSuggestions, setTailoredSuggestions] = useState(null)
+  const [candidateResult, setCandidateResult] = useState(null)
+  const [localParsedResult, setLocalParsedResult] = useState(null)
 
   const textareaRef = useRef(null)
   const resultsRef = useRef(null)
@@ -206,12 +215,42 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
     const localResult = extractSymptoms(input, { preferredLanguage: selectedLang })
     let candidate = localResult
 
-    // Urgent findings use local rules immediately and never wait on an online model.
-    if (!safetyWarnings.length && geminiConsent) {
-      try {
-        const response = await requestSymptomAnalysis({ text: input, language: selectedLang })
-        const validation = validateOutput(response)
-        if (!validation.valid) throw new AnalysisUnavailableError('The online response did not pass safety checks.')
+    // Urgent acute findings bypass follow-up and trigger immediate urgent guidance
+    if (safetyWarnings.length > 0) {
+      const parsed = assessWithSafety(input, candidate, localResult)
+      setExtractedResult(parsed)
+      setSymptomsList(parsed.symptoms)
+
+      const newEntry = createHealthEntry({
+        language: parsed.detectedLanguage || selectedLang,
+        inputMode,
+        rawTranscript: input,
+        symptoms: parsed.symptoms,
+        assessment: {
+          statement: parsed.disclaimer,
+          urgency: parsed.urgency,
+          topics: parsed.topics,
+          questionsForDoctor: parsed.questionsForDoctor,
+          redFlags: parsed.redFlags,
+          safetyWarnings: parsed.safetyWarnings,
+        },
+      })
+
+      setHealthEntry(newEntry)
+      const saveResult = publishHealthEntry(newEntry)
+      setStorageSaveError(saveResult?.ok ? '' : saveResult?.error || 'Your note could not be saved on this device.')
+      if (onHealthEntryCreated) onHealthEntryCreated(newEntry)
+
+      setCurrentState('results')
+      setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)
+      return
+    }
+
+    // Gemini is optional. Local symptom extraction remains available without it.
+    if (geminiConsent) try {
+      const response = await requestSymptomAnalysis({ text: input, language: selectedLang })
+      const validation = validateOutput(response)
+      if (validation.valid) {
         const backendResult = validation.output
         candidate = {
           ...localResult,
@@ -220,7 +259,6 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
           answer: backendResult.answer || '',
           summary: backendResult.summary || '',
           explanation: backendResult.explanation || '',
-          // Keep locally structured symptom cards, while accepting safe backend education.
           symptoms: Array.isArray(backendResult.extractedSymptoms) && backendResult.extractedSymptoms.length
             ? backendResult.extractedSymptoms.map((name, index) => ({ id: `gemini-${index}`, symptom: name, severity: 'Moderate', duration: 'Not specified', frequency: 'Not specified' }))
             : localResult.symptoms,
@@ -237,37 +275,130 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
           questionsForDoctor: backendResult.questionsForDoctor || backendResult.questions_for_doctor || localResult.questionsForDoctor,
           disclaimer: getSafetyDisclaimer(),
         }
-      } catch (error) {
-        const safetyBlocked = error instanceof AnalysisUnavailableError && /safety checks/i.test(error.message)
-        setAnalysisFallbackMessage(safetyBlocked
-          ? 'The online response was hidden by safety checks, so LunaHer used on-device guidance instead.'
-          : 'We could not use the online analysis service, so LunaHer used private on-device symptom guidance instead.')
+      }
+    } catch (error) {
+      const safetyBlocked = error instanceof AnalysisUnavailableError && /safety checks/i.test(error.message)
+      if (safetyBlocked) {
+        setAnalysisFallbackMessage('The online response was hidden by safety checks, so LunaHer used on-device guidance instead.')
       }
     }
 
-    if (!safetyWarnings.length && localResult.symptoms.length === 0 && !candidate.answer) {
-      candidate = {
-        ...localResult,
-        requestType: 'general',
-        summary: 'General health question',
-        answer: geminiConsent
-          ? 'An AI answer is unavailable right now. Please try again when the service is available, or speak with a qualified healthcare professional for personal advice.'
-          : 'To get an AI answer to a general health question, choose the optional Gemini response below. If you prefer not to send your message, LunaHer can still organize symptoms using on-device guidance.',
-        explanation: '',
+    if (localResult.symptoms.length === 0) {
+      if (!candidate.answer) {
+        candidate = {
+          ...localResult,
+          requestType: 'general',
+          summary: 'General health question',
+          answer: geminiConsent
+            ? 'An AI answer is unavailable right now. Please try again shortly.'
+            : 'Select the optional Gemini AI response to ask a general health question. Without it, LunaHer can still organize symptoms using on-device guidance.',
+          explanation: '',
+        }
       }
+      const parsed = assessWithSafety(input, candidate, localResult)
+      setExtractedResult(parsed)
+      setSymptomsList([])
+      setHealthEntry(null)
+      setCurrentState('results')
+      setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)
+      return
     }
 
-    const parsed = assessWithSafety(input, candidate, localResult)
+    setCandidateResult(candidate)
+    setLocalParsedResult(localResult)
+
+    // Generate intelligent follow-up questions to understand context deeper
+    const questions = generateFollowUpQuestions({
+      text: input,
+      symptoms: localResult.symptoms,
+      language: selectedLang,
+    })
+    setFollowUpQuestions(questions)
+
+    setCurrentState('followup')
+    setTimeout(() => {
+      document.getElementById('followup-questions-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 100)
+  }
+
+  async function handleFollowUpSubmit(answers = {}, notes = {}) {
+    setFollowUpAnswers(answers)
+    setCustomNotes(notes)
+    setCurrentState('processing')
+
+    const input = inputText.trim()
+    const baseCandidate = candidateResult || extractSymptoms(input, { preferredLanguage: selectedLang })
+    const baseLocal = localParsedResult || baseCandidate
+
+    let onlineSuggestions = null
+    if (geminiConsent) try {
+      const response = await requestSymptomAnalysis({
+        text: input,
+        language: selectedLang,
+        followUpAnswers: answers,
+      })
+      const validation = validateOutput(response)
+      if (validation.valid && validation.output) {
+        onlineSuggestions = validation.output
+      }
+    } catch {}
+
+    const synthesized = synthesizeSuggestions({
+      inputText: input,
+      symptoms: baseLocal.symptoms,
+      followUpAnswers: answers,
+      language: selectedLang,
+    })
+
+    setTailoredSuggestions(synthesized)
+
+    const mergedQuestions = [
+      ...new Set([
+        ...synthesized.questionsForDoctor,
+        ...(onlineSuggestions?.questionsForDoctor || baseCandidate.questionsForDoctor || []),
+      ]),
+    ]
+    const mergedTips = [
+      ...new Set([
+        ...synthesized.tailoredTips.map((t) => `${t.category}: ${t.tip}`),
+        ...(onlineSuggestions?.lifestyleTips || baseCandidate.lifestyleTips || []),
+      ]),
+    ]
+
+    const parsed = assessWithSafety(
+      input,
+      {
+        ...baseCandidate,
+        questionsForDoctor: mergedQuestions,
+        lifestyleTips: mergedTips,
+        recommendedSpecialist: synthesized.recommendedSpecialist || baseCandidate.recommendedSpecialist,
+        urgency: synthesized.urgency === 'urgent' ? 'urgent' : baseCandidate.urgency,
+      },
+      baseLocal
+    )
 
     setExtractedResult(parsed)
     setSymptomsList(parsed.symptoms)
 
-    // Build and save the shared local HealthEntry regardless of backend availability.
-    const newEntry = parsed.requestType === 'general' ? null : createHealthEntry({
+    // Build structured followUpQnA list for HealthEntry record
+    const followUpQnA = followUpQuestions.map((q) => {
+      const ans = answers[q.id]
+      const note = notes[q.id]
+      return {
+        questionId: q.id,
+        question: q.question,
+        answer: ans || 'Skipped',
+        customNote: note || '',
+      }
+    })
+
+    const newEntry = createHealthEntry({
       language: parsed.detectedLanguage || selectedLang,
       inputMode,
-      rawTranscript: inputText.trim(),
+      rawTranscript: input,
       symptoms: parsed.symptoms,
+      followUpQnA,
+      tailoredSuggestions: synthesized,
       assessment: {
         statement: parsed.disclaimer,
         urgency: parsed.urgency,
@@ -288,8 +419,11 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
     }
 
     setCurrentState('results')
-
     setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)
+  }
+
+  function handleSkipFollowUp() {
+    handleFollowUpSubmit({}, {})
   }
 
   // Symptom Card Operations
@@ -326,53 +460,8 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
     if (onHealthEntryCreated) onHealthEntryCreated(updatedEntry)
   }
 
-  // Force state directly for Hackathon judge testing
-  function handleJudgeStateSelect(targetState) {
-    setCurrentState(targetState)
-    if (targetState === 'recording') {
-      setMicActive(true)
-      setRecordingStatusMessage(strings.listening) // "Listening…"
-    } else {
-      setMicActive(false)
-    }
-
-    if (targetState === 'empty') {
-      setInputText('')
-      setRecordingStatusMessage('')
-    } else if (targetState === 'typing' && !inputText) {
-      setInputText(examples[0].text)
-      setRecordingStatusMessage('')
-    } else if (targetState === 'transcribing') {
-      setRecordingStatusMessage('Transcribing voice input...')
-      setInterimSpokenText('My periods have been irregular for two or three months...')
-    } else if (targetState === 'processing') {
-      setRecordingStatusMessage('')
-    } else if (targetState === 'results') {
-      const sample = 'My periods come every 2–3 months, and I have acne and severe pain.'
-      if (!inputText) setInputText(sample)
-      const localResult = extractSymptoms(sample, { preferredLanguage: selectedLang })
-      const parsed = assessWithSafety(sample, localResult, localResult)
-      setExtractedResult(parsed)
-      setSymptomsList(parsed.symptoms)
-      const mockEntry = createHealthEntry({
-        language: selectedLang,
-        inputMode: 'speech',
-        rawTranscript: 'My periods come every 2–3 months, and I have acne and severe pain.',
-        symptoms: parsed.symptoms,
-      })
-      setHealthEntry(mockEntry)
-      publishHealthEntry(mockEntry)
-    }
-  }
-
   return (
     <div className="talk-or-type-module">
-      {/* HACKATHON STATE TESTER */}
-      <StatePreviewBar
-        currentState={currentState}
-        onSelectState={handleJudgeStateSelect}
-      />
-
       {/* MAIN CARD */}
       <div className="talk-card bg-white/95 rounded-3xl border border-stone-200/90 p-6 md:p-8 shadow-sm backdrop-blur-xl relative overflow-hidden transition-all">
         {/* TOP CONTROLS: LANGUAGE PICKER & STATUS BADGE */}
@@ -665,10 +754,31 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
         </div>
       </div>
 
+      {/* AI FOLLOW-UP CLARIFICATION QUESTIONS */}
+      {currentState === 'followup' && followUpQuestions.length > 0 && (
+        <FollowUpQuestions
+          questions={followUpQuestions}
+          initialAnswers={followUpAnswers}
+          onSubmitAnswers={handleFollowUpSubmit}
+          onSkip={handleSkipFollowUp}
+          isAnalyzing={false}
+        />
+      )}
+
       {/* RESULTS DISPLAY */}
       {currentState === 'results' && extractedResult && (
         <section ref={resultsRef} className="results-container" id="results-view" aria-live="polite">
           <UrgentCareBanner warnings={extractedResult.safetyWarnings || []} />
+
+          {/* AI SYNTHESIZED TAILORED SUGGESTIONS (FROM SYMPTOMS + FOLLOW-UP ANSWERS) */}
+          {tailoredSuggestions && (
+            <TailoredSuggestions
+              suggestions={tailoredSuggestions}
+              followUpAnswers={followUpAnswers}
+              onEditFollowUp={() => setCurrentState('followup')}
+            />
+          )}
+
           {/* SECTION HEADER */}
           <div className="results-hero-strip">
             <div className="strip-title-group">

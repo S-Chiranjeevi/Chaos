@@ -123,11 +123,28 @@ export async function fetchLiveCycleForecast({
     if (err.name === 'AbortError') {
       throw err;
     }
-    throw new APIVerveForecastError(
-      'Could not connect to the backend server. Please verify the backend service is running.',
-      'NETWORK_ERROR',
-      null
-    );
+    // Fallback to direct ApiVerve call if local backend is not running
+    try {
+      const directKey =
+        (typeof import.meta !== 'undefined' && import.meta.env?.VITE_APIVERVE_API_KEY) ||
+        'apv_e3dba278-96cb-45d4-b232-3dddc2d720a8';
+      const q = new URLSearchParams(payload).toString();
+      response = await fetch(`https://api.apiverve.com/v1/menstrualcycle?${q}`, {
+        method: 'GET',
+        headers: {
+          'x-api-key': directKey,
+          Accept: 'application/json',
+        },
+        signal,
+      });
+    } catch (directErr) {
+      if (directErr.name === 'AbortError') throw directErr;
+      throw new APIVerveForecastError(
+        'Could not connect to the APIVerve service. Please check your internet connection.',
+        'NETWORK_ERROR',
+        null
+      );
+    }
   }
 
   let body;
