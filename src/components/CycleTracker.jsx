@@ -19,7 +19,10 @@ export function CycleTracker({ latestEntry }) {
 
   function saveEntries(nextEntries) {
     setEntries(nextEntries)
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(nextEntries)) } catch { /* Storage can be unavailable in private browsing. */ }
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(nextEntries))
+      window.dispatchEvent(new CustomEvent('sakhicare:cycleTrackerUpdate', { detail: nextEntries }))
+    } catch { /* Storage can be unavailable in private browsing. */ }
   }
 
   const pattern = useMemo(() => {

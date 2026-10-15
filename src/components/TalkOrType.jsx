@@ -1,18 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useRef } from 'react'
 import {
   Mic,
   MicOff,
   Globe,
-  Send,
   RotateCcw,
   AlertCircle,
-  Volume2,
   Sparkles,
   ArrowRight,
   Info,
-  CheckCircle2,
   Loader2,
-  HelpCircle,
   Radio,
   FileCheck,
 } from 'lucide-react'
@@ -49,17 +45,6 @@ export function TalkOrType({ onHealthEntryCreated }) {
   const strings = UI_STRINGS[selectedLang] || UI_STRINGS.en
   const examples = EXAMPLE_PROMPTS[selectedLang] || EXAMPLE_PROMPTS.en
 
-  // Update typing vs empty states naturally
-  useEffect(() => {
-    if (['recording', 'transcribing', 'processing', 'results', 'permission-denied', 'unsupported-browser', 'network-error'].includes(currentState)) {
-      return
-    }
-    if (inputText.trim().length > 0) {
-      setCurrentState('typing')
-    } else {
-      setCurrentState('empty')
-    }
-  }, [inputText])
 
   // Handle language change
   function handleLanguageChange(code) {
@@ -118,7 +103,7 @@ export function TalkOrType({ onHealthEntryCreated }) {
         setCurrentState('recording')
         setRecordingStatusMessage(strings.listening) // "Listening…"
       },
-      onResult: ({ fullTranscript, finalTranscript, interimTranscript }) => {
+      onResult: ({ finalTranscript, interimTranscript }) => {
         setCurrentState('transcribing')
         setInterimSpokenText(interimTranscript)
         if (finalTranscript) {
@@ -129,7 +114,7 @@ export function TalkOrType({ onHealthEntryCreated }) {
           setInterimSpokenText('')
         }
       },
-      onNoMatch: ({ message }) => {
+      onNoMatch: () => {
         setMicActive(false)
         setRecordingStatusMessage(strings.couldNotHear) // "We could not hear you. Try again."
         setCurrentState('typing')

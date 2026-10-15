@@ -1,15 +1,26 @@
 import React, { useState, useEffect } from 'react'
 import { TalkOrType } from './components/TalkOrType.jsx'
 import { CycleTracker } from './components/CycleTracker.jsx'
+import { PersonalizedInsights } from './components/PersonalizedInsights.jsx'
 import { PrivacyControls } from './components/PrivacyControls.jsx'
 import { EducationLibrary } from './components/EducationLibrary.jsx'
 import { Heart, Shield, Sparkles, Stethoscope, Sun, Moon, Info } from 'lucide-react'
 import { getLatestHealthEntry } from './models/healthEntry.js'
 import './App.css'
 
+const CURRENT_YEAR = new Date().getFullYear()
+
 function App() {
   const [darkMode, setDarkMode] = useState(false)
   const [lastSharedEntry, setLastSharedEntry] = useState(() => getLatestHealthEntry())
+  const [cycleTrackerLogs, setCycleTrackerLogs] = useState(() => {
+    try {
+      const saved = localStorage.getItem('sakhicare_cycle_tracker')
+      return saved ? JSON.parse(saved) : []
+    } catch {
+      return []
+    }
+  })
 
   useEffect(() => {
     // Listen for custom event from HealthEntry
@@ -17,9 +28,22 @@ function App() {
       setLastSharedEntry(event.detail)
     }
 
+    const handleCycleUpdate = (event) => {
+      setCycleTrackerLogs(event.detail)
+    }
+
+    const handleDataDeleted = () => {
+      setLastSharedEntry(null)
+      setCycleTrackerLogs([])
+    }
+
     window.addEventListener('sakhicare:healthEntryUpdate', handleEntryUpdate)
+    window.addEventListener('sakhicare:cycleTrackerUpdate', handleCycleUpdate)
+    window.addEventListener('sakhicare:dataDeleted', handleDataDeleted)
     return () => {
       window.removeEventListener('sakhicare:healthEntryUpdate', handleEntryUpdate)
+      window.removeEventListener('sakhicare:cycleTrackerUpdate', handleCycleUpdate)
+      window.removeEventListener('sakhicare:dataDeleted', handleDataDeleted)
     }
   }, [])
 
@@ -55,6 +79,10 @@ function App() {
             >
               {darkMode ? <Sun size={18} /> : <Moon size={18} />}
             </button>
+            <a href="#ai-insights-section" className="nav-cta-btn" style={{ background: 'rgba(168, 85, 247, 0.15)', color: 'var(--primary-color)', border: '1px solid rgba(168, 85, 247, 0.3)' }}>
+              <Sparkles size={14} />
+              <span>AI Insights</span>
+            </a>
             <a href="#talk-or-type-section" className="nav-cta-btn">
               <span>Talk or Type</span>
               <span>↓</span>
@@ -109,6 +137,17 @@ function App() {
             </div>
 
             <TalkOrType onHealthEntryCreated={(entry) => setLastSharedEntry(entry)} />
+          </div>
+        </section>
+
+        {/* PERSONALIZED AI INSIGHTS FEATURE SECTION */}
+        <section className="insights-section" id="ai-insights-section">
+          <div className="section-container">
+            <PersonalizedInsights
+              currentPeriodLogs={cycleTrackerLogs}
+              currentSymptomLogs={lastSharedEntry?.symptoms || []}
+              userLanguage={lastSharedEntry?.language === 'hi' ? 'Hindi' : 'English'}
+            />
           </div>
         </section>
 
@@ -178,7 +217,7 @@ function App() {
             </p>
           </div>
           <div className="footer-bottom-row">
-            <span>© {new Date().getFullYear()} SakhiCare · Hackathon Prototype</span>
+            <span>© {CURRENT_YEAR} SakhiCare · Hackathon Prototype</span>
             <a href="#top" className="back-to-top">Back to top ↑</a>
           </div>
         </div>

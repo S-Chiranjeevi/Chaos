@@ -1,7 +1,7 @@
 import React from 'react'
-import { Sliders, Sparkles } from 'lucide-react'
+import { Sliders } from 'lucide-react'
 
-export const UI_STATES = [
+const UI_STATES = [
   { id: 'empty', label: 'Empty' },
   { id: 'typing', label: 'Typing' },
   { id: 'recording', label: 'Recording' },
@@ -13,7 +13,7 @@ export const UI_STATES = [
   { id: 'network-error', label: 'Network Error' },
 ]
 
-export function StatePreviewBar({ currentState, onSelectState, isLiveDemo = true }) {
+export function StatePreviewBar({ currentState, onSelectState }) {
   return (
     <div className="state-preview-bar">
       <div className="preview-bar-inner">
