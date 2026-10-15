@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { assessSymptoms } from './engine.js'
+import HealthTracker from './HealthTracker.jsx'
 import './App.css'
 
 function App() {
@@ -23,7 +24,7 @@ function App() {
       <a className="skip-link" href="#checker">Skip to symptom checker</a>
       <header className="site-header">
         <a className="brand" href="#top" aria-label="SakhiCare home"><span className="brand-mark">✳</span><span>Sakhi<span className="brand-accent">Care</span></span></a>
-        <nav aria-label="Main navigation"><a href="#how-it-works">How it works</a><a className="nav-cta" href="#checker">Check symptoms <span>↗</span></a></nav>
+        <nav aria-label="Main navigation"><a href="#how-it-works">How it works</a><a href="#health-tracker">Health tracker</a><a className="nav-cta" href="#checker">Check symptoms <span>↗</span></a></nav>
       </header>
 
       <main id="top">
@@ -70,6 +71,8 @@ function App() {
             <p className="results-disclaimer">This is information, not a diagnosis.</p>
           </div>
         </article></section>}
+
+        <HealthTracker />
 
         <section className="how-section" id="how-it-works"><div><p className="eyebrow">Small steps, more confidence</p><h2>Make the next conversation<br />a little easier.</h2></div><div className="steps"><article><span>01</span><div><h3>Put it into words</h3><p>Share symptoms in your own words and language.</p></div></article><article><span>02</span><div><h3>See what stands out</h3><p>Get a simple summary and guidance on when to seek care.</p></div></article><article><span>03</span><div><h3>Feel ready to ask</h3><p>Take suggested questions to a health professional.</p></div></article></div></section>
       </main>
