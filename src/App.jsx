@@ -183,15 +183,16 @@ export function App() {
         }}
       />
 
-      {/* Header */}
-      <Header
-        currentLanguage={currentLanguage}
-        onOpenLanguageSelector={() => setLanguageDialogOpen(true)}
-        onNavigateHome={() => navigate('home')}
-      />
+      {/* Header — slim bar, branding & language now live in the sidebar */}
+      <Header onNavigateHome={() => navigate('home')} />
 
       <div className="app-body">
-        <Navigation activePage={activePage} onNavigate={navigate} />
+        <Navigation
+          activePage={activePage}
+          onNavigate={navigate}
+          currentLanguage={currentLanguage}
+          onOpenLanguageSelector={() => setLanguageDialogOpen(true)}
+        />
         <div className="app-column">
           <main id="main-content" className="page-content" tabIndex="-1">
             {renderPage()}
