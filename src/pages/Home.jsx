@@ -1,5 +1,5 @@
 import React from 'react'
-import { ArrowRight, BookOpen, CalendarDays, HeartPulse, LockKeyhole, MessageCircle, Stethoscope } from 'lucide-react'
+import { ArrowRight, BookOpen, CalendarDays, HeartPulse, MessageCircle, Stethoscope } from 'lucide-react'
 
 const actions = [
   { id: 'talk', label: 'Describe my symptoms', detail: 'Write or say what you notice, using your own words.', icon: MessageCircle, primary: true },
@@ -7,7 +7,6 @@ const actions = [
   { id: 'insights', label: 'View my insights', detail: 'Review notes you have saved on this device.', icon: HeartPulse },
   { id: 'doctor', label: 'Prepare for a doctor visit', detail: 'Make a simple summary and questions to bring.', icon: Stethoscope },
   { id: 'learn', label: 'Learn about PCOS', detail: 'Read clear, gentle information and myth checks.', icon: BookOpen },
-  { id: 'privacy', label: 'Manage privacy', detail: 'See what stays on your device and delete it.', icon: LockKeyhole },
 ]
 
 export function Home({ onNavigate }) {

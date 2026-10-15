@@ -8,7 +8,7 @@ import { SUPPORTED_LANGUAGES } from '../common/LanguageSelector.jsx';
  * Contains:
  * 1. SakhiCare branding & logo
  * 2. Current language trigger with visible helper text
- * 3. Privacy Indicator: "Stored only on this device"
+ * 3. Language selector
  */
 export function Header({
   currentLanguage = 'en',
@@ -33,30 +33,8 @@ export function Header({
           </button>
         </div>
 
-        {/* Center / Right: Privacy Indicator & Language */}
+        {/* Language selector */}
         <div className="flex items-center gap-2 sm:gap-4">
-          
-          {/* Privacy Indicator */}
-          <div
-            className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-1.5 bg-emerald-50/90 border border-emerald-200/90 rounded-xl text-emerald-900 text-xs shadow-xs lunaher-privacy-indicator"
-            title="All health records, audio notes, and logs remain strictly encrypted on this device."
-            role="status"
-            aria-label="Device Privacy: Stored only on this device"
-          >
-            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" aria-hidden="true" />
-            <svg className="w-3.5 h-3.5 text-emerald-700 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-            <div className="flex flex-col text-left">
-              <span className="font-semibold text-[11px] sm:text-xs leading-tight">
-                Stored only on this device
-              </span>
-              <span className="text-[9px] text-emerald-700 hidden md:inline leading-none">
-                Zero Cloud Uploads · Offline Safe
-              </span>
-            </div>
-          </div>
-
           {/* Current Language Trigger */}
           <div className="flex flex-col items-end">
             <button

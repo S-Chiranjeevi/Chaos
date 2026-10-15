@@ -10,7 +10,6 @@ import { Home } from './pages/Home.jsx';
 import { InsightsPage } from './pages/InsightsPage.jsx';
 import { LearnPage } from './pages/LearnPage.jsx';
 import { TalkOrTypePage } from './pages/TalkOrTypePage.jsx';
-import { PrivacyView } from './views/PrivacyView.jsx';
 import { ChatbotWidget } from './components/ChatbotWidget.jsx';
 import { getLatestHealthEntry } from './models/healthEntry.js';
 import { StorageService } from './services/storageService.js';
@@ -26,7 +25,6 @@ const PATH_TO_PAGE = {
   '/doctor': 'doctor',
   '/summary': 'doctor',
   '/learn': 'learn',
-  '/privacy': 'privacy',
 };
 
 const PAGE_TO_PATH = {
@@ -36,7 +34,6 @@ const PAGE_TO_PATH = {
   insights: '/insights',
   doctor: '/summary',
   learn: '/learn',
-  privacy: '/privacy',
 };
 
 const PAGE_TITLES = {
@@ -46,7 +43,6 @@ const PAGE_TITLES = {
   insights: 'Early Warnings and Insights',
   doctor: 'Doctor Summary',
   learn: 'Learn and Myths',
-  privacy: 'Privacy Controls',
 };
 
 export function App() {
@@ -158,8 +154,6 @@ export function App() {
         );
       case 'learn':
         return <LearnPage />;
-      case 'privacy':
-        return <PrivacyView onNavigate={navigate} />;
       default:
         return <Home onNavigate={navigate} />;
     }
@@ -194,10 +188,7 @@ export function App() {
           <main id="main-content" className="page-content" tabIndex="-1">
             {renderPage()}
             <footer className="page-footer">
-              <span>LunaHer · A gentle, private place to begin</span>
-              <button type="button" onClick={() => navigate('privacy')}>
-                Privacy choices
-              </button>
+              <span>LunaHer · A gentle place to begin</span>
             </footer>
           </main>
         </div>
