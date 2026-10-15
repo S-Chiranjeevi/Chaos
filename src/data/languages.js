@@ -82,23 +82,23 @@ export const EXAMPLE_PROMPTS = {
   en: [
     {
       title: 'Irregular cycles',
-      text: 'My periods come every 2–3 months.',
+      text: 'My periods come every two or three months.',
       tag: 'Cycle irregularity',
     },
     {
       title: 'Acne & facial hair',
-      text: 'I have acne and increased facial hair.',
+      text: 'I have acne and more facial hair than before.',
       tag: 'Hormonal signs',
     },
     {
-      title: 'Pain & heavy bleeding',
-      text: 'I have severe pain and heavy bleeding.',
+      title: 'Pelvic pain & dizziness',
+      text: 'I have pelvic pain and feel dizzy.',
       tag: 'Urgent attention',
     },
     {
-      title: 'Weight & hair loss',
-      text: 'I have sudden weight gain and noticeable scalp hair thinning over the last 6 months.',
-      tag: 'Metabolic / Hair',
+      title: 'Heavier bleeding',
+      text: 'My bleeding is heavier than usual.',
+      tag: 'Bleeding change',
     },
   ],
   hinglish: [

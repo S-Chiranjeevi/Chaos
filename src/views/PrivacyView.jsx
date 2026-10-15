@@ -3,7 +3,6 @@ import { PageHeader } from '../components/layout/PageHeader.jsx';
 import { Card } from '../components/common/Card.jsx';
 import { Badge } from '../components/common/Badge.jsx';
 import { Button } from '../components/common/Button.jsx';
-import { DisclaimerBanner } from '../components/common/DisclaimerBanner.jsx';
 import { StorageService } from '../services/storageService.js';
 import { STORAGE_KEYS } from '../models/pcosSaathiSchemas.js';
 
@@ -68,8 +67,6 @@ export function PrivacyView({ onNavigate }) {
         backLabel="Back to Home Dashboard"
         backHelperText="Returns to main overview"
       />
-
-      <DisclaimerBanner dismissible={false} />
 
       {/* Vault Status Card */}
       <section aria-labelledby="vault-status-title">

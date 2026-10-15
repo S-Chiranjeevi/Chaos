@@ -1,7 +1,12 @@
 import React from 'react'
+import { PageHeader } from '../components/layout/PageHeader.jsx'
 import { TalkOrType } from '../components/TalkOrType.jsx'
-import { DisclaimerBanner } from '../components/DisclaimerBanner.jsx'
 
-export function TalkOrTypePage({ onHealthEntryCreated, currentLanguage = 'en' }) {
-  return <div className="page-stack"><header className="page-heading"><p className="eyebrow">Start with what you notice</p><h1 data-page-heading tabIndex="-1">Talk or type</h1><p>Use your everyday words. You can speak or type, and review the notes before saving.</p></header><DisclaimerBanner /><TalkOrType initialLanguage={currentLanguage} onHealthEntryCreated={onHealthEntryCreated} /></div>
+export function TalkOrTypePage({ onNavigate, onHealthEntryCreated, currentLanguage = 'en' }) {
+  return <div className="space-y-6">
+    <PageHeader title="Talk or Type with Sakhi" description="Describe symptoms in your own words, by voice or text. Results are educational, not diagnostic." badge="Private Companion" badgeVariant="rose" onBack={onNavigate ? () => onNavigate('/') : undefined} backLabel="Back to Home Dashboard" backHelperText="Returns to main overview" />
+    <TalkOrType initialLanguage={currentLanguage} onHealthEntryCreated={onHealthEntryCreated} />
+  </div>
 }
+
+export default TalkOrTypePage

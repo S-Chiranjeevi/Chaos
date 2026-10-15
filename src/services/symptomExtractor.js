@@ -203,6 +203,14 @@ export const SYMPTOM_DEFINITIONS = [
   },
 ]
 
+export function detectLanguage(text = '', preferredLanguage = 'en') {
+  if (/\p{Script=Devanagari}/u.test(text)) return 'hi'
+  if (/\p{Script=Kannada}/u.test(text)) return 'kn'
+  if (/\p{Script=Tamil}/u.test(text)) return 'ta'
+  if (/\p{Script=Malayalam}/u.test(text)) return 'ml'
+  return preferredLanguage || 'en'
+}
+
 /**
  * Extracts duration phrase from user note (e.g. "2-3 months", "past 6 months", "1 year")
  */
@@ -255,8 +263,9 @@ function extractSeverityFromText(text, fallback = 'Moderate') {
 /**
  * Main parser: takes a text note and returns structured symptom cards and non-diagnostic guidance
  */
-export function extractSymptoms(rawText = '') {
+export function extractSymptoms(rawText = '', { preferredLanguage = 'en' } = {}) {
   const text = (rawText || '').trim()
+  const detectedLanguage = detectLanguage(text, preferredLanguage)
   if (!text) {
     return {
       symptoms: [],
@@ -268,6 +277,9 @@ export function extractSymptoms(rawText = '') {
       topics: [],
       questionsForDoctor: [],
       lifestyleTips: [],
+      detectedLanguage,
+      possibleRelationships: [],
+      recommendedSpecialist: 'Consider booking an appointment with a gynecologist.',
     }
   }
 
@@ -336,10 +348,15 @@ export function extractSymptoms(rawText = '') {
     questionsForDoctor.unshift('What signs should prompt me to go to an urgent care or emergency room immediately?')
   }
 
+  const possibleRelationships = []
+  if (hasHormonalSigns) possibleRelationships.push('This could be related to hormone changes, including PCOS, but there can be many possible causes.')
+  if (ids.has('pelvic_discomfort') || ids.has('severe_pain')) possibleRelationships.push('Pelvic discomfort can have many possible causes and may be worth discussing with a clinician.')
+  if (ids.has('heavy_bleeding')) possibleRelationships.push('A change in bleeding can have many possible causes and may be worth discussing with a clinician.')
+  if (!possibleRelationships.length) possibleRelationships.push('This pattern may be worth discussing with a healthcare professional because there can be many possible causes.')
+
   // Educational topics
   const topics = [
-    'How gynecologists evaluate menstrual cycle health (Rotterdam criteria overview)',
-    'Other potential causes: Thyroid conditions (Hypothyroidism), Hyperprolactinemia, Stress/Cortisol, and Endometriosis',
+    ...possibleRelationships,
     'Self-advocacy tips: Preparing for your consultation and tracking symptoms',
   ]
 
@@ -387,5 +404,12 @@ export function extractSymptoms(rawText = '') {
       androgenic: hasAndrogenic,
       metabolic: hasMetabolic,
     },
+    detectedLanguage,
+    possibleRelationships,
+    recommendedSpecialist: isUrgent
+      ? 'Please seek urgent medical care now or contact local emergency services.'
+      : hasHormonalSigns
+        ? 'Consider booking an appointment with a gynecologist. An endocrinologist may also be helpful.'
+        : 'Consider booking an appointment with a gynecologist.',
   }
 }

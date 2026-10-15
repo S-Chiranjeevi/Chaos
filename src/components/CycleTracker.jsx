@@ -1,166 +1,263 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { CalendarDays, Plus, TrendingUp } from 'lucide-react';
-import { readLocalData, writeLocalData } from '../services/localStorage.js';
+import {
+  CalendarDays,
+  Plus,
+  TrendingUp,
+  Activity,
+  Calendar as CalendarIcon,
+  BookOpen,
+  Info,
+  Clock,
+  Sparkles,
+} from 'lucide-react';
+import { StorageService } from '../services/storageService.js';
 import { STORAGE_KEYS } from '../models/pcosSaathiSchemas.js';
+import { defaultPredictionService } from '../services/cyclePredictionService.js';
+import { computeCycleIntervals, computeCycleStats } from '../services/cycleCalculations.js';
+import { CycleHistoryForm } from './tracker/CycleHistoryForm.jsx';
+import { CycleHistoryList } from './tracker/CycleHistoryList.jsx';
+import { CycleTrendChart } from './tracker/CycleTrendChart.jsx';
+import { CycleCalendarView } from './tracker/CycleCalendarView.jsx';
+import { UpcomingPeriodCard } from './tracker/UpcomingPeriodCard.jsx';
+import { CycleInsightsCard } from './tracker/CycleInsightsCard.jsx';
+import { CycleEducationalSafety } from './tracker/CycleEducationalSafety.jsx';
 
-function readEntries() {
+function readInitialEntries() {
   try {
-    const canonical = localStorage.getItem(STORAGE_KEYS.CYCLE_ENTRIES);
-    if (canonical) {
-      const parsed = JSON.parse(canonical);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    const canonical = StorageService.getCycleEntries();
+    if (Array.isArray(canonical) && canonical.length > 0) {
+      return canonical;
     }
-    const legacy = readLocalData('sakhicare_cycle_tracker', []).value;
-    return Array.isArray(legacy) ? legacy : [];
+    const legacy = localStorage.getItem('sakhicare_cycle_tracker');
+    if (legacy) {
+      const parsed = JSON.parse(legacy);
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
+    }
+    return [];
   } catch {
     return [];
   }
 }
 
 export function CycleTracker({ latestEntry }) {
-  const [entries, setEntries] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [storageError, setStorageError] = useState('');
-  const [cycleDate, setCycleDate] = useState('');
-  const [cycleNote, setCycleNote] = useState('');
+  const [entries, setEntries] = useState(() => readInitialEntries());
+  const [activeTab, setActiveTab] = useState('insights'); // 'insights' | 'calendar' | 'safety'
+  const [editingEntry, setEditingEntry] = useState(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [statusMessage, setStatusMessage] = useState(null);
 
-  useEffect(() => {
-    const timer = window.setTimeout(() => {
-      setEntries(readEntries());
-      setIsLoading(false);
-    }, 0);
-    return () => window.clearTimeout(timer);
-  }, []);
+  const reloadEntries = () => {
+    setEntries(readInitialEntries());
+  };
 
-  // Synchronize on external changes
+
+  // Listen to cross-app storage changes
   useEffect(() => {
     const handleStorageChange = (e) => {
       if (e.detail?.key === STORAGE_KEYS.CYCLE_ENTRIES || e.detail?.key === 'all_purged') {
-        setEntries(readEntries());
+        reloadEntries();
       }
     };
     window.addEventListener('pcos_saathi:data_change', handleStorageChange);
     return () => window.removeEventListener('pcos_saathi:data_change', handleStorageChange);
   }, []);
 
-  function saveEntries(nextEntries) {
-    setEntries(nextEntries);
-    try {
-      localStorage.setItem(STORAGE_KEYS.CYCLE_ENTRIES, JSON.stringify(nextEntries));
-      writeLocalData('sakhicare_cycle_tracker', nextEntries);
-      window.dispatchEvent(new CustomEvent('pcos_saathi:data_change', {
-        detail: { key: STORAGE_KEYS.CYCLE_ENTRIES, data: nextEntries },
-        bubbles: true,
-      }));
-    } catch {
-      setStorageError('Could not save to local storage.');
-    }
-  }
-
-  const pattern = useMemo(() => {
-    const irregular = entries.filter((entry) =>
-      /irregular|late|missed|2.?3 months|infrequent/i.test(entry.note || entry.notes || '')
-    ).length;
-    if (irregular >= 3)
-      return 'Three or more entries mention irregular cycles. Consider bringing this timeline to a gynecologist.';
-    if (entries.length >= 3)
-      return 'You have three or more entries. This timeline can make your doctor conversation easier.';
-    return null;
+  // Compute intervals & prediction
+  const intervals = useMemo(() => computeCycleIntervals(entries), [entries]);
+  const stats = useMemo(() => computeCycleStats(intervals), [intervals]);
+  const predictionResult = useMemo(() => {
+    return defaultPredictionService.predict(entries);
   }, [entries]);
 
-  function addCycle(event) {
-    event.preventDefault();
-    if (!cycleDate) return;
-    const note =
-      cycleNote.trim() ||
-      latestEntry?.symptoms?.map((symptom) => symptom.name || symptom.symptom).join(', ') ||
-      'Period logged';
+  // Handlers
+  const handleSaveEntry = (newOrUpdated) => {
+    try {
+      const saved = StorageService.saveCycleEntry(newOrUpdated);
+      const allEntries = StorageService.getCycleEntries();
+      try {
+        localStorage.setItem('sakhicare_cycle_tracker', JSON.stringify(allEntries));
+        window.dispatchEvent(new CustomEvent('sakhicare:cycleTrackerUpdate', { detail: allEntries }));
+      } catch {}
+      reloadEntries();
+      setEditingEntry(null);
+      setIsFormOpen(false);
+      setStatusMessage({ type: 'success', text: 'Period entry saved successfully.' });
+      setTimeout(() => setStatusMessage(null), 4000);
+    } catch (err) {
+      setStatusMessage({ type: 'error', text: 'Failed to save period entry.' });
+    }
+  };
 
-    const nextEntries = [
-      ...entries,
-      {
-        id: `cy-${Date.now()}`,
-        startDate: cycleDate,
-        date: cycleDate,
-        note,
-        notes: note,
-        flowLevel: 'medium',
-        painScore: 0,
-        timestamp: new Date().toISOString(),
-      },
-    ].sort((a, b) => (b.startDate || b.date).localeCompare(a.startDate || a.date));
+  const handleDeleteEntry = (id) => {
+    try {
+      const remaining = StorageService.deleteCycleEntry(id);
+      try {
+        localStorage.setItem('sakhicare_cycle_tracker', JSON.stringify(remaining));
+        window.dispatchEvent(new CustomEvent('sakhicare:cycleTrackerUpdate', { detail: remaining }));
+      } catch {}
+      reloadEntries();
+      if (editingEntry?.id === id) {
+        setEditingEntry(null);
+        setIsFormOpen(false);
+      }
+      setStatusMessage({ type: 'success', text: 'Period entry deleted.' });
+      setTimeout(() => setStatusMessage(null), 3000);
+    } catch (err) {
+      setStatusMessage({ type: 'error', text: 'Failed to delete entry.' });
+    }
+  };
 
-    saveEntries(nextEntries);
-    setCycleDate('');
-    setCycleNote('');
-  }
+
+  const handleEditEntry = (entry) => {
+    setEditingEntry(entry);
+    setIsFormOpen(true);
+    // Switch to calendar / history tab so the form is visible
+    setActiveTab('calendar');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   return (
-    <div className="tracker-card">
-      <div className="tracker-intro">
-        <CalendarDays size={22} aria-hidden="true" />
-        <div>
-          <h3>Cycle and symptom log</h3>
-          <p>Saved only on this device. Add a date if it feels useful.</p>
+    <div className="space-y-6">
+      {/* Status Alert */}
+      {statusMessage && (
+        <div
+          className={`p-3.5 rounded-2xl text-xs font-medium flex items-center justify-between ${
+            statusMessage.type === 'success'
+              ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+              : 'bg-rose-50 text-rose-800 border border-rose-200'
+          }`}
+          role="status"
+        >
+          <span>{statusMessage.text}</span>
+          <button
+            type="button"
+            onClick={() => setStatusMessage(null)}
+            className="text-stone-400 hover:text-stone-600 font-bold px-1"
+          >
+            ×
+          </button>
         </div>
-      </div>
-      <form className="tracker-form" onSubmit={addCycle}>
-        <label htmlFor="period-start-date">
-          Period start date
-          <span className="tracker-helper">Choose the first day you noticed bleeding.</span>
-          <input
-            id="period-start-date"
-            type="date"
-            value={cycleDate}
-            onChange={(event) => setCycleDate(event.target.value)}
-            required
-          />
-        </label>
-        <label htmlFor="period-note">
-          Optional note
-          <span className="tracker-helper">Use your own words. You can leave this empty.</span>
-          <input
-            id="period-note"
-            value={cycleNote}
-            onChange={(event) => setCycleNote(event.target.value)}
-            placeholder="For example: I felt tired"
-          />
-        </label>
-        <button className="tracker-add" type="submit" aria-label="Save this period date and optional note">
-          <Plus size={16} aria-hidden="true" /> Save period date
+      )}
+
+      {/* Feature Navigation Tabs */}
+      <div className="flex items-center justify-between gap-2 flex-wrap border-b border-stone-200/80 pb-2">
+        <div className="flex items-center gap-1.5 p-1 bg-stone-200/50 rounded-2xl">
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab('insights');
+              setIsFormOpen(false);
+            }}
+            className={`px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all ${
+              activeTab === 'insights'
+                ? 'bg-white text-stone-900 shadow-xs'
+                : 'text-stone-600 hover:text-stone-900'
+            }`}
+          >
+            <Activity className="w-4 h-4 text-rose-600" />
+            <span>Cycle Insights & Forecast</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('calendar')}
+            className={`px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all ${
+              activeTab === 'calendar'
+                ? 'bg-white text-stone-900 shadow-xs'
+                : 'text-stone-600 hover:text-stone-900'
+            }`}
+          >
+            <CalendarDays className="w-4 h-4 text-rose-600" />
+            <span>Calendar & History ({entries.length})</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab('safety');
+              setIsFormOpen(false);
+            }}
+            className={`px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 transition-all ${
+              activeTab === 'safety'
+                ? 'bg-white text-stone-900 shadow-xs'
+                : 'text-stone-600 hover:text-stone-900'
+            }`}
+          >
+            <BookOpen className="w-4 h-4 text-emerald-600" />
+            <span>Clinical Guide</span>
+          </button>
+        </div>
+
+        {/* Quick Log Action */}
+        <button
+          type="button"
+          onClick={() => {
+            setEditingEntry(null);
+            setIsFormOpen(!isFormOpen);
+            if (!isFormOpen) setActiveTab('calendar');
+          }}
+          className={`px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all ${
+            isFormOpen
+              ? 'bg-stone-200 text-stone-700 hover:bg-stone-300'
+              : 'bg-rose-600 text-white hover:bg-rose-700 shadow-xs'
+          }`}
+        >
+          <Plus className="w-4 h-4" />
+          <span>{isFormOpen ? 'Close Form' : 'Log Period Date'}</span>
         </button>
-      </form>
-      {storageError && (
-        <p className="tracker-error" role="alert">
-          <strong>We could not access your saved notes.</strong> {storageError}
-        </p>
+      </div>
+
+      {/* Expandable Period Entry Form */}
+      {isFormOpen && (
+        <CycleHistoryForm
+          onSave={handleSaveEntry}
+          onCancel={() => {
+            setIsFormOpen(false);
+            setEditingEntry(null);
+          }}
+          existingEntries={entries}
+          entryToEdit={editingEntry}
+        />
       )}
-      {isLoading ? (
-        <p className="tracker-loading" role="status">Loading your saved dates. Please wait.</p>
-      ) : pattern && (
-        <div className="pattern-alert">
-          <TrendingUp size={18} aria-hidden="true" />
-          <span>{pattern}</span>
+
+      {/* TAB 1: Insights & Forecast */}
+      {activeTab === 'insights' && (
+        <div className="space-y-6">
+          {/* Upcoming Period Forecast Card */}
+          <UpcomingPeriodCard predictionResult={predictionResult} />
+
+          {/* Regularity & Pattern Evaluation Card */}
+          <CycleInsightsCard predictionResult={predictionResult} />
+
+          {/* Historical Trend Chart */}
+          <CycleTrendChart intervals={intervals} stats={stats} />
         </div>
       )}
-      {!isLoading && entries.length === 0 ? (
-        <div className="tracker-empty" role="status">
-          <strong>No tracker dates yet</strong>
-          <span>Add a period start date when you are ready. Tracking is optional.</span>
+
+      {/* TAB 2: Calendar & Logged History */}
+      {activeTab === 'calendar' && (
+        <div className="space-y-6">
+          {/* Interactive Menstrual Calendar */}
+          <CycleCalendarView
+            entries={entries}
+            expectedWindow={predictionResult?.expectedNextPeriod}
+          />
+
+          {/* Chronological Entry List with Edit / Delete */}
+          <CycleHistoryList
+            entries={entries}
+            onEdit={handleEditEntry}
+            onDelete={handleDeleteEntry}
+          />
         </div>
-      ) : (
-        !isLoading && (
-          <ul className="tracker-list">
-            {entries.map((entry) => (
-              <li key={entry.id}>
-                <strong>{new Date(`${entry.startDate || entry.date}T12:00:00`).toLocaleDateString()}</strong>
-                <span>{entry.notes || entry.note}</span>
-              </li>
-            ))}
-          </ul>
-        )
       )}
-      <p className="tracker-disclaimer">This is information, not a diagnosis.</p>
+
+      {/* TAB 3: Clinical Guide & Safety */}
+      {activeTab === 'safety' && (
+        <CycleEducationalSafety />
+      )}
     </div>
   );
 }

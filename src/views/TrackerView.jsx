@@ -3,7 +3,6 @@ import { PageHeader } from '../components/layout/PageHeader.jsx';
 import { Card } from '../components/common/Card.jsx';
 import { Badge } from '../components/common/Badge.jsx';
 import { Button } from '../components/common/Button.jsx';
-import { DisclaimerBanner } from '../components/common/DisclaimerBanner.jsx';
 import { EmptyState } from '../components/common/EmptyState.jsx';
 import { MOCK_HEALTH_ENTRIES } from '../mockData/healthEntries.js';
 import { ENTRY_CATEGORIES } from '../types/health.js';
@@ -93,8 +92,6 @@ export function TrackerView({ onNavigate }) {
           </Button>
         }
       />
-
-      <DisclaimerBanner dismissible={true} />
 
       {/* Clean Placeholder Section: Tracking Logic & Analysis */}
       <Card
