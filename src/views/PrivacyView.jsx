@@ -5,6 +5,7 @@ import { Badge } from '../components/common/Badge.jsx';
 import { Button } from '../components/common/Button.jsx';
 import { StorageService } from '../services/storageService.js';
 import { STORAGE_KEYS } from '../models/pcosSaathiSchemas.js';
+import { MongoStatusCard } from '../components/MongoStatusCard.jsx';
 
 /**
  * PrivacyView - Product Area 7: Privacy Controls & Data Vault
@@ -67,6 +68,11 @@ export function PrivacyView({ onNavigate }) {
         backLabel="Back to Home Dashboard"
         backHelperText="Returns to main overview"
       />
+
+      {/* MongoDB Database Integration Card */}
+      <section aria-labelledby="mongodb-vault-title">
+        <MongoStatusCard />
+      </section>
 
       {/* Vault Status Card */}
       <section aria-labelledby="vault-status-title">
