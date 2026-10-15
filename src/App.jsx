@@ -1,193 +1,164 @@
-import React, { useState, useEffect } from 'react'
-import { TalkOrType } from './components/TalkOrType.jsx'
-import { PatternDetectionView } from './components/PatternDetectionView.jsx'
-import { PrivacyControls } from './components/PrivacyControls.jsx'
-import { EducationLibrary } from './components/EducationLibrary.jsx'
-import { Heart, Shield, Sparkles, Stethoscope, Sun, Moon, Info } from 'lucide-react'
-import { getLatestHealthEntry } from './models/healthEntry.js'
-import './App.css'
+import React, { useState, useEffect } from 'react';
+import Header from './components/layout/Header.jsx';
+import Sidebar from './components/layout/Sidebar.jsx';
+import MobileNav from './components/layout/MobileNav.jsx';
+import GlobalError from './components/layout/GlobalError.jsx';
+import LanguageSelector from './components/common/LanguageSelector.jsx';
 
-function App() {
-  const [darkMode, setDarkMode] = useState(false)
-  const [lastSharedEntry, setLastSharedEntry] = useState(() => getLatestHealthEntry())
+import HomeView from './views/HomeView.jsx';
+import TalkView from './views/TalkView.jsx';
+import TrackerView from './views/TrackerView.jsx';
+import SummaryView from './views/SummaryView.jsx';
+import LearnView from './views/LearnView.jsx';
 
+// Pattern detection integration if available from teammate contribution
+import { PatternDetectionView } from './components/PatternDetectionView.jsx';
+
+/**
+ * SakhiCare - Main Responsive Frontend Shell
+ * Hackathon-optimized, accessible, privacy-first women's & maternal health shell.
+ */
+export function App() {
+  // Navigation Route State (supports '/', '/talk', '/tracker', '/summary', '/learn')
+  const [currentPath, setCurrentPath] = useState(() => {
+    const hash = window.location.hash.replace('#', '');
+    if (['/', '/talk', '/tracker', '/summary', '/learn', '/patterns'].includes(hash)) {
+      return hash;
+    }
+    const path = window.location.pathname;
+    if (['/talk', '/tracker', '/summary', '/learn', '/patterns'].includes(path)) {
+      return path;
+    }
+    return '/';
+  });
+
+  // Current Language State
+  const [currentLanguage, setCurrentLanguage] = useState('en');
+  const [isLanguageModalOpen, setIsLanguageModalOpen] = useState(false);
+
+  // Global Error Area State
+  const [globalError, setGlobalError] = useState(null);
+
+  // Sync hash routing
   useEffect(() => {
-    // Listen for custom event from HealthEntry
-    const handleEntryUpdate = (event) => {
-      setLastSharedEntry(event.detail)
-    }
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (['/', '/talk', '/tracker', '/summary', '/learn', '/patterns'].includes(hash)) {
+        setCurrentPath(hash);
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
-    window.addEventListener('sakhicare:healthEntryUpdate', handleEntryUpdate)
-    return () => {
-      window.removeEventListener('sakhicare:healthEntryUpdate', handleEntryUpdate)
-    }
-  }, [])
+  const handleNavigate = (path) => {
+    setCurrentPath(path);
+    window.location.hash = path;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
-  function toggleDarkMode() {
-    setDarkMode(!darkMode)
-  }
+  const handleTriggerDemoError = () => {
+    setGlobalError({
+      title: 'Local Vault Sync Warning',
+      message: 'IndexedDB transaction took longer than expected. Local encrypted cache remains intact.',
+      code: 'ERR_LOCAL_STORAGE_WARN_04'
+    });
+  };
+
+  const handleEmergencyCall = () => {
+    alert('🚨 Emergency Protocol Triggered: Connecting to National Maternal & Ambulance Helpline: 108 / 102.');
+  };
 
   return (
-    <div className={`app-root ${darkMode ? 'dark-theme' : 'light-theme'}`}>
-      <header className="site-navbar">
-        <div className="navbar-container">
-          <a href="#top" className="brand-logo" aria-label="SakhiCare Home">
-            <span className="brand-symbol">✿</span>
-            <span className="brand-name">
-              Sakhi<span className="accent">Care</span>
-            </span>
-          </a>
+    <div className="min-h-screen bg-stone-100/70 text-stone-900 font-sans flex flex-col selection:bg-rose-100 selection:text-rose-900">
+      
+      {/* 7. Global Error Message Area */}
+      <GlobalError
+        error={globalError}
+        onDismiss={() => setGlobalError(null)}
+        onRetry={() => {
+          alert('Retrying local storage verification...');
+          setGlobalError(null);
+        }}
+      />
 
-          <div className="navbar-center-tag">
-            <span className="nav-pill">
-              <Sparkles size={13} className="pill-sparkle" />
-              Empathetic PCOS & Women's Health Guide
-            </span>
-          </div>
+      {/* 2. Top Header (Logo, Language, Privacy Indicator) */}
+      <Header
+        currentLanguage={currentLanguage}
+        onOpenLanguageSelector={() => setIsLanguageModalOpen(true)}
+        onNavigateHome={() => handleNavigate('/')}
+        onTriggerDemoError={handleTriggerDemoError}
+      />
 
-          <div className="navbar-actions">
-            <button
-              type="button"
-              className="theme-toggle-btn"
-              onClick={toggleDarkMode}
-              title={darkMode ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
-              aria-label="Toggle theme"
-            >
-              {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
-            <a href="#talk-or-type-section" className="nav-cta-btn">
-              <span>Talk or Type</span>
-              <span>↓</span>
-            </a>
-          </div>
-        </div>
-      </header>
+      {/* Main Layout Container (Sidebar + Content Body) */}
+      <div className="flex-1 max-w-7xl w-full mx-auto flex">
+        
+        {/* 4. Desktop Sidebar Navigation */}
+        <Sidebar
+          currentPath={currentPath}
+          onNavigate={handleNavigate}
+          onEmergencyCall={handleEmergencyCall}
+        />
 
-      <main id="top" className="main-content">
-        {/* HERO SECTION */}
-        <section className="hero-section">
-          <div className="hero-container">
-            <div className="hero-content">
-              <div className="eyebrow-badge">
-                <Heart size={14} className="heart-icon" />
-                <span>Multilingual Care Navigation</span>
-              </div>
-              <h1 className="hero-headline">
-                Your body speaks in everyday words.<br />
-                <span className="gradient-text">Let's make sense of it together.</span>
-              </h1>
-              <p className="hero-lead">
-                Describe how you feel in <strong>English, Hindi, Kannada, Tamil, or Malayalam</strong>—by speaking or typing.
-                SakhiCare structures your symptoms into clear details and helps you prepare for your doctor visit with confidence.
-              </p>
+        {/* Responsive Content Area */}
+        <main
+          id="main-content"
+          role="main"
+          className="flex-1 p-4 sm:p-6 lg:p-8 pb-24 md:pb-12 max-w-5xl w-full focus:outline-none"
+          tabIndex={-1}
+        >
+          {/* Active View Router */}
+          {currentPath === '/' && (
+            <HomeView onNavigate={handleNavigate} />
+          )}
 
-              <div className="hero-trust-badges">
-                <div className="trust-item">
-                  <Shield size={16} className="trust-icon" />
-                  <span>100% Private in Browser</span>
-                </div>
-                <div className="trust-item">
-                  <Info size={16} className="trust-icon" />
-                  <span>No Diagnosis · Educational Support</span>
-                </div>
-                <div className="trust-item">
-                  <Stethoscope size={16} className="trust-icon" />
-                  <span>Doctor Discussion Ready</span>
-                </div>
-              </div>
+          {currentPath === '/talk' && (
+            <TalkView onNavigate={handleNavigate} currentLanguage={currentLanguage} />
+          )}
+
+          {currentPath === '/tracker' && (
+            <TrackerView onNavigate={handleNavigate} />
+          )}
+
+          {currentPath === '/summary' && (
+            <SummaryView onNavigate={handleNavigate} />
+          )}
+
+          {currentPath === '/learn' && (
+            <LearnView onNavigate={handleNavigate} />
+          )}
+
+          {currentPath === '/patterns' && PatternDetectionView && (
+            <div className="space-y-6">
+              <PatternDetectionView onNavigateToSymptomGuide={() => handleNavigate('/talk')} />
             </div>
-          </div>
-        </section>
+          )}
+        </main>
+      </div>
 
-        {/* TALK OR TYPE FEATURE SECTION */}
-        <section className="feature-section" id="talk-or-type-section">
-          <div className="section-container">
-            <div className="section-header">
-              <span className="subhead-pill">Interactive Feature</span>
-              <h2>“Talk or Type” for SakhiCare</h2>
-              <p>Choose your preferred language, speak into your microphone or type naturally.</p>
-            </div>
+      {/* 3. Mobile Bottom Navigation */}
+      <MobileNav
+        currentPath={currentPath}
+        onNavigate={handleNavigate}
+      />
 
-            <TalkOrType onHealthEntryCreated={(entry) => setLastSharedEntry(entry)} />
-          </div>
-        </section>
+      {/* Shared Multilingual Selector Modal */}
+      <LanguageSelector
+        isOpen={isLanguageModalOpen}
+        onClose={() => setIsLanguageModalOpen(false)}
+        currentLanguage={currentLanguage}
+        onSelectLanguage={(langCode) => setCurrentLanguage(langCode)}
+      />
 
-        <section className="integration-section" id="pattern-detection">
-          <div className="section-container">
-            <PatternDetectionView
-              initialSymptomLogs={lastSharedEntry?.symptoms?.map((s) => ({
-                symptom: s.symptom,
-                severity: s.severity?.toLowerCase() || 'moderate',
-                duration: s.duration,
-                date: new Date().toISOString().slice(0, 10),
-                note: 'From Talk or Type entry',
-              })) || []}
-            />
-          </div>
-        </section>
-
-        <section className="education-section" id="learn">
-          <div className="section-container">
-            <EducationLibrary />
-          </div>
-        </section>
-
-        <section className="privacy-section" id="privacy">
-          <div className="section-container"><PrivacyControls onDataDeleted={() => setLastSharedEntry(null)} /></div>
-        </section>
-
-        {/* HOW IT HELPS SECTION */}
-        <section className="guidance-overview-section" id="how-it-works">
-          <div className="section-container">
-            <div className="overview-grid">
-              <div className="step-card">
-                <div className="step-num">01</div>
-                <h3>Express in Any Dialect</h3>
-                <p>Use your local language or everyday phrasing without medical jargon.</p>
-              </div>
-              <div className="step-card">
-                <div className="step-num">02</div>
-                <h3>Structured Health Cards</h3>
-                <p>We identify duration, frequency, and severity for each symptom so you can review and edit.</p>
-              </div>
-              <div className="step-card">
-                <div className="step-num">03</div>
-                <h3>PCOS & Differential Guidance</h3>
-                <p>Learn why symptoms might occur with PCOS while acknowledging other possible conditions.</p>
-              </div>
-              <div className="step-card">
-                <div className="step-num">04</div>
-                <h3>Shared HealthEntry Record</h3>
-                <p>Export a standardized doctor prep report or interoperable data for care providers.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
-
-      {/* FOOTER */}
-      <footer className="site-footer">
-        <div className="footer-container">
-          <div className="footer-brand">
-            <span className="footer-logo">✿ SakhiCare</span>
-            <p>A companion for women's reproductive health navigation and self-advocacy.</p>
-          </div>
-          <div className="footer-disclaimer-box">
-            <strong>Medical Disclaimer:</strong>
-            <p>
-              SakhiCare is an informational tool. This is information, not a diagnosis.
-              “These symptoms can sometimes occur with PCOS, but they can also have other causes.”
-              Always consult a certified medical practitioner or gynecologist for diagnosis and clinical care.
-            </p>
-          </div>
-          <div className="footer-bottom-row">
-            <span>© {new Date().getFullYear()} SakhiCare · Hackathon Prototype</span>
-            <a href="#top" className="back-to-top">Back to top ↑</a>
-          </div>
-        </div>
-      </footer>
+      {/* Accessibility Skip-To-Content Link */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 z-50 bg-rose-700 text-white px-4 py-2 rounded-xl shadow-lg text-xs font-semibold"
+      >
+        Skip directly to main health content
+      </a>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
