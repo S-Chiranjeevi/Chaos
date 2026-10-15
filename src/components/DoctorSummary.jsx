@@ -22,6 +22,15 @@ import { t } from '../data/translations.js'
 import { getLatestHealthEntry } from '../models/healthEntry.js'
 import { analyzeHealthPatterns, DISCLAIMER } from '../services/patternDetectionService.js'
 
+function savedPersonalizedInsights() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('sakhicare_doctor_insights') || '[]')
+    return Array.isArray(saved) ? saved.map((insight) => `${insight.title}: ${insight.message}`).filter(Boolean) : []
+  } catch {
+    return []
+  }
+}
+
 export const DEFAULT_DOCTOR_SUMMARY = {
   narrative: 'Over the last three months, I recorded periods occurring approximately every 40–45 days. I also noticed acne and increased facial hair. Pelvic discomfort was recorded twice. I would like to discuss possible causes and whether further evaluation is appropriate.',
   mainSymptoms: [
@@ -71,6 +80,7 @@ export function DoctorSummary({
   onCopySuccess
 }) {
   const [summaryData, setSummaryData] = useState(() => {
+    const selectedInsights = savedPersonalizedInsights()
     // Check if initialData provided, or latest health entry, or default
     if (initialData) return initialData
     const savedEntry = getLatestHealthEntry()
@@ -85,9 +95,10 @@ export function DoctorSummary({
           severity: s.severity || 'Moderate',
         })),
         disclaimer: DISCLAIMER,
+        personalizedInsights: [...new Set([...DEFAULT_DOCTOR_SUMMARY.personalizedInsights, ...selectedInsights])],
       }
     }
-    return DEFAULT_DOCTOR_SUMMARY
+    return { ...DEFAULT_DOCTOR_SUMMARY, personalizedInsights: [...new Set([...DEFAULT_DOCTOR_SUMMARY.personalizedInsights, ...selectedInsights])] }
   })
 
   const [isEditing, setIsEditing] = useState(false)
