@@ -10,7 +10,7 @@ import {
   ArrowRight,
   Trash2,
 } from 'lucide-react'
-import { runUltrasoundAnalysis } from '../../services/screeningApi.js'
+import { runLocalUltrasoundAnalysis } from '../../services/localScreening.js'
 
 export function UltrasoundImageAnalyzer({ onApplyFollicles }) {
   const [file, setFile] = useState(null)
@@ -51,7 +51,7 @@ export function UltrasoundImageAnalyzer({ onApplyFollicles }) {
     setError(null)
 
     try {
-      const data = await runUltrasoundAnalysis(file)
+      const data = await runLocalUltrasoundAnalysis(file)
       setResult(data)
     } catch (err) {
       setError(err.message || 'Failed to analyze ultrasound image.')

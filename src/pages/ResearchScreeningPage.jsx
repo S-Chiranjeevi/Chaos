@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Activity,
   AlertCircle,
-  CheckCircle2,
   Cpu,
   FileCheck2,
   FileText,
@@ -10,19 +9,16 @@ import {
   Image as ImageIcon,
   Info,
   Lock,
-  RefreshCw,
   Shield,
   Stethoscope
 } from 'lucide-react';
-import { checkScreeningHealth, getModelInfo, runClinicalScreening } from '../services/screeningApi.js';
+import { runLocalScreening } from '../services/localScreening.js';
 import { ClinicalScreeningForm } from '../components/screening/ClinicalScreeningForm.jsx';
 import { UltrasoundImageAnalyzer } from '../components/screening/UltrasoundImageAnalyzer.jsx';
 import { ScreeningResultsDashboard } from '../components/screening/ScreeningResultsDashboard.jsx';
 
 export function ResearchScreeningPage() {
   const [activeTab, setActiveTab] = useState('clinical'); // 'clinical' | 'ultrasound' | 'transparency'
-  const [backendStatus, setBackendStatus] = useState({ checking: true, available: false, info: null, error: null });
-  const [modelInfo, setModelInfo] = useState(null);
   
   // Ultrasound transfer state
   const [ultrasoundPreFill, setUltrasoundPreFill] = useState(null);
@@ -33,40 +29,13 @@ export function ResearchScreeningPage() {
   const [screeningResult, setScreeningResult] = useState(null);
   const [lastSubmittedInputs, setLastSubmittedInputs] = useState(null);
 
-  // Health and Model info check
-  const verifyBackend = async () => {
-    setBackendStatus((prev) => ({ ...prev, checking: true, error: null }));
-    try {
-      const health = await checkScreeningHealth();
-      const info = await getModelInfo().catch(() => null);
-      setBackendStatus({
-        checking: false,
-        available: health.status === 'ok' && health.model_loaded,
-        info: health,
-        error: null,
-      });
-      if (info) setModelInfo(info);
-    } catch (err) {
-      setBackendStatus({
-        checking: false,
-        available: false,
-        info: null,
-        error: err.message || 'Screening backend is unreachable.',
-      });
-    }
-  };
-
-  useEffect(() => {
-    verifyBackend();
-  }, []);
-
   const handleClinicalSubmit = async (formData) => {
     setSubmitting(true);
     setSubmitError(null);
     setScreeningResult(null);
 
     try {
-      const response = await runClinicalScreening(formData);
+      const response = runLocalScreening(formData);
       setScreeningResult(response);
       setLastSubmittedInputs(formData);
       // Smooth scroll to results
@@ -114,32 +83,9 @@ export function ResearchScreeningPage() {
             Review clinical, physical, and hormonal information with LunaHer’s research-only pattern screening model. It highlights statistical patterns to support a conversation with a qualified healthcare professional.
           </p>
 
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            {backendStatus.checking ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/10 rounded-full text-xs text-white/90">
-                <RefreshCw size={13} className="animate-spin" />
-                <span>Checking ML backend...</span>
-              </span>
-            ) : backendStatus.available ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 rounded-full text-xs font-medium">
-                <CheckCircle2 size={13} />
-                <span>ML Pipeline Online (XGBoost v1.0.0 Ready)</span>
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded-full text-xs font-medium">
-                <AlertCircle size={13} />
-                <span>Backend Offline: Run uvicorn backend.app.main:app</span>
-              </span>
-            )}
-
-            <button
-              type="button"
-              onClick={verifyBackend}
-              className="text-xs text-teal-200 hover:text-white underline inline-flex items-center gap-1"
-            >
-              <RefreshCw size={12} />
-              <span>Re-check</span>
-            </button>
+          <div className="mt-4 inline-flex items-center gap-1.5 px-3 py-1 bg-white/10 rounded-full text-xs text-white/90">
+            <Cpu size={13} />
+            <span>Private browser-only pattern screening</span>
           </div>
         </div>
       </div>
@@ -203,36 +149,14 @@ export function ResearchScreeningPage() {
         </nav>
       </div>
 
-      {/* Backend Offline Warning (if applicable) */}
-      {!backendStatus.checking && !backendStatus.available && (
-        <div className="p-4 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/60 text-amber-900 dark:text-amber-200 text-xs flex items-start gap-3">
-          <AlertCircle size={20} className="shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
-          <div className="space-y-1">
-            <strong>FastAPI Screening Backend is currently offline:</strong>
-            <p>
-              To run live inferences, ensure the Python backend is running on port 8000. Start it from your terminal with:
-            </p>
-            <code className="block bg-stone-900 text-stone-100 p-2 rounded text-xs font-mono select-all">
-              python -m uvicorn backend.app.main:app --port 8000 --reload
-            </code>
-          </div>
-        </div>
-      )}
-
       {/* Tab 1: Mode A - Clinical Parameters Form */}
       {activeTab === 'clinical' && (
         <div className="space-y-6">
           <div id="clinical-screening-form">
             <ClinicalScreeningForm
               onSubmit={handleClinicalSubmit}
-              isLoading={submitting}
-              prefilledData={
-                ultrasoundPreFill
-                  ? {
-                      follicle_no_right: ultrasoundPreFill.follicle_count_estimate,
-                    }
-                  : null
-              }
+              isSubmitting={submitting}
+              prefilledFollicles={ultrasoundPreFill}
             />
           </div>
 
@@ -261,7 +185,7 @@ export function ResearchScreeningPage() {
       {/* Tab 2: Mode B - Ultrasound Analysis */}
       {activeTab === 'ultrasound' && (
         <div className="space-y-6">
-          <UltrasoundImageAnalyzer onFollicleTransferred={handleUltrasoundTransferred} />
+          <UltrasoundImageAnalyzer onApplyFollicles={handleUltrasoundTransferred} />
         </div>
       )}
 
