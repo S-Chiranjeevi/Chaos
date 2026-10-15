@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { assessSymptoms } from './engine.js'
-import HealthTracker from './HealthTracker.jsx'
+import CycleTracker from './components/CycleTracker.jsx'
+import { saveHealthEntry } from './services/storageService.js'
 import './App.css'
 
 function App() {
   const [note, setNote] = useState('')
   const [result, setResult] = useState(null)
   const [error, setError] = useState(false)
+  const [storageError, setStorageError] = useState('')
 
   function submit(event) {
     event.preventDefault()
@@ -15,7 +17,15 @@ function App() {
       return
     }
     setError(false)
-    setResult(assessSymptoms(note))
+    const assessment = assessSymptoms(note)
+    setResult(assessment)
+    try {
+      saveHealthEntry({ recordedAt: new Date().toISOString(), notes: note.trim(), symptoms: assessment.extractedSymptoms.map((symptom) => ({ symptom })), assessment: { urgency: assessment.urgency, redFlags: assessment.redFlags } })
+      setStorageError('')
+      window.dispatchEvent(new Event('sakhicare:health-entry-update'))
+    } catch {
+      setStorageError('Your summary is ready, but it could not be saved on this device.')
+    }
     window.setTimeout(() => document.getElementById('results')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 0)
   }
 
@@ -55,6 +65,7 @@ function App() {
               <div className="input-footer"><span className="privacy-note">▣ &nbsp;Your note stays in this browser.</span><span>{note.length} / 1500</span></div>
               <button className="primary-button submit-button" type="submit">Help me understand <span>→</span></button>
               {error && <p className="inline-error" role="alert">Please add a few words about what you’ve been noticing.</p>}
+              {storageError && <p className="inline-error" role="status">{storageError}</p>}
               <p className="form-disclaimer">This is an educational tool. It cannot diagnose a condition or replace care from a qualified professional.</p>
             </form>
             <aside className="side-note"><div className="note-icon">✧</div><p className="eyebrow">A note from SakhiCare</p><h3>You deserve to be heard.</h3><p>Symptoms can have several causes. This tool can help you find words for what you’re feeling and questions to bring to a clinician.</p><div className="note-divider" /><p className="note-small"><span>♡</span> If you feel unsafe or have severe symptoms, please seek medical help right away.</p><div className="leaf-art" aria-hidden="true">❧</div></aside>
@@ -72,7 +83,7 @@ function App() {
           </div>
         </article></section>}
 
-        <HealthTracker />
+        <CycleTracker />
 
         <section className="how-section" id="how-it-works"><div><p className="eyebrow">Small steps, more confidence</p><h2>Make the next conversation<br />a little easier.</h2></div><div className="steps"><article><span>01</span><div><h3>Put it into words</h3><p>Share symptoms in your own words and language.</p></div></article><article><span>02</span><div><h3>See what stands out</h3><p>Get a simple summary and guidance on when to seek care.</p></div></article><article><span>03</span><div><h3>Feel ready to ask</h3><p>Take suggested questions to a health professional.</p></div></article></div></section>
       </main>
