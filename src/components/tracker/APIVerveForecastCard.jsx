@@ -11,7 +11,6 @@ import {
   RefreshCw,
   Info,
   ChevronRight,
-  ShieldCheck,
   History,
 } from 'lucide-react';
 import {
@@ -155,31 +154,6 @@ export function APIVerveForecastCard() {
 
   return (
     <div className="space-y-6">
-      {/* Top Banner & Header */}
-      <div className="bg-gradient-to-r from-rose-500 via-rose-600 to-pink-600 rounded-3xl p-6 text-white shadow-md relative overflow-hidden">
-        <div className="absolute right-0 top-0 w-64 h-64 bg-white/10 rounded-full blur-2xl pointer-events-none" />
-
-        <div className="relative z-10">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-white/20 backdrop-blur-xs tracking-wide">
-              Official API Integration
-            </span>
-            <span className="flex items-center gap-1 text-[11px] text-rose-100 font-medium">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              Secure Server Gateway
-            </span>
-          </div>
-
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight">
-            Live Cycle Insights & Forecast
-          </h2>
-          <p className="text-rose-100 text-xs sm:text-sm mt-1 max-w-xl">
-            Powered by the official APIVerve Menstrual Cycle Calculator API. Accurately calculates
-            upcoming period onset, ovulation dates, and fertile phases based on physiological parameters.
-          </p>
-        </div>
-      </div>
-
       {/* Input Form Card */}
       <div className="bg-white rounded-3xl p-5 sm:p-6 border border-stone-200/80 shadow-xs">
         <div className="flex items-center justify-between pb-4 border-b border-stone-100 mb-5 flex-wrap gap-2">
