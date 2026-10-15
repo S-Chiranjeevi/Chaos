@@ -23,6 +23,7 @@ from .routes.analyze import router as analyze_router
 from .routes.cycle import router as cycle_router
 from .routes.db_routes import router as db_router
 from .routes.health import router as health_router
+from .routes.screening import router as screening_router
 from .routes.summary import router as summary_router
 
 
@@ -77,6 +78,7 @@ app.include_router(analyze_router)
 app.include_router(cycle_router)
 app.include_router(summary_router)
 app.include_router(db_router)
+app.include_router(screening_router)
 
 
 @app.get("/", include_in_schema=False)

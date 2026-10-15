@@ -379,7 +379,7 @@ def local_analyze(
         questions_for_doctor=questions_for_doctor,
         self_care_tips=self_care_tips,
         disclaimer=DISCLAIMER,
-        reply_text=reply_text,
+        reply_text=possible_relation,
         follow_up_questions=follow_up_questions[:3],
         synthesized_suggestions=synthesized_suggestions,
     )
