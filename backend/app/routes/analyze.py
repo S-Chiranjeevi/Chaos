@@ -43,9 +43,10 @@ async def analyze_symptoms(request: AnalyzeRequest) -> AnalyzeResponse:
 
     # Urgent input uses the local path immediately and never waits on AI.
     if not warnings and gemini_service.is_available:
+        follow_up_context = f"\nUser Follow-up Clarification Answers: {request.follow_up_answers}" if request.follow_up_answers else ""
         user_prompt = (
             f"Analyze user input (Age: {request.age or 'Not provided'}, Preferred language: {request.language}):\n"
-            f"\"{request.text}\""
+            f"\"{request.text}\"{follow_up_context}"
         )
         ai_data = await gemini_service.generate_json(ANALYZE_SYSTEM_PROMPT, user_prompt)
         if ai_data:
@@ -69,7 +70,8 @@ async def analyze_symptoms(request: AnalyzeRequest) -> AnalyzeResponse:
     local_response = local_analyze(
         text=request.text,
         language=request.language or "en",
-        age=request.age
+        age=request.age,
+        follow_up_answers=request.follow_up_answers,
     )
     safe_local_response = _validate_response(local_response, warnings)
     return safe_local_response or _blocked_response(warnings, request.language or "en")

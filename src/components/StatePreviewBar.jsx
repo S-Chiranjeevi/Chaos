@@ -7,6 +7,7 @@ const UI_STATES = [
   { id: 'recording', label: 'Recording' },
   { id: 'transcribing', label: 'Transcribing' },
   { id: 'processing', label: 'Processing' },
+  { id: 'followup', label: 'AI Follow-Up' },
   { id: 'results', label: 'Results' },
   { id: 'permission-denied', label: 'Permission Denied' },
   { id: 'unsupported-browser', label: 'Unsupported Browser' },

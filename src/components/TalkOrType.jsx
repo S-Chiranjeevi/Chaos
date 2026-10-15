@@ -19,11 +19,14 @@ import { AnalysisUnavailableError, requestSymptomAnalysis } from '../services/ap
 import { detectRedFlags, getSafetyDisclaimer } from '../services/safetyRules.js'
 import { validateOutput } from '../services/outputValidator.js'
 import { createHealthEntry, publishHealthEntry } from '../models/healthEntry.js'
+import { generateFollowUpQuestions, synthesizeSuggestions } from '../services/followUpService.js'
 import { UrgentCareBanner } from './UrgentCareBanner.jsx'
 import { SymptomCards } from './SymptomCards.jsx'
 import { AssessmentView } from './AssessmentView.jsx'
 import { HealthEntryExport } from './HealthEntryExport.jsx'
 import { StatePreviewBar } from './StatePreviewBar.jsx'
+import { FollowUpQuestions } from './FollowUpQuestions.jsx'
+import { TailoredSuggestions } from './TailoredSuggestions.jsx'
 
 function assessWithSafety(input, candidate, localResult) {
   const safetyWarnings = detectRedFlags(input)
@@ -61,7 +64,7 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
   // Primary state
   const [selectedLang, setSelectedLang] = useState(initialLanguage)
   const [inputText, setInputText] = useState('')
-  const [currentState, setCurrentState] = useState('empty') // 'empty' | 'typing' | 'recording' | 'transcribing' | 'processing' | 'results' | 'permission-denied' | 'unsupported-browser' | 'network-error'
+  const [currentState, setCurrentState] = useState('empty') // 'empty' | 'typing' | 'recording' | 'transcribing' | 'processing' | 'followup' | 'results' | 'permission-denied' | 'unsupported-browser' | 'network-error'
   
   // Audio & Speech status
   const [recordingStatusMessage, setRecordingStatusMessage] = useState('') // "Listening...", "Tap to stop", "We could not hear you. Try again."
@@ -74,6 +77,15 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
   const [symptomsList, setSymptomsList] = useState([])
   const [healthEntry, setHealthEntry] = useState(null)
   const [analysisFallbackMessage, setAnalysisFallbackMessage] = useState('')
+  const [storageSaveError, setStorageSaveError] = useState('')
+
+  // Follow-up Q&A and Tailored Suggestions State
+  const [followUpQuestions, setFollowUpQuestions] = useState([])
+  const [followUpAnswers, setFollowUpAnswers] = useState({})
+  const [customNotes, setCustomNotes] = useState({})
+  const [tailoredSuggestions, setTailoredSuggestions] = useState(null)
+  const [candidateResult, setCandidateResult] = useState(null)
+  const [localParsedResult, setLocalParsedResult] = useState(null)
 
   const textareaRef = useRef(null)
   const resultsRef = useRef(null)
@@ -204,17 +216,46 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
     const localResult = extractSymptoms(input, { preferredLanguage: selectedLang })
     let candidate = localResult
 
-    // Urgent findings use local rules immediately and never wait on an online model.
-    if (!safetyWarnings.length) {
-      try {
-        const response = await requestSymptomAnalysis({ text: input, language: selectedLang })
-        const validation = validateOutput(response)
-        if (!validation.valid) throw new AnalysisUnavailableError('The online response did not pass safety checks.')
+    // Urgent acute findings bypass follow-up and trigger immediate urgent guidance
+    if (safetyWarnings.length > 0) {
+      const parsed = assessWithSafety(input, candidate, localResult)
+      setExtractedResult(parsed)
+      setSymptomsList(parsed.symptoms)
+
+      const newEntry = createHealthEntry({
+        language: parsed.detectedLanguage || selectedLang,
+        inputMode,
+        rawTranscript: input,
+        symptoms: parsed.symptoms,
+        assessment: {
+          statement: parsed.disclaimer,
+          urgency: parsed.urgency,
+          topics: parsed.topics,
+          questionsForDoctor: parsed.questionsForDoctor,
+          redFlags: parsed.redFlags,
+          safetyWarnings: parsed.safetyWarnings,
+        },
+      })
+
+      setHealthEntry(newEntry)
+      const saveResult = publishHealthEntry(newEntry)
+      setStorageSaveError(saveResult?.ok ? '' : saveResult?.error || 'Your note could not be saved on this device.')
+      if (onHealthEntryCreated) onHealthEntryCreated(newEntry)
+
+      setCurrentState('results')
+      setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)
+      return
+    }
+
+    // Routine & soon patterns: Try online analysis if service is configured
+    try {
+      const response = await requestSymptomAnalysis({ text: input, language: selectedLang })
+      const validation = validateOutput(response)
+      if (validation.valid) {
         const backendResult = validation.output
         candidate = {
           ...localResult,
           ...backendResult,
-          // Keep locally structured symptom cards, while accepting safe backend education.
           symptoms: localResult.symptoms,
           detectedLanguage: backendResult.detectedLanguage || backendResult.detected_language || localResult.detectedLanguage,
           possibleRelationships: Array.isArray(backendResult.possibleRelationships)
@@ -227,25 +268,116 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
           questionsForDoctor: backendResult.questionsForDoctor || backendResult.questions_for_doctor || localResult.questionsForDoctor,
           disclaimer: getSafetyDisclaimer(),
         }
-      } catch (error) {
-        const safetyBlocked = error instanceof AnalysisUnavailableError && /safety checks/i.test(error.message)
-        setAnalysisFallbackMessage(safetyBlocked
-          ? 'The online response was hidden by safety checks, so LunaHer used on-device guidance instead.'
-          : 'We could not use the online analysis service, so LunaHer used private on-device symptom guidance instead.')
+      }
+    } catch (error) {
+      const safetyBlocked = error instanceof AnalysisUnavailableError && /safety checks/i.test(error.message)
+      if (safetyBlocked) {
+        setAnalysisFallbackMessage('The online response was hidden by safety checks, so LunaHer used on-device guidance instead.')
       }
     }
 
-    const parsed = assessWithSafety(input, candidate, localResult)
+    setCandidateResult(candidate)
+    setLocalParsedResult(localResult)
+
+    // Generate intelligent follow-up questions to understand context deeper
+    const questions = generateFollowUpQuestions({
+      text: input,
+      symptoms: localResult.symptoms,
+      language: selectedLang,
+    })
+    setFollowUpQuestions(questions)
+
+    // Transition to follow-up questions state!
+    setCurrentState('followup')
+    setTimeout(() => {
+      document.getElementById('followup-questions-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 100)
+  }
+
+  // Handle submitting answers to follow-up questions
+  async function handleFollowUpSubmit(answers = {}, notes = {}) {
+    setFollowUpAnswers(answers)
+    setCustomNotes(notes)
+    setCurrentState('processing')
+
+    const input = inputText.trim()
+    const baseCandidate = candidateResult || extractSymptoms(input, { preferredLanguage: selectedLang })
+    const baseLocal = localParsedResult || baseCandidate
+
+    // Try optional online synthesis if backend is running
+    let onlineSuggestions = null
+    try {
+      const response = await requestSymptomAnalysis({
+        text: input,
+        language: selectedLang,
+        followUpAnswers: answers,
+      })
+      const validation = validateOutput(response)
+      if (validation.valid && validation.output) {
+        onlineSuggestions = validation.output
+      }
+    } catch {
+      // Graceful offline fallback
+    }
+
+    // Synthesize tailored suggestions from symptoms + follow-up answers
+    const synthesized = synthesizeSuggestions({
+      inputText: input,
+      symptoms: baseLocal.symptoms,
+      followUpAnswers: answers,
+      language: selectedLang,
+    })
+
+    setTailoredSuggestions(synthesized)
+
+    // Merge tailored doctor questions & self-care tips into parsed candidate
+    const mergedQuestions = [
+      ...new Set([
+        ...synthesized.questionsForDoctor,
+        ...(onlineSuggestions?.questionsForDoctor || baseCandidate.questionsForDoctor || []),
+      ]),
+    ]
+    const mergedTips = [
+      ...new Set([
+        ...synthesized.tailoredTips.map((t) => `${t.category}: ${t.tip}`),
+        ...(onlineSuggestions?.lifestyleTips || baseCandidate.lifestyleTips || []),
+      ]),
+    ]
+
+    const parsed = assessWithSafety(
+      input,
+      {
+        ...baseCandidate,
+        questionsForDoctor: mergedQuestions,
+        lifestyleTips: mergedTips,
+        recommendedSpecialist: synthesized.recommendedSpecialist || baseCandidate.recommendedSpecialist,
+        urgency: synthesized.urgency === 'urgent' ? 'urgent' : baseCandidate.urgency,
+      },
+      baseLocal
+    )
 
     setExtractedResult(parsed)
     setSymptomsList(parsed.symptoms)
 
-    // Build and save the shared local HealthEntry regardless of backend availability.
+    // Build structured followUpQnA list for HealthEntry record
+    const followUpQnA = followUpQuestions.map((q) => {
+      const ans = answers[q.id]
+      const note = notes[q.id]
+      return {
+        questionId: q.id,
+        question: q.question,
+        answer: ans || 'Skipped',
+        customNote: note || '',
+      }
+    })
+
     const newEntry = createHealthEntry({
       language: parsed.detectedLanguage || selectedLang,
       inputMode,
-      rawTranscript: inputText.trim(),
+      rawTranscript: input,
       symptoms: parsed.symptoms,
+      followUpQnA,
+      tailoredSuggestions: synthesized,
       assessment: {
         statement: parsed.disclaimer,
         urgency: parsed.urgency,
@@ -263,8 +395,11 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
     if (onHealthEntryCreated) onHealthEntryCreated(newEntry)
 
     setCurrentState('results')
-
     setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100)
+  }
+
+  function handleSkipFollowUp() {
+    handleFollowUpSubmit({}, {})
   }
 
   // Symptom Card Operations
@@ -322,11 +457,32 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
       setInterimSpokenText('My periods have been irregular for two or three months...')
     } else if (targetState === 'processing') {
       setRecordingStatusMessage('')
+    } else if (targetState === 'followup') {
+      const sample = 'My periods have been irregular for two or three months, and I have breakouts on my jawline.'
+      if (!inputText) setInputText(sample)
+      const localResult = extractSymptoms(sample, { preferredLanguage: selectedLang })
+      const questions = generateFollowUpQuestions({ text: sample, symptoms: localResult.symptoms, language: selectedLang })
+      setFollowUpQuestions(questions)
+      setCandidateResult(localResult)
+      setLocalParsedResult(localResult)
+      setRecordingStatusMessage('')
     } else if (targetState === 'results') {
       const sample = 'My periods come every 2–3 months, and I have acne and severe pain.'
       if (!inputText) setInputText(sample)
       const localResult = extractSymptoms(sample, { preferredLanguage: selectedLang })
       const parsed = assessWithSafety(sample, localResult, localResult)
+      const synth = synthesizeSuggestions({
+        inputText: sample,
+        symptoms: parsed.symptoms,
+        followUpAnswers: {
+          cycle_duration: '3_to_6m',
+          cycle_gap: 'gap_long',
+          androgen_signs: ['jawline_acne'],
+          pain_profile: 'pain_severe',
+        },
+        language: selectedLang,
+      })
+      setTailoredSuggestions(synth)
       setExtractedResult(parsed)
       setSymptomsList(parsed.symptoms)
       const mockEntry = createHealthEntry({
@@ -334,6 +490,7 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
         inputMode: 'speech',
         rawTranscript: 'My periods come every 2–3 months, and I have acne and severe pain.',
         symptoms: parsed.symptoms,
+        tailoredSuggestions: synth,
       })
       setHealthEntry(mockEntry)
       publishHealthEntry(mockEntry)
@@ -624,10 +781,31 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
         </div>
       </div>
 
+      {/* AI FOLLOW-UP CLARIFICATION QUESTIONS */}
+      {currentState === 'followup' && followUpQuestions.length > 0 && (
+        <FollowUpQuestions
+          questions={followUpQuestions}
+          initialAnswers={followUpAnswers}
+          onSubmitAnswers={handleFollowUpSubmit}
+          onSkip={handleSkipFollowUp}
+          isAnalyzing={false}
+        />
+      )}
+
       {/* RESULTS DISPLAY */}
       {currentState === 'results' && extractedResult && (
         <section ref={resultsRef} className="results-container" id="results-view" aria-live="polite">
           <UrgentCareBanner warnings={extractedResult.safetyWarnings || []} />
+
+          {/* AI SYNTHESIZED TAILORED SUGGESTIONS (FROM SYMPTOMS + FOLLOW-UP ANSWERS) */}
+          {tailoredSuggestions && (
+            <TailoredSuggestions
+              suggestions={tailoredSuggestions}
+              followUpAnswers={followUpAnswers}
+              onEditFollowUp={() => setCurrentState('followup')}
+            />
+          )}
+
           {/* SECTION HEADER */}
           <div className="results-hero-strip">
             <div className="strip-title-group">

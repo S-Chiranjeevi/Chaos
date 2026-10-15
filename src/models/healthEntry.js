@@ -21,6 +21,8 @@ export const createHealthEntry = ({
   assessment = null,
   disclaimerAcknowledged = true,
   notes = '',
+  followUpQnA = [],
+  tailoredSuggestions = null,
 } = {}) => {
   return {
     id,
@@ -46,6 +48,8 @@ export const createHealthEntry = ({
       questionsForDoctor: [],
       redFlags: [],
     },
+    followUpQnA,
+    tailoredSuggestions,
     disclaimerAcknowledged,
     notes,
     metadata: {
