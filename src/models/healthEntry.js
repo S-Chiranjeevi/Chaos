@@ -57,26 +57,20 @@ export const createHealthEntry = ({
 export const publishHealthEntry = (entry) => {
   if (typeof window === 'undefined') return
 
-  // Expose to window shared state
-  window.SakhiCareSharedState = entry
-
-  // Dispatch custom event for interoperability
+  // Keep the entry in this page and notify first-party UI components.
+  // Health data is never sent to a server, analytics tool, or external API.
   try {
     const event = new CustomEvent('sakhicare:healthEntryUpdate', {
       detail: entry,
       bubbles: true,
     })
     window.dispatchEvent(event)
-  } catch (err) {
-    console.error('Failed to dispatch sakhicare:healthEntryUpdate event:', err)
-  }
+  } catch { /* The page can still save locally if events are unavailable. */ }
 
   // Persist latest entry in localStorage
   try {
     localStorage.setItem('sakhicare_latest_entry', JSON.stringify(entry))
-  } catch (err) {
-    console.warn('LocalStorage save failed:', err)
-  }
+  } catch { /* Private browsing or storage limits can prevent local saves. */ }
 }
 
 /**
@@ -89,5 +83,13 @@ export const getLatestHealthEntry = () => {
     return stored ? JSON.parse(stored) : null
   } catch {
     return null
+  }
+}
+
+export const deleteAllLocalHealthData = () => {
+  if (typeof window === 'undefined') return
+  for (let index = localStorage.length - 1; index >= 0; index -= 1) {
+    const key = localStorage.key(index)
+    if (key?.startsWith('sakhicare_')) localStorage.removeItem(key)
   }
 }

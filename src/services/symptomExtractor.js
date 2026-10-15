@@ -20,11 +20,12 @@ export const SYMPTOM_DEFINITIONS = [
     patterns: [
       /\b(irregular|infrequent|missed|late|skipped|unpredictable|delay(?:ed)?)\s+(periods?|menstrual cycles?|cycles?|menses)\b/i,
       /\b(periods?|cycles?)\s+(?:come\s+|arrive\s+|are\s+)?(?:every\s+)?(?:2[\s–-]3|two[\s–-]three|\d+)\s+months?\b/i,
+      /\b(periods?|cycles?)\b.{0,45}\b(irregular|infrequent|late|unpredictable)\b/i,
       /\b(no\s+period|period.{0,20}(?:three|3|two|2|several)\s+months?)\b/i,
-      /अनियमित|महीनों से पीरियड|पीरियड नहीं|माहवारी में देरी|मासिक धर्म/i,
-      /ಅನಿಯಮಿತ|ಮುಟ್ಟು.*ತಡ|ಋತುಚಕ್ರ.*ಆಲಸ್ಯ|ತಿಂಗಳು.*ಬರಲಿಲ್ಲ/i,
-      /ஒழுங்கற்ற|மாதவிடாய்.*தாமதம்|மாதவிடாய்.*வரவில்லை/i,
-      /ക്രമരഹിതമായ|ആർത്തവം.*വൈക|മാസമുറ.*തടസ്സം/i,
+      /अनियमित|महीनों से पीरियड|पीरियड नहीं|माहवारी में देरी|मासिक धर्म|पीरियड्स.*(?:2[\s–-]3|महीने|देरी)/i,
+      /ಅನಿಯಮಿತ|ಮುಟ್ಟು.*ತಡ|ಋತುಚಕ್ರ.*ಆಲಸ್ಯ|ತಿಂಗಳು.*ಬರಲಿಲ್ಲ|ಮುಟ್ಟು.*(?:2[\s–-]3|ತಿಂಗಳು)/i,
+      /ஒழுங்கற்ற|மாதவிடாய்.*தாமதம்|மாதவிடாய்.*வரவில்லை|மாதவிடாய்.*(?:2[\s–-]3|மாதம்)/i,
+      /ക്രമരഹിതമായ|ആർത്തവം.*വൈക|മാസമുറ.*തടസ്സം|ആർത്തവം.*(?:2[\s–-]3|മാസം)/i,
     ],
     defaultDuration: '2–3 months',
     defaultFrequency: 'Every 2–3 months',
@@ -157,6 +158,20 @@ export const SYMPTOM_DEFINITIONS = [
     defaultSeverity: 'Severe',
     isRedFlag: true,
   },
+  {
+    id: 'pregnancy_warning',
+    label: 'Possible pregnancy-related warning signs',
+    category: 'Pregnancy-related warning signs',
+    patterns: [
+      /\b(pregnan(?:t|cy)|might be pregnant|possible pregnancy)\b.{0,70}\b(bleeding|spotting|pain|cramps?|dizz(?:y|iness)|faint(?:ed|ing)?)\b/i,
+      /\b(bleeding|spotting|pain|cramps?|dizz(?:y|iness)|faint(?:ed|ing)?)\b.{0,70}\b(pregnan(?:t|cy)|might be pregnant|possible pregnancy)\b/i,
+      /गर्भवती|गर्भावस्था.{0,30}(दर्द|खून|चक्कर)/i,
+    ],
+    defaultDuration: 'Not specified',
+    defaultFrequency: 'Not specified',
+    defaultSeverity: 'Severe',
+    isRedFlag: true,
+  },
 ]
 
 /**
@@ -219,7 +234,8 @@ export function extractSymptoms(rawText = '') {
       hasPcosIndicators: false,
       isUrgent: false,
       redFlags: [],
-      disclaimer: 'These symptoms can sometimes occur with PCOS, but they can also have other causes.',
+      disclaimer: 'These symptoms can sometimes occur with PCOS, but they can also have other causes. This is information, not a diagnosis.',
+      urgency: 'routine',
       topics: [],
       questionsForDoctor: [],
       lifestyleTips: [],
@@ -279,7 +295,7 @@ export function extractSymptoms(rawText = '') {
 
   // Carefully framed questions for the doctor
   const questionsForDoctor = [
-    'What diagnostic tests (such as pelvic ultrasound or hormone panel) are appropriate for my symptoms?',
+    'What evaluations, such as a pelvic ultrasound or hormone panel, might be appropriate for my symptoms?',
     'Could these symptoms be linked to PCOS, thyroid function, or another underlying hormonal balance?',
     'What symptom diary or tracking parameters should I keep over the next few cycles?',
   ]
@@ -310,7 +326,7 @@ export function extractSymptoms(rawText = '') {
     hasPcosIndicators: hasHormonalSigns,
     isUrgent,
     redFlags,
-    disclaimer: 'These symptoms can sometimes occur with PCOS, but they can also have other causes.',
+    disclaimer: 'These symptoms can sometimes occur with PCOS, but they can also have other causes. This is information, not a diagnosis.',
     urgency: isUrgent ? 'urgent' : hasHormonalSigns ? 'soon' : 'routine',
     topics,
     questionsForDoctor,
