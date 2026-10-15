@@ -16,6 +16,7 @@ import {
   Download,
 } from 'lucide-react'
 import { analyzeHealthPatterns, DISCLAIMER } from '../services/patternDetectionService.js'
+import { InsightsPanel } from './InsightsPanel.jsx'
 
 // Pre-packaged test scenarios for hackathon judges and users to test immediately
 export const TEST_PRESETS = [
@@ -356,6 +357,9 @@ export function PatternDetectionView({ initialPeriodLogs = [], initialSymptomLog
           </div>
         )}
       </div>
+
+      {/* Personalized, explainable insight layer uses the same local tracker data. */}
+      <InsightsPanel periodLogs={periodLogs} symptomLogs={symptomLogs} />
 
       {/* DOCTOR SUMMARY BASKET */}
       {doctorSummaryItems.length > 0 && (

@@ -1,0 +1,54 @@
+[
+  {
+    "id": "self_care_sleep",
+    "pillar": "Sleep & Circadian Rhythm",
+    "title": "Supporting Hormonal Balance Through Restorative Sleep",
+    "summary": "Consistent, restorative sleep stabilizes evening cortisol, optimizes melatonin production, and improves morning insulin sensitivity.",
+    "actionableTips": [
+      "Maintain a consistent sleep-wake schedule within a 30-minute window daily, even on weekends.",
+      "Get 10–15 minutes of natural morning sunlight within an hour of waking to anchor your circadian rhythm.",
+      "Dim artificial lights and screens 60 minutes before bed to allow natural melatonin synthesis.",
+      "Keep your bedroom cool (around 18–20°C / 65–68°F) and quiet to facilitate deep slow-wave restorative sleep."
+    ],
+    "source": "Sleep Medicine Reviews / Circadian Disruption and Metabolic Health in PCOS (2022)"
+  },
+  {
+    "id": "self_care_movement",
+    "pillar": "Movement & Physical Activity",
+    "title": "Movement That Nourishes Without Over-stressing",
+    "summary": "Regular movement enhances muscular glucose uptake, supports mood, and promotes ovulatory regularity when balanced with adequate rest.",
+    "actionableTips": [
+      "Incorporate gentle progressive resistance training 2–3 times per week to boost muscle insulin sensitivity.",
+      "Engage in low-intensity steady-state movement such as daily 20–30 minute post-meal walks, which blunts postprandial glucose spikes.",
+      "Include restorative practices like yoga, stretching, or Pilates to improve mobility and lower systemic inflammation.",
+      "Avoid chronic high-intensity exhaustive exercise without adequate recovery, which can elevate circulating cortisol and disrupt cycle regularity."
+    ],
+    "source": "Monash International Evidence-based Guideline / Lifestyle Management in PCOS (2023)"
+  },
+  {
+    "id": "self_care_nutrition",
+    "pillar": "Nutrition & Blood Sugar Harmony",
+    "title": "Nourishing Foods for Stable Energy and Hormones",
+    "summary": "Eating to support steady blood sugar reduces insulin spikes, which in turn helps lower excess ovarian androgen production.",
+    "actionableTips": [
+      "Anchor meals with 20–30 grams of protein (such as lentils, eggs, paneer, tofu, fish, or poultry) to promote satiety and metabolic balance.",
+      "Pair carbohydrates with dietary fiber and healthy fats (seeds, nuts, olive oil, avocado) to prevent rapid glucose spikes.",
+      "Enjoy a wide variety of colorful plant foods rich in polyphenols and antioxidants to reduce low-grade inflammation.",
+      "Stay hydrated with 2–2.5 liters of water daily, reducing sugary beverages and excessive caffeine intake on empty stomachs."
+    ],
+    "source": "Academy of Nutrition and Dietetics / Medical Nutrition Therapy for Women with Polycystic Ovary Syndrome"
+  },
+  {
+    "id": "self_care_stress",
+    "pillar": "Stress Reduction & Nervous System Care",
+    "title": "Regulating the HPO & Adrenal Axis",
+    "summary": "Chronic mental and physical stress stimulates the adrenal glands to release DHEA-S and cortisol, which can directly suppress the ovulatory signal.",
+    "actionableTips": [
+      "Practice 5 minutes of physiological sigh breathing (two quick inhales through the nose, one long slow exhale through the mouth) to calm acute anxiety.",
+      "Establish healthy boundaries around work, caretaking, and social obligations to protect downtime.",
+      "Engage in enjoyable creative outlets, journaling, or connecting with trusted friends or support groups.",
+      "Consider working with a licensed mental health professional or counselor specializing in chronic health navigation if feeling overwhelmed."
+    ],
+    "source": "Journal of Clinical Endocrinology & Metabolism / Psychosocial Wellbeing and the HPA Axis in PCOS"
+  }
+]
