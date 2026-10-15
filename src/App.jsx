@@ -12,6 +12,7 @@ import { LearnPage } from './pages/LearnPage.jsx';
 import { TalkOrTypePage } from './pages/TalkOrTypePage.jsx';
 import { ChatbotWidget } from './components/ChatbotWidget.jsx';
 import { BackgroundMusic } from './components/BackgroundMusic.jsx';
+import { ResearchScreeningPage } from './pages/ResearchScreeningPage.jsx';
 import { getLatestHealthEntry } from './models/healthEntry.js';
 import { StorageService } from './services/storageService.js';
 import './App.css';
@@ -25,6 +26,8 @@ const PATH_TO_PAGE = {
   '/patterns': 'insights',
   '/doctor': 'doctor',
   '/summary': 'doctor',
+  '/screening': 'screening',
+  '/research': 'screening',
   '/learn': 'learn',
 };
 
@@ -33,6 +36,7 @@ const PAGE_TO_PATH = {
   talk: '/talk',
   tracker: '/tracker',
   insights: '/insights',
+  screening: '/screening',
   doctor: '/summary',
   learn: '/learn',
 };
@@ -42,6 +46,7 @@ const PAGE_TITLES = {
   talk: 'Talk or Type',
   tracker: 'Cycle Insights & Forecast',
   insights: 'Early Warnings and Insights',
+  screening: 'PCOS Research Screening',
   doctor: 'Doctor Summary',
   learn: 'Learn and Myths',
 };
@@ -144,6 +149,8 @@ export function App() {
             refreshKey={refreshKey}
           />
         );
+      case 'screening':
+        return <ResearchScreeningPage onNavigate={navigate} />;
       case 'doctor':
         return (
           <DoctorSummaryPage
