@@ -16,6 +16,14 @@ import {
   Download,
 } from 'lucide-react'
 import { analyzeHealthPatterns, DISCLAIMER } from '../services/patternDetectionService.js'
+import {
+  detectEarlyWarnings,
+  dismissWarning as dismissEarlyWarn,
+  toggleDoctorSummaryWarning,
+  getDismissedWarningIds,
+  getDoctorSummaryWarningIds,
+} from '../services/earlyWarning.js'
+import { EarlyWarningCard } from './EarlyWarningCard.jsx'
 
 // Pre-packaged test scenarios for hackathon judges and users to test immediately
 export const TEST_PRESETS = [
@@ -140,6 +148,44 @@ export function PatternDetectionView({ initialPeriodLogs = [], initialSymptomLog
     })
   }, [periodLogs, symptomLogs])
 
+  // Run early warning detection engine (deterministic, rules-based)
+  const [localDismissed, setLocalDismissed] = useState(() => new Set(getDismissedWarningIds()))
+  const [localSummaryIds, setLocalSummaryIds] = useState(() => new Set(getDoctorSummaryWarningIds()))
+
+  const earlyWarnings = useMemo(() => {
+    return detectEarlyWarnings({ periodLogs, symptomLogs }, { includeDismissed: true })
+      .filter((w) => !localDismissed.has(w.id))
+      .map((w) => ({
+        ...w,
+        isAddedToDoctorSummary: localSummaryIds.has(w.id),
+      }))
+  }, [periodLogs, symptomLogs, localDismissed, localSummaryIds])
+
+  function handleDismissEarlyWarning(id) {
+    dismissEarlyWarn(id)
+    setLocalDismissed((prev) => new Set([...prev, id]))
+  }
+
+  function handleToggleDoctorSummaryEarlyWarning(id) {
+    const isAdded = toggleDoctorSummaryWarning(id)
+    setLocalSummaryIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+
+    const targetWarning = earlyWarnings.find((w) => w.id === id)
+    if (targetWarning) {
+      if (isAdded) {
+        setDoctorSummaryItems((prev) => [...prev.filter((i) => i.id !== id), targetWarning])
+        if (onDoctorSummaryAdd) onDoctorSummaryAdd(targetWarning)
+      } else {
+        setDoctorSummaryItems((prev) => prev.filter((i) => i.id !== id))
+      }
+    }
+  }
+
   // Filter out user-dismissed warnings
   const visibleWarnings = useMemo(() => {
     return analysis.warnings.filter((w) => !dismissedWarningIds.has(w.id))
@@ -151,6 +197,7 @@ export function PatternDetectionView({ initialPeriodLogs = [], initialSymptomLog
     setPeriodLogs(preset.data.periodLogs)
     setSymptomLogs(preset.data.symptomLogs)
     setDismissedWarningIds(new Set())
+    setLocalDismissed(new Set())
   }
 
   function handleAddPeriod(e) {
@@ -284,7 +331,7 @@ export function PatternDetectionView({ initialPeriodLogs = [], initialSymptomLog
 
       {/* WARNING CARDS LIST */}
       <div className="warnings-section">
-        {visibleWarnings.length === 0 ? (
+        {earlyWarnings.length === 0 ? (
           <div className="empty-patterns-card">
             <Info size={28} className="empty-icon" />
             <h4>Keep logging periods and symptoms. We’ll help you notice patterns over time.</h4>
@@ -293,69 +340,20 @@ export function PatternDetectionView({ initialPeriodLogs = [], initialSymptomLog
             </p>
           </div>
         ) : (
-          <div className="warning-cards-grid">
-            {visibleWarnings.map((item) => {
-              const cardClass = getVisualLevelStyle(item.level)
-              const isAddedToSummary = doctorSummaryItems.some((s) => s.id === item.id)
-
-              return (
-                <article key={item.id} className={`warning-card ${cardClass}`}>
-                  <div className="card-top-indicator">
-                    <div className="level-badge-group">
-                      {item.level === 'red' && <AlertCircle size={15} className="level-icon" />}
-                      {item.level === 'amber' && <AlertTriangle size={15} className="level-icon" />}
-                      {item.level === 'blue' && <Info size={15} className="level-icon" />}
-                      <span className="level-label">
-                        {item.level === 'red'
-                          ? 'Seek Urgent Care'
-                          : item.level === 'amber'
-                          ? 'Consider Booking Appointment'
-                          : 'Information'}
-                      </span>
-                    </div>
-                    <span className="urgency-pill-tag">Urgency: {item.urgency}</span>
-                  </div>
-
-                  <h3 className="card-headline">{item.title}</h3>
-                  <p className="card-explanation">{item.description}</p>
-
-                  {item.evidence && (
-                    <div className="card-evidence-box">
-                      <span className="evidence-label">Evidence from your entries:</span>
-                      <p className="evidence-text">“{item.evidence}”</p>
-                    </div>
-                  )}
-
-                  <div className="card-next-step">
-                    <strong>Suggested Next Step:</strong>
-                    <span>{item.suggestedAction}</span>
-                  </div>
-
-                  <div className="card-footer-actions">
-                    <button
-                      type="button"
-                      className={`btn-doctor-summary ${isAddedToSummary ? 'added' : ''}`}
-                      onClick={() => handleAddToDoctorSummary(item)}
-                    >
-                      {isAddedToSummary ? <Check size={14} /> : <Plus size={14} />}
-                      <span>{isAddedToSummary ? 'Added to Doctor Summary' : 'Add to Doctor Summary'}</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      className="btn-dismiss-warning"
-                      onClick={() => handleDismiss(item.id)}
-                      aria-label="Dismiss warning"
-                    >
-                      <span>Dismiss</span>
-                    </button>
-                  </div>
-                </article>
-              )
-            })}
+          <div className="warning-cards-grid grid grid-cols-1 md:grid-cols-2 gap-4">
+            {earlyWarnings.map((item) => (
+              <EarlyWarningCard
+                key={item.id}
+                warning={item}
+                onDismiss={handleDismissEarlyWarning}
+                onToggleDoctorSummary={handleToggleDoctorSummaryEarlyWarning}
+                showExplanationDefault={false}
+              />
+            ))}
           </div>
         )}
       </div>
+
 
       {/* DOCTOR SUMMARY BASKET */}
       {doctorSummaryItems.length > 0 && (
