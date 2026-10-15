@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import {
   Mic,
   MicOff,
@@ -88,17 +88,23 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
 
   const textareaRef = useRef(null)
   const resultsRef = useRef(null)
+  const voiceTranscriptRef = useRef('')
+  const shouldAnalyzeVoiceRef = useRef(false)
 
   const currentLangObj = LANGUAGES.find((l) => l.code === selectedLang) || LANGUAGES[0]
   const strings = UI_STRINGS[selectedLang] || UI_STRINGS.en
   const examples = EXAMPLE_PROMPTS[selectedLang] || EXAMPLE_PROMPTS.en
 
+  useEffect(() => {
+    setSelectedLang(initialLanguage)
+  }, [initialLanguage])
 
   // Handle language change
   function handleLanguageChange(code) {
     setSelectedLang(code)
     // If mic is active, restart or stop
     if (micActive) {
+      shouldAnalyzeVoiceRef.current = false
       speechService.stop()
       setMicActive(false)
       setCurrentState(inputText.trim() ? 'typing' : 'empty')
@@ -119,15 +125,11 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
   function handleToggleMic() {
     if (micActive) {
       // User tapped to stop
+      shouldAnalyzeVoiceRef.current = true
       setRecordingStatusMessage(strings.processingText || 'Finalizing speech...')
       setCurrentState('transcribing')
       speechService.stop()
       setMicActive(false)
-      
-      setTimeout(() => {
-        setRecordingStatusMessage('')
-        setCurrentState('typing')
-      }, 700)
       return
     }
 
@@ -140,6 +142,8 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
 
     // Starting recording
     setInputMode('speech')
+    shouldAnalyzeVoiceRef.current = false
+    voiceTranscriptRef.current = inputText.trim()
     setRecordingStatusMessage(strings.listening) // "Listening…"
     setCurrentState('recording')
     setMicActive(true)
@@ -155,19 +159,19 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
         setCurrentState('transcribing')
         setInterimSpokenText(interimTranscript)
         if (finalTranscript) {
-          setInputText((prev) => {
-            const separator = prev && !prev.endsWith(' ') ? ' ' : ''
-            return prev + separator + finalTranscript.trim()
-          })
+          voiceTranscriptRef.current = [voiceTranscriptRef.current, finalTranscript.trim()].filter(Boolean).join(' ')
+          setInputText(voiceTranscriptRef.current)
           setInterimSpokenText('')
         }
       },
       onNoMatch: () => {
+        shouldAnalyzeVoiceRef.current = false
         setMicActive(false)
         setRecordingStatusMessage(strings.couldNotHear) // "We could not hear you. Try again."
         setCurrentState('typing')
       },
       onError: ({ error }) => {
+        shouldAnalyzeVoiceRef.current = false
         setMicActive(false)
         if (error === 'permission-denied') {
           setCurrentState('permission-denied')
@@ -182,8 +186,15 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
       },
       onEnd: () => {
         setMicActive(false)
-        if (currentState === 'recording' || currentState === 'transcribing') {
-          setCurrentState('typing')
+        const transcript = voiceTranscriptRef.current.trim()
+        const shouldAnalyze = shouldAnalyzeVoiceRef.current
+        shouldAnalyzeVoiceRef.current = false
+        setRecordingStatusMessage('')
+        if (shouldAnalyze && transcript) {
+          setInputText(transcript)
+          handleUnderstandSymptoms(null, transcript, 'speech')
+        } else {
+          setCurrentState(transcript ? 'typing' : 'empty')
         }
       },
     })
@@ -194,9 +205,10 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
   }
 
   // Submit / Understand my symptoms
-  async function handleUnderstandSymptoms(e) {
+  async function handleUnderstandSymptoms(e, suppliedText, suppliedInputMode) {
     if (e) e.preventDefault()
-    if (!inputText.trim()) {
+    const input = typeof suppliedText === 'string' ? suppliedText.trim() : inputText.trim()
+    if (!input) {
       textareaRef.current?.focus()
       return
     }
@@ -210,7 +222,7 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
     setCurrentState('processing')
     setAnalysisFallbackMessage('')
 
-    const input = inputText.trim()
+    const entryInputMode = suppliedInputMode || inputMode
     const safetyWarnings = detectRedFlags(input)
     const localResult = extractSymptoms(input, { preferredLanguage: selectedLang })
     let candidate = localResult
@@ -223,7 +235,7 @@ export function TalkOrType({ onHealthEntryCreated, initialLanguage = 'en' }) {
 
       const newEntry = createHealthEntry({
         language: parsed.detectedLanguage || selectedLang,
-        inputMode,
+        inputMode: entryInputMode,
         rawTranscript: input,
         symptoms: parsed.symptoms,
         assessment: {

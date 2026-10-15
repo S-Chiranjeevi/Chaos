@@ -216,7 +216,7 @@ export function App() {
       </div>
 
       {/* Mobile Navigation */}
-      <BottomNavigation activePage={activePage} onNavigate={navigate} />
+      <BottomNavigation activePage={activePage} onNavigate={navigate} currentLanguage={currentLanguage} />
 
       <ChatbotWidget onNavigate={navigate} />
       <BackgroundMusic />
