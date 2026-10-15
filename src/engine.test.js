@@ -2,6 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { assessSymptoms, examples, DISCLAIMER } from './engine.js'
 import { extractSymptoms } from './services/symptomExtractor.js'
+import { deleteAllLocalHealthData } from './models/healthEntry.js'
 
 for (const example of examples) {
   test(example.name, () => {
@@ -48,4 +49,24 @@ test('integrated extractor flags severe pain and heavy bleeding with dizziness',
 test('integrated extractor reads a regional-language example', () => {
   const result = extractSymptoms('मेरे पीरियड्स हर 2-3 महीने में आते हैं।')
   assert.ok(result.symptoms.some((symptom) => symptom.defId === 'irregular_periods'))
+})
+
+test('privacy control deletes only SakhiCare local data', () => {
+  const items = new Map([
+    ['sakhicare_latest_entry', 'private health entry'],
+    ['sakhicare_cycle_tracker', 'private cycle data'],
+    ['unrelated_preference', 'keep me'],
+  ])
+  globalThis.window = {}
+  globalThis.localStorage = {
+    get length() { return items.size },
+    key(index) { return [...items.keys()][index] ?? null },
+    removeItem(key) { items.delete(key) },
+  }
+  deleteAllLocalHealthData()
+  assert.equal(items.has('sakhicare_latest_entry'), false)
+  assert.equal(items.has('sakhicare_cycle_tracker'), false)
+  assert.equal(items.get('unrelated_preference'), 'keep me')
+  delete globalThis.window
+  delete globalThis.localStorage
 })
