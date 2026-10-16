@@ -1,19 +1,19 @@
 export const MAX_NOTE_LENGTH = 1500
-export const API_ROOT = 'https://generativelanguage.googleapis.com/v1beta/interactions'
+export const API_ROOT = 'https://generativelanguage.googleapis.com/v1beta/models'
 
 const responseSchema = {
-  type: 'OBJECT',
+  type: 'object',
   properties: {
-    requestType: { type: 'STRING', enum: ['general', 'symptoms', 'mixed'] },
-    summary: { type: 'STRING' },
-    answer: { type: 'STRING' },
-    extractedSymptoms: { type: 'ARRAY', items: { type: 'STRING' } },
-    possibleTopics: { type: 'ARRAY', items: { type: 'STRING' } },
-    urgency: { type: 'STRING', enum: ['routine', 'soon', 'urgent'] },
-    explanation: { type: 'STRING' },
-    recommendedDoctor: { type: 'STRING' },
-    questionsForDoctor: { type: 'ARRAY', items: { type: 'STRING' } },
-    redFlags: { type: 'ARRAY', items: { type: 'STRING' } },
+    requestType: { type: 'string', enum: ['general', 'symptoms', 'mixed'] },
+    summary: { type: 'string' },
+    answer: { type: 'string' },
+    extractedSymptoms: { type: 'array', items: { type: 'string' } },
+    possibleTopics: { type: 'array', items: { type: 'string' } },
+    urgency: { type: 'string', enum: ['routine', 'soon', 'urgent'] },
+    explanation: { type: 'string' },
+    recommendedDoctor: { type: 'string' },
+    questionsForDoctor: { type: 'array', items: { type: 'string' } },
+    redFlags: { type: 'array', items: { type: 'string' } },
   },
   required: ['requestType', 'summary', 'answer', 'extractedSymptoms', 'possibleTopics', 'urgency', 'explanation', 'recommendedDoctor', 'questionsForDoctor', 'redFlags'],
 }
@@ -53,13 +53,12 @@ function cleanList(value, maxItems = 8) {
 
 export async function generateResponse({ text, language, apiKey, model, signal }) {
   const requestModel = async (selectedModel) => {
-    const upstream = await fetch(API_ROOT, {
+    const upstream = await fetch(`${API_ROOT}/${encodeURIComponent(selectedModel)}:generateContent`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
       body: JSON.stringify({
-        model: selectedModel,
-        input: makePrompt(text, language),
-        response_format: { type: 'text', mime_type: 'application/json', schema: responseSchema },
+        contents: [{ parts: [{ text: makePrompt(text, language) }] }],
+        generationConfig: { responseMimeType: 'application/json', responseSchema },
       }),
       signal,
     })
@@ -68,7 +67,7 @@ export async function generateResponse({ text, language, apiKey, model, signal }
 
   let { upstream, result } = await requestModel(model)
   if (upstream.status === 503 && model === 'gemini-3.8-flash') {
-    ({ upstream, result } = await requestModel('gemini-3.6-flash'))
+    ({ upstream, result } = await requestModel('gemini-2.5-flash'))
   }
   if (!upstream.ok) {
     const upstreamDetail = typeof result?.error?.message === 'string' ? result.error.message.slice(0, 300) : ''
@@ -84,9 +83,7 @@ export async function generateResponse({ text, language, apiKey, model, signal }
     throw Object.assign(new Error(message), { status: 502 })
   }
 
-  const generatedText = typeof result?.output_text === 'string'
-    ? result.output_text.trim()
-    : result?.candidates?.[0]?.content?.parts?.map((part) => part.text || '').join('').trim() || ''
+  const generatedText = result?.candidates?.[0]?.content?.parts?.map((part) => part.text || '').join('').trim() || ''
   if (!generatedText) throw Object.assign(new Error('Gemini could not safely process that message. Please rephrase it or speak with a healthcare professional.'), { status: 502 })
   let generated
   try { generated = JSON.parse(generatedText) } catch { throw Object.assign(new Error('Gemini returned an unreadable result. Please try again.'), { status: 502 }) }
